@@ -1,0 +1,41 @@
+{
+  "name": "monorepo-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev --parallel",
+    "dev:reference": "turbo dev:reference --parallel",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "turbo lint",
+    "package:create": "node skills/create-minimal-package/scripts/scaffold-package.mjs",
+    "prepare": "husky",
+    "skills:check": "node scripts/skills.mjs check",
+    "skills:create": "node scripts/skills.mjs create",
+    "skills:remove": "node scripts/skills.mjs remove",
+    "skills:sync": "node scripts/skills.mjs sync",
+    "skills:test": "node --test scripts/skills.test.mjs",
+    "typecheck": "turbo typecheck"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,yml,yaml}": "prettier --write"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0",
+    "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2",
+    "shadcn": "^4.15.0",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.19.1",
+    "yaml": "2.9.0"
+  }
+}

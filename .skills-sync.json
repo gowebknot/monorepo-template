@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "skills": {
+    "code-quality": {
+      "hash": "58cac9f47fa631d1d6c080d2565c90c949ef8ae37ad64508fa98db8297ec027f"
+    },
+    "create-minimal-package": {
+      "hash": "2600cddd66bd386fc9f55f926f9f0214a893cb2a10decd4160c6bda8b8635257"
+    },
+    "create-portable-skill": {
+      "hash": "8c6b0a47fc36c1fded152ac452243d16b082f80ebbde598aa66c8fbbea84cc93"
+    }
+  }
+}

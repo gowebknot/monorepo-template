@@ -1,0 +1,44 @@
+{
+  "name": "@monorepo-template/db",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./example": {
+      "types": "./dist/example/index.d.ts",
+      "default": "./dist/example.js"
+    }
+  },
+  "imports": {
+    "#example/*": "./example/*.ts",
+    "#src/*": "./src/*.ts"
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.1.1",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "~6.0.2",
+    "unplugin-dts": "^1.0.3",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "@monorepo-template/env": "workspace:^",
+    "better-sqlite3": "^13.0.1",
+    "drizzle-orm": "^0.45.2"
+  }
+}

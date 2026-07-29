@@ -1,0 +1,12 @@
+---
+name: <skill-name>
+description: <what the skill does and the requests that should trigger it>
+---
+
+# <Skill Title>
+
+<State the outcome this skill produces.>
+
+1. <Give concise, imperative workflow steps.>
+2. <Reference bundled resources only when they are needed.>
+3. <State the required validation and completion criteria.>

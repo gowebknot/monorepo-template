@@ -1,0 +1,36 @@
+{
+  "name": "@monorepo-template/api-client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./example": {
+      "types": "./dist/example.d.ts",
+      "default": "./dist/example.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "axios": "^1.18.1"
+  },
+  "devDependencies": {
+    "axios": "^1.18.1",
+    "typescript": "~6.0.2",
+    "unplugin-dts": "^1.0.3",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "@monorepo-template/entities": "workspace:^"
+  }
+}

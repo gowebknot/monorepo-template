@@ -1,0 +1,42 @@
+{
+  "name": "@monorepo-template/env",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "types": "./dist/env.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/env.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./web": {
+      "types": "./dist/src/web-env.d.ts",
+      "default": "./dist/web-env.js"
+    },
+    "./server": {
+      "types": "./dist/src/server-env.d.ts",
+      "default": "./dist/server-env.js"
+    },
+    "./reference-server": {
+      "types": "./dist/src/reference-server-env.d.ts",
+      "default": "./dist/reference-server-env.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "~6.0.2",
+    "unplugin-dts": "^1.0.3",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.11",
+    "zod": "^4.4.3"
+  }
+}
