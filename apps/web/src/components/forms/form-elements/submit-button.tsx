@@ -1,7 +1,7 @@
 import { useFormContext } from "@/components/forms/form-core";
 import { Button } from "@/components/ui/button";
 
-interface SubmitButtonProps extends React.ComponentProps<typeof Button> {}
+type SubmitButtonProps = React.ComponentProps<typeof Button>;
 
 export function SubmitButton(props: SubmitButtonProps) {
   const form = useFormContext();

@@ -230,7 +230,11 @@ async function readLockedNativeSkillNames(root = repositoryRoot) {
   if (!(await pathExists(path))) return new Set();
 
   const lock = JSON.parse(await readFile(path, "utf8"));
-  if (lock.version !== 1 || lock.skills === null || typeof lock.skills !== "object") {
+  if (
+    lock.version !== 1 ||
+    lock.skills === null ||
+    typeof lock.skills !== "object"
+  ) {
     fail(`${NATIVE_SKILLS_LOCK_FILE} has an unsupported format.`);
   }
 
@@ -295,7 +299,10 @@ async function synchronize(root = repositoryRoot) {
   const names = new Set(Object.keys(manifest.skills));
 
   for (const location of locations) {
-    for (const name of await listPortableSkills(location, lockedNativeSkillNames)) {
+    for (const name of await listPortableSkills(
+      location,
+      lockedNativeSkillNames
+    )) {
       names.add(name);
     }
   }

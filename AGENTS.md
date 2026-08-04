@@ -116,6 +116,16 @@ Conventional Commits enforced by commitlint (`commit-msg` hook):
 
 Valid types: `feat fix docs style refactor perf test build ci chore revert`
 
+## Non-Negotiable Git Safety
+
+- **NEVER use `--no-verify`, `--no-hooks`, `HUSKY=0`, skipped hooks, disabled checks, or any equivalent
+  bypass.** Fix the underlying failure instead.
+- **NEVER commit, amend, push, force-push, tag, publish, release, or deploy without explicit user
+  permission for that specific action.** Permission to edit files or run validation is not permission
+  to perform any Git or release operation.
+- Before any explicitly authorized commit or release operation, inspect `git status`, `git diff`, and
+  recent history, stage only intended files, and run the required validation checks.
+
 ## Pre-commit hooks
 
 Every commit runs two checks automatically (via Husky):
@@ -145,6 +155,41 @@ pnpm skills:test                                # run skills unit tests
 ```
 
 Each skill lives in `skills/<name>/SKILL.md` with exactly two frontmatter keys (`name`, `description`). No provider-specific syntax (no `` !`...` ``, no `${CLAUDE_*}`).
+
+## Mandatory Agent Workflow
+
+Every agent task must begin with the `test-first-workflow` skill, regardless of whether the task
+changes code, tests, documentation, configuration, packages, or skills. Define acceptance criteria
+and executable tests or equivalent validation checks before editing, then run the checks after the
+change.
+
+Load the additional skills when their task boundaries apply:
+
+- `checklist-tracking` when changing Markdown checklists, plans, status tables, or tracked test cases.
+- `testing-policy` whenever adding, editing, reviewing, or troubleshooting tests.
+- `security-testing-policy` whenever security boundaries, authorization, secret handling, input
+  hardening, sandboxed integrations, or externally connected tests are involved.
+- `contract-validation` whenever defining or changing schemas, DTOs, request/response payloads, route
+  parameters, query parameters, forms, API parsing, or shared inferred types.
+- `backend-standards` whenever changing backend modules, controllers, services, persistence,
+  transactions, authorization, background jobs, or backend observability.
+- `frontend-standards` whenever changing frontend routes, components, forms, tables, UI states,
+  environment use, accessibility, styling, or responsive behavior.
+- `react-19` whenever writing or reviewing React code, hooks, forms, state, effects, or components.
+- `jsx-component-extraction` when JSX or TSX nesting, render logic, or component extraction is
+  involved.
+- `end-to-end-api-flow` when API behavior crosses contracts, backend endpoints, API clients,
+  query-client hooks, and consuming clients.
+- `observability` whenever changing logs, metrics, traces, audit events, correlation IDs, lifecycle
+  status, retries, or error metadata.
+- `code-review` whenever reviewing a patch, pull request, refactor, migration, dependency change,
+  configuration change, or release preparation.
+- `release-flow` whenever preparing versions, changelogs, release notes, migrations, deprecations,
+  package publication, or deployment handoffs.
+
+The mandatory test-first workflow does not permit skipping validation because a change is described
+as documentation-only, configuration-only, or metadata-only. Use an appropriate parser, formatter,
+sync check, test, build, typecheck, or exact reference scan for non-executable changes.
 
 ## Style
 

@@ -1,14 +1,53 @@
 {
   "version": 1,
   "skills": {
+    "backend-standards": {
+      "hash": "877d99efc816644bf0c3d3e99030712c98195b0ed52aaaaecd9829b20b101647"
+    },
+    "checklist-tracking": {
+      "hash": "dc961a9253c249a7ea0d17a2dc2175aecfbb3f81ff18796fe0059af18b31a839"
+    },
     "code-quality": {
       "hash": "58cac9f47fa631d1d6c080d2565c90c949ef8ae37ad64508fa98db8297ec027f"
+    },
+    "code-review": {
+      "hash": "6d6b61887c5515964359afaef6a19c9a89817f001a97d61db241f4b6b753ca01"
+    },
+    "contract-validation": {
+      "hash": "bc3cb2b0da52bb31878c2a92aa039496015f30f68c3008b640f4e97eedf821b5"
     },
     "create-minimal-package": {
       "hash": "2600cddd66bd386fc9f55f926f9f0214a893cb2a10decd4160c6bda8b8635257"
     },
     "create-portable-skill": {
       "hash": "8c6b0a47fc36c1fded152ac452243d16b082f80ebbde598aa66c8fbbea84cc93"
+    },
+    "end-to-end-api-flow": {
+      "hash": "393cab2cbbf9c4496ef8120cbdba8fba187f288e101ba72d07b0b23f0034fdc8"
+    },
+    "frontend-standards": {
+      "hash": "83dfc3863d706479bbb613f8a64e68783390287510037cd42e8c82f2c5b12fe6"
+    },
+    "jsx-component-extraction": {
+      "hash": "7689bd916547eae555176eeabfafa37079cd1faf4d1eeba1d3ec8fe943ff505f"
+    },
+    "observability": {
+      "hash": "09e6e6363a9c1755fcb0c5b6ef2b0039495aa038ea891e7c6f39dced8414a7e3"
+    },
+    "react-19": {
+      "hash": "47284eec6ba9dd00b8289eb921583d9870f1034aaa25da00af3056b6942bac1a"
+    },
+    "release-flow": {
+      "hash": "ecbfd10c8b939fd047b88f28a3ed6a16b598b80c2382b333a1ffa160636dab1c"
+    },
+    "security-testing-policy": {
+      "hash": "ddcb3b8ae5ca933521d91beb64d3dfd81848235d4dc7fec5c173cee10470bc29"
+    },
+    "test-first-workflow": {
+      "hash": "a24c7fce11cf9dfbe4a5f949080f6c0a450d399ca33ecd3dee8c8c44104871af"
+    },
+    "testing-policy": {
+      "hash": "e977db62c7cef94123624268c68bceb3c002a4fb528bd48437be83a2ac785b80"
     }
   }
 }
