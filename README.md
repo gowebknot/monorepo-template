@@ -2,14 +2,58 @@
 
 pnpm workspace powered by Turborepo, Just, Husky, lint-staged, and Conventional Commits.
 
+## Creating a project
+
+This repository is also a [Copier](https://copier.readthedocs.io/) template. Copier keeps the
+template version in the generated project and can apply later template changes without blindly
+overwriting the entire project.
+
+Use the `create-mono-stack` package to install pinned Copier dependencies into a temporary virtual
+environment and render the newest stable template version. Node.js 20+, Python 3.10+, Git, and SSH
+access to `gowebknot/monorepo-template` are required. Docker and global Python packages are not used.
+
+```sh
+pnpm create mono-stack my-project --name "My Project"
+cd my-project
+pnpm install
+```
+
+For local launcher development, point it at this checkout explicitly:
+
+```sh
+node core/create-mono-stack/bin/create-mono-stack.js ../my-project \
+  --name "My Project" \
+  --template . \
+  --vcs-ref HEAD
+```
+
+Copier selects the newest stable PEP 440-compatible Git tag by default. Publish immutable tags such
+as `v1.0.0` and `v1.1.0` so generated projects can update predictably.
+
+The generated project records its template source and version in `.copier-answers.yml`. To update it,
+install the pinned tool into the project-local `.venv`, then run Copier from the project root:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install --requirement requirements/copier.txt
+.venv/bin/copier update
+```
+
+Review and resolve any reported conflicts before running the project checks. Keep the generated
+project's working tree clean before updating so user changes are easy to distinguish from template
+changes.
+
 ## Structure
 
 - `apps/web`: example frontend-style app
 - `apps/server`: example API-style app (NestJS)
-- `packages/ui`: shared UI helpers
+- `core/create-mono-stack`: source-only npm launcher and Copier tests
+- `packages/api-client`: shared Axios API client helpers
 - `packages/config`: shared config
 - `packages/env`: shared T3 env + Zod validation
 - `packages/db`: shared Drizzle database connection helpers
+- `packages/entities`: shared API contracts
+- `packages/query-client`: shared TanStack Query hooks
 
 ## Commands
 
@@ -38,7 +82,8 @@ Create minimal Vite library packages with:
 pnpm package:create <project-name>
 ```
 
-The script creates `packages/<project-name>` and names the package as `@<root package.json name>/<project-name>`. In this repo, `pnpm package:create billing` creates `packages/billing` with package name `@monorepo-template/billing`.
+The script creates `packages/<project-name>` under the stable `@repo` workspace scope. For example,
+`pnpm package:create billing` creates `packages/billing` with package name `@repo/billing`.
 
 It creates `package.json`, `tsconfig.json`, `vite.config.ts`, `.gitignore`, and `src/index.ts`, then refuses to overwrite an existing package unless `--force` is passed.
 
@@ -47,16 +92,18 @@ Use absolute `@/...` imports in implementation files. Use relative exports in ba
 Validate a new package with:
 
 ```sh
-pnpm --filter @monorepo-template/<project-name> build
-pnpm --filter @monorepo-template/<project-name> typecheck
-pnpm --filter @monorepo-template/<project-name> lint
+pnpm --filter @repo/<project-name> build
+pnpm --filter @repo/<project-name> typecheck
+pnpm --filter @repo/<project-name> lint
 ```
 
 ## API contracts
 
-`packages/entities` (`@monorepo-template/entities`) owns shared API contracts. Define each contract as a Zod schema plus inferred TypeScript type there, then import both schema and type from consumer projects. Frontend and backend packages should not hand-write API contract types locally.
+`packages/entities` (`@repo/entities`) owns shared API contracts. Define each contract as a Zod schema plus inferred TypeScript type there, then import both schema and type from consumer projects. Frontend and backend packages should not hand-write API contract types locally.
 
-Because this repository is a template, concrete sample contracts live under `packages/entities/example/` rather than exported `src/` code. When adapting the template for a real project, move/create real contracts under `packages/entities/src/api-contracts` and export them from `src/index.ts`.
+Concrete reference contracts live under `packages/entities/example/` rather than exported `src/`
+code. Create product contracts under `packages/entities/src/api-contracts` and export them from
+`src/index.ts`.
 
 Example export pattern:
 
@@ -72,22 +119,23 @@ export type HealthResponse = z.infer<typeof healthResponseSchema>;
 
 ## Environment config
 
-`packages/env` (`@monorepo-template/env`) owns workspace env validation. Put every env schema in the `globalEnv` Zod object, then derive app-specific envs with `globalEnv.pick(...).shape`.
+`packages/env` (`@repo/env`) owns workspace env validation. Put every env schema in the `globalEnv` Zod object, then derive app-specific envs with `globalEnv.pick(...).shape`.
 
 Import parsed app envs from subpaths so each app validates only its own required variables:
 
 ```ts
-import { webEnv } from "@monorepo-template/env/web";
-import { serverEnv } from "@monorepo-template/env/server";
+import { webEnv } from "@repo/env/web";
+import { serverEnv } from "@repo/env/server";
 ```
 
 The package root exports `globalEnv`, picked validators (`webEnvSchema`, `webServerEnvSchema`, `webClientEnvSchema`, `serverEnvSchema`), and factory functions (`createWebEnv`, `createServerEnv`) for composition/testing without eagerly validating app-specific envs.
 
 ## Database
 
-`packages/db` (`@monorepo-template/db`) owns shared Drizzle database connection helpers. Because this repository is a template, example tables live under `packages/db/example/schema/`; exported `src/` code stays connection-only.
+`packages/db` (`@repo/db`) owns shared Drizzle database connection helpers. Example tables live under
+`packages/db/example/schema/`; exported `src/` code stays connection-only.
 
-Database configuration is read through `@monorepo-template/env/server`, not directly from `process.env`.
+Database configuration is read through `@repo/env/server`, not directly from `process.env`.
 
 ## Portable agent skills
 
@@ -120,3 +168,7 @@ pnpm skills:check
 ```
 
 Remove a skill from every location with `pnpm skills:remove <skill-name>`.
+
+## License
+
+Licensed under the [MIT License](LICENSE). Copyright (c) 2026 Webknot Technologies.

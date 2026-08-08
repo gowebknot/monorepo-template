@@ -7,7 +7,7 @@
 ## Rules
 
 - Keep this package focused on static shared configuration.
-- Do not read `process.env` directly in this package. Environment-specific values belong in `@monorepo-template/env`.
+- Do not read `process.env` directly in this package. Environment-specific values belong in `@repo/env`.
 - Preserve the current plain `tsc` package shape unless intentionally migrating this package to the Vite library scaffold.
 - Export public configuration from `src/index.ts` through the package root export.
 

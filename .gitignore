@@ -1,6 +1,9 @@
 node_modules
 dist
 .turbo
+.venv
+.claude/worktrees/
+.tmp
 .env
 *.log
 *.db

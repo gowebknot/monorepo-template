@@ -4,3 +4,5 @@ dist
 packages/*/dist
 packages/*/drizzle
 .agents/skills/shadcn
+apps/web/src/routeTree.gen.ts
+.copier-answers.yml

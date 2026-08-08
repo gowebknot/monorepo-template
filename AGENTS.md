@@ -5,17 +5,23 @@
 ```
 apps/
   server/      # server — NestJS example API app (own CommonJS/Jest toolchain, see apps/server/AGENTS.md)
+core/
+  create-mono-stack/ # source-only npm launcher and Copier test owner; excluded from generated projects
 packages/
   config/      # @repo/config — shared app config, plain tsc, NodeNext
-  db/          # @monorepo-template/db — Drizzle database connection helpers
-  env/         # @monorepo-template/env — T3 env + Zod workspace env validation
-  entities/    # @monorepo-template/entities — shared API Zod contracts + inferred types
-  api-client/  # @monorepo-template/api-client — shared Axios API client helpers
+  db/          # @repo/db — Drizzle database connection helpers
+  env/         # @repo/env — T3 env + Zod workspace env validation
+  entities/    # @repo/entities — shared API Zod contracts + inferred types
+  api-client/  # @repo/api-client — shared Axios API client helpers
 skills/        # canonical source for portable agent skills (see below)
 scripts/       # skills.mjs CLI + skills.test.mjs (Node built-in test runner)
 ```
 
 Package manager: `pnpm@9.15.4`. Root `"type": "module"` — ESM throughout.
+
+Install dependencies and development tools at the repository/workspace level only. Never install
+packages globally. For non-Node tooling, use a repository-local environment such as `.venv` or an
+ephemeral runner that does not persist a global installation.
 
 ## Key commands
 
@@ -23,19 +29,20 @@ Package manager: `pnpm@9.15.4`. Root `"type": "module"` — ESM throughout.
 pnpm build          # turbo build (topological, cached)
 pnpm dev            # turbo dev --parallel (persistent, never cached)
 pnpm lint           # turbo lint (requires upstream build first)
-pnpm package:create <name>  # scaffold packages/<name> as @monorepo-template/<name>
+pnpm package:create <name>  # scaffold packages/<name> as @repo/<name>
 pnpm typecheck      # turbo typecheck (requires upstream build first)
 pnpm format         # prettier --write . (root-level only, not per-package)
 pnpm format:check   # CI-safe format check
 
-just check          # lint + typecheck + format-check + skills-check + skills-test
+just check          # lint + typecheck + format-check + skills-check + skills-test + template-test
 just package-create <name>  # Just wrapper for pnpm package:create
 ```
 
 Run a single package:
 
 ```sh
-pnpm --filter @monorepo-template/entities build
+pnpm --filter create-mono-stack test
+pnpm --filter @repo/entities build
 pnpm --filter @repo/config typecheck
 ```
 
@@ -43,7 +50,7 @@ pnpm --filter @repo/config typecheck
 
 ## Creating packages
 
-Use `pnpm package:create <project-name>` or `just package-create <project-name>` instead of hand-writing package setup. The scaffold reads root `package.json` and creates `packages/<project-name>` with package name `@<root-name>/<project-name>` (for this repo: `@monorepo-template/<project-name>`).
+Use `pnpm package:create <project-name>` or `just package-create <project-name>` instead of hand-writing package setup. The scaffold creates `packages/<project-name>` with package name `@repo/<project-name>`.
 
 The scaffold creates Vite lib-mode package files (`package.json`, `tsconfig.json`, `vite.config.ts`, `.gitignore`, `README.md`, `AGENTS.md`, `src/index.ts`) and refuses to overwrite an existing package unless `--force` is passed to the pnpm script.
 
@@ -57,7 +64,7 @@ Package source convention: use absolute `@/...` imports in implementation files,
 
 ## TypeScript quirks
 
-`packages/entities` (`@monorepo-template/entities`) and `packages/env` (`@monorepo-template/env`) use **TypeScript 6** (`~6.0.2`), not the root `^5.7.2`.
+`packages/entities` (`@repo/entities`) and `packages/env` (`@repo/env`) use **TypeScript 6** (`~6.0.2`), not the root `^5.7.2`.
 
 - Their `tsconfig.json` files do **not** extend `tsconfig.base.json`; they are fully standalone.
 - `erasableSyntaxOnly: true` (TS6-only) — bans enums, decorators, and namespaces. Do not add them.
@@ -68,11 +75,11 @@ Package source convention: use absolute `@/...` imports in implementation files,
 
 ## Environment config
 
-All env validation and environment variable access belongs in `packages/env`, exported by `@monorepo-template/env`. Read `packages/env/AGENTS.md` before changing env code.
+All env validation and environment variable access belongs in `packages/env`, exported by `@repo/env`. Read `packages/env/AGENTS.md` before changing env code.
 
-`globalEnv` is a single Zod object in `src/global-env.ts`; app envs derive and export their validators with `globalEnv.pick(...).shape`. Split client/server validators for app envs when T3 env needs separate `client` and `server` shapes. Apps must import envs or validators from `@monorepo-template/env/web`, `@monorepo-template/env/server`, or package-root exports instead of defining validation locally.
+`globalEnv` is a single Zod object in `src/global-env.ts`; app envs derive and export their validators with `globalEnv.pick(...).shape`. Split client/server validators for app envs when T3 env needs separate `client` and `server` shapes. Apps must import envs or validators from `@repo/env/web`, `@repo/env/server`, or package-root exports instead of defining validation locally.
 
-Do not read `process.env` directly outside `packages/env` internals. Add missing variables to `globalEnv`, derive the app-specific env, then import from `@monorepo-template/env/*`.
+Do not read `process.env` directly outside `packages/env` internals. Add missing variables to `globalEnv`, derive the app-specific env, then import from `@repo/env/*`.
 
 The env package Vite root entry is package-root `env.ts`, not `src/index.ts`.
 Its Vite `envDir` points to the workspace root (`../..`) so `.env` is loaded from the repo root.
@@ -81,11 +88,11 @@ Use current Zod imports, methods, and functions only; do not add deprecated pre-
 
 ## Database
 
-`packages/db` (`@monorepo-template/db`) owns shared Drizzle connection helpers. Read `packages/db/AGENTS.md` before changing database code.
+`packages/db` (`@repo/db`) owns shared Drizzle connection helpers. Read `packages/db/AGENTS.md` before changing database code.
 
 This is a template repo: keep example schema tables under `packages/db/example/schema/`; exported `packages/db/src/` code should stay connection-only unless adapting the template into a real project.
 
-Database configuration must come from `@monorepo-template/env/server`, not direct `process.env` reads.
+Database configuration must come from `@repo/env/server`, not direct `process.env` reads.
 
 ## `packages/entities` build
 
@@ -96,7 +103,7 @@ Path alias `@/*` → `./src/*`, mirrored in both `vite.config.ts` and `tsconfig.
 
 ## API contracts
 
-All shared API contracts belong in `packages/entities`, exported by `@monorepo-template/entities`. Define Zod schemas and inferred types together there; frontend/backend consumers must import them instead of writing matching contract types locally.
+All shared API contracts belong in `packages/entities`, exported by `@repo/entities`. Define Zod schemas and inferred types together there; frontend/backend consumers must import them instead of writing matching contract types locally.
 
 Read `packages/entities/AGENTS.md` before changing API contracts.
 

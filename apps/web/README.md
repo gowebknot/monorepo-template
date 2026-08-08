@@ -1,3 +1,3 @@
 # web
 
-Web application in the monorepo-template workspace.
+Web application in the workspace.

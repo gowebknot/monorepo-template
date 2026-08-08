@@ -2,19 +2,19 @@
 
 ## Purpose
 
-`@monorepo-template/api-client` owns shared Axios-based API call helpers.
+`@repo/api-client` owns shared Axios-based API call helpers.
 
 ## Rules
 
 - Keep this package focused on reusable API path helpers, Axios client setup, and typed service helpers.
 - Keep `axios` as a peer dependency and dev dependency; consumers provide their own compatible Axios install.
 - Do not validate responses in this package. Make API calls and return `response.data` only.
-- Always import API types from `@monorepo-template/entities`; create them in `@monorepo-template/entities` if they do not exist. Reference/example code imports from `@monorepo-template/entities/example`. Do not make this package depend on `zod` directly.
+- Always import API types from `@repo/entities`; create them in `@repo/entities` if they do not exist. Reference/example code imports from `@repo/entities/example`. Do not make this package depend on `zod` directly.
 - Keep peer dependencies external in `vite.config.ts` so they are not bundled into this package output.
 - Do not read `process.env` directly in this package. Pass runtime configuration, such as `baseURL`, into `createApiClient` from the consuming app.
 - Keep domain-specific routes and Zod contracts outside this package unless intentionally adapting the template into a real project.
 - Product-level API services (e.g., `healthApi`, `rootApi`) live in `src/` and are exported from `src/index.ts`.
-- Domain-specific reference code (concrete resource paths, per-resource API call functions) lives under `example/` and is exposed via the `@monorepo-template/api-client/example` subpath. It exists purely to show how `src/`'s generic helpers (`getClient`, `buildPath`, `createResourcePaths`, `createCrudService`) are meant to be used for a concrete resource.
+- Domain-specific reference code (concrete resource paths, per-resource API call functions) lives under `example/` and is exposed via the `@repo/api-client/example` subpath. It exists purely to show how `src/`'s generic helpers (`getClient`, `buildPath`, `createResourcePaths`, `createCrudService`) are meant to be used for a concrete resource.
 
 ## Source Layout
 
@@ -30,7 +30,7 @@ src/
     index.ts
     crud.service.ts      # generic createCrudService factory
 example/
-  index.ts               # barrel export for the @monorepo-template/api-client/example subpath
+  index.ts               # barrel export for the @repo/api-client/example subpath
   api-paths.ts           # referenceApiRouteTemplates / referenceApiPaths — concrete route strings for the reference server
   auth-account-api.ts    # authAccountApi
   auth-session-api.ts    # authSessionApi
@@ -41,7 +41,7 @@ example/
 
 `example/` has its own `tsconfig.json` (extends the package's `tsconfig.json`, includes `**/*.ts`) since the package's main `tsconfig.json`/`typecheck` script only includes `src`. Verify example code with `npx tsc -p example/tsconfig.json --noEmit` from this package's directory.
 
-The `example/` directory is built as a separate entry (`dist/example.js`) and exposed via the `@monorepo-template/api-client/example` subpath export. Import reference API clients from there so domain-specific code stays separate from the generic helpers exported by the main package.
+The `example/` directory is built as a separate entry (`dist/example.js`) and exposed via the `@repo/api-client/example` subpath export. Import reference API clients from there so domain-specific code stays separate from the generic helpers exported by the main package.
 
 ## Imports
 
@@ -53,7 +53,7 @@ The `example/` directory is built as a separate entry (`dist/example.js`) and ex
 Run from the repo root:
 
 ```sh
-pnpm --filter @monorepo-template/api-client build
-pnpm --filter @monorepo-template/api-client typecheck
-pnpm --filter @monorepo-template/api-client lint
+pnpm --filter @repo/api-client build
+pnpm --filter @repo/api-client typecheck
+pnpm --filter @repo/api-client lint
 ```

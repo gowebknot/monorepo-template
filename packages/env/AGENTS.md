@@ -2,21 +2,21 @@
 
 ## Purpose
 
-`@monorepo-template/env` owns env validation for the whole workspace.
+`@repo/env` owns env validation for the whole workspace.
 
 ## Rules
 
 - Put every env schema in the `globalEnv` Zod object in `src/global-env.ts` first.
 - App-specific envs must derive their schema with `globalEnv.pick(...).shape`; do not define app env schemas directly in apps.
-- This package is the only place that may read `process.env`; all other packages must import parsed envs, validators, or factory functions from `@monorepo-template/env`.
+- This package is the only place that may read `process.env`; all other packages must import parsed envs, validators, or factory functions from `@repo/env`.
 - Use current Zod imports, methods, and functions only; do not add deprecated pre-Zod-4 patterns or compatibility implementations.
-- Export app-specific parsed constants from subpaths (`@monorepo-template/env/web`, `@monorepo-template/env/server`) so importing one app env does not validate another app's required variables.
+- Export app-specific parsed constants from subpaths (`@repo/env/web`, `@repo/env/server`) so importing one app env does not validate another app's required variables.
 - Root package exports `globalEnv`, app-specific validator objects (`webEnvSchema`, `webServerEnvSchema`, `webClientEnvSchema`, `serverEnvSchema`), and factory functions (`createWebEnv`, `createServerEnv`); it must not export parsed `webEnv` or `serverEnv` constants.
 
 ## Entry Points
 
 - `vite.config.ts` sets `envDir` to the workspace root (`../..`) so Vite reads root `.env` files, not `packages/env/.env`.
-- Vite root lib entry points at package-root `env.ts`, but outputs `dist/index.js` for `@monorepo-template/env`.
+- Vite root lib entry points at package-root `env.ts`, but outputs `dist/index.js` for `@repo/env`.
 - Subpath exports output `dist/web-env.js` and `dist/server-env.js`.
 
 ## Import Rules
@@ -30,7 +30,7 @@
 Run from the repo root:
 
 ```sh
-pnpm --filter @monorepo-template/env build
-pnpm --filter @monorepo-template/env typecheck
-pnpm --filter @monorepo-template/env lint
+pnpm --filter @repo/env build
+pnpm --filter @repo/env typecheck
+pnpm --filter @repo/env lint
 ```

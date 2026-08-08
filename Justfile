@@ -24,7 +24,7 @@ typecheck:
 format:
     pnpm format
 
-check: lint typecheck format-check skills-check skills-test
+check: lint typecheck format-check skills-check skills-test template-test
 
 format-check:
     pnpm format:check
@@ -43,6 +43,12 @@ skills-check:
 
 skills-test:
     pnpm skills:test
+
+template-test:
+    pnpm template:test
+
+template-test-integration:
+    pnpm template:test:integration
 
 skills-remove name:
     pnpm skills:remove {{name}}

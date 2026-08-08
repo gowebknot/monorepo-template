@@ -1,0 +1,53 @@
+_min_copier_version: "9.0.0"
+_answers_file: .copier-answers.yml
+
+_envops:
+  block_start_string: "<%!"
+  block_end_string: "!%>"
+  variable_start_string: "<%="
+  variable_end_string: "=%>"
+  comment_start_string: "<%#"
+  comment_end_string: "#%>"
+
+_exclude:
+  - copier.yml
+  - copier.yaml
+  - "~*"
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - .svn
+  - core
+  - .claude/worktrees
+  - "**/.turbo"
+  - "**/node_modules"
+  - "**/dist"
+  - .venv
+  - .env
+  - .env.local
+  - .env.*.local
+
+project_name:
+  type: str
+  help: Project name
+  default: my-project
+  validator: >-
+    <%!- set slug = project_name | lower | regex_replace('[^a-z0-9]+', '-') | regex_replace('^-+|-+$', '') -!%>
+    <%!- if not slug -!%>
+    Project name must contain at least one letter or number.
+    <%!- elif slug | length > 214 -!%>
+    Project slug must not exceed 214 characters.
+    <%!- endif -!%>
+
+_message_after_copy: |
+  Project "<%= project_name =%>" created successfully.
+
+  Next steps:
+    cd <%= _copier_conf.dst_path =%>
+    pnpm install
+    pnpm dev
+
+_message_after_update: |
+  Project "<%= project_name =%>" updated successfully.
+  Review any conflicts, then run `just check`.

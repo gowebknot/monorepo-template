@@ -8,11 +8,11 @@ import {
   getAuthSessionByToken,
   listAuthAccountsByUser,
   listAuthSessionsByUser,
-} from '@monorepo-template/db/example';
+} from '@repo/db/example';
 import type {
   CreateAuthAccountInput,
   CreateAuthSessionInput,
-} from '@monorepo-template/db/example';
+} from '@repo/db/example';
 
 import { EXAMPLE_DB } from '../database/database.constants';
 import type { ExampleDb } from '../database/database.module';

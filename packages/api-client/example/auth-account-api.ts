@@ -4,7 +4,7 @@ import { createCrudService } from "@/services/crud.service";
 import type {
   AuthAccount,
   CreateAuthAccountInput
-} from "@monorepo-template/entities/example";
+} from "@repo/entities/example";
 
 import { referenceApiPaths } from "./api-paths";
 

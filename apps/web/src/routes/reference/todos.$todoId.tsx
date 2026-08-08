@@ -19,8 +19,8 @@ import {
   useCreateTodoItemOptimistic,
   useUpdateTodoItemOptimistic,
   useRemoveTodoItemOptimistic
-} from "@monorepo-template/query-client/example";
-import type { CreateTodoItemInput } from "@monorepo-template/entities/example";
+} from "@repo/query-client/example";
+import type { CreateTodoItemInput } from "@repo/entities/example";
 import { clientEnv } from "@/lib/env";
 
 export const Route = createFileRoute("/reference/todos/$todoId")({

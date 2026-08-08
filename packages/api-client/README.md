@@ -1,10 +1,10 @@
-# @monorepo-template/api-client
+# @repo/api-client
 
 Shared Axios-based API call package for workspace apps and packages.
 
 ## Install
 
-This package declares `axios` as a peer dependency. API contract types should come from `@monorepo-template/entities`.
+This package declares `axios` as a peer dependency. API contract types should come from `@repo/entities`.
 
 ```sh
 pnpm add axios
@@ -13,8 +13,8 @@ pnpm add axios
 ## Usage
 
 ```ts
-import { createCrudService } from "@monorepo-template/api-client";
-import type { User, UserCreate, UserUpdate } from "@monorepo-template/entities";
+import { createCrudService } from "@repo/api-client";
+import type { User, UserCreate, UserUpdate } from "@repo/entities";
 
 const userService = createCrudService<User, User[], UserCreate, UserUpdate>(
   "users"
@@ -55,7 +55,7 @@ Creates collection/detail path helpers for a REST resource.
 ## Development
 
 ```sh
-pnpm --filter @monorepo-template/api-client build
-pnpm --filter @monorepo-template/api-client typecheck
-pnpm --filter @monorepo-template/api-client lint
+pnpm --filter @repo/api-client build
+pnpm --filter @repo/api-client typecheck
+pnpm --filter @repo/api-client lint
 ```

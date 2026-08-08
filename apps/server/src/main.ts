@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { serverEnv } from '@monorepo-template/env/server';
+import { serverEnv } from '@repo/env/server';
 import { AppModule } from './app.module';
 
 async function bootstrap() {

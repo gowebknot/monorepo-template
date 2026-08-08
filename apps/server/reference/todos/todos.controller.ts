@@ -8,10 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import type {
-  CreateTodoInput,
-  UpdateTodoInput,
-} from '@monorepo-template/db/example';
+import type { CreateTodoInput, UpdateTodoInput } from '@repo/db/example';
 
 import { TodosService } from './todos.service';
 

@@ -7,7 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import type { CreateAuthAccountInput } from '@monorepo-template/db/example';
+import type { CreateAuthAccountInput } from '@repo/db/example';
 
 import { AuthService } from './auth.service';
 

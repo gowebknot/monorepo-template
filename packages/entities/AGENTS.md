@@ -2,20 +2,20 @@
 
 ## Purpose
 
-`@monorepo-template/entities` owns shared API contracts for frontend and backend packages.
+`@repo/entities` owns shared API contracts for frontend and backend packages.
 
 ## Contract Rule
 
 - Define API request, response, params, and error contracts here first.
 - Export each contract as a Zod schema plus an inferred TypeScript type.
 - Use current Zod imports, methods, and functions only; do not add deprecated pre-Zod-4 patterns or compatibility implementations.
-- Consumer packages must import schemas/types from `@monorepo-template/entities`; do not hand-write matching API contract types in consumers.
+- Consumer packages must import schemas/types from `@repo/entities`; do not hand-write matching API contract types in consumers.
 
 ## Layout
 
 Real, exported contracts live under `src/api-contracts` and are re-exported from root `src/index.ts`.
 
-Purely illustrative sample contracts live under `example/api-contracts` and are exported from the `@monorepo-template/entities/example` subpath. Do not put sample/domain code directly in `src`.
+Purely illustrative sample contracts live under `example/api-contracts` and are exported from the `@repo/entities/example` subpath. Do not put sample/domain code directly in `src`.
 
 ```text
 src/api-contracts/         # real, product-level contracts
@@ -74,9 +74,9 @@ Use explicit names: `<action><Resource>RequestSchema`, `<action><Resource>Respon
 Run from the repo root:
 
 ```sh
-pnpm --filter @monorepo-template/entities build
-pnpm --filter @monorepo-template/entities typecheck
-pnpm --filter @monorepo-template/entities lint
+pnpm --filter @repo/entities build
+pnpm --filter @repo/entities typecheck
+pnpm --filter @repo/entities lint
 ```
 
 Verify example code from the package directory:

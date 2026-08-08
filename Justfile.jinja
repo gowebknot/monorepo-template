@@ -1,0 +1,5 @@
+<%!- filter replace(" skills-test template-test", " skills-test")
+  | replace('\ntemplate-test:\n    pnpm template:test\n', "")
+  | replace('\ntemplate-test-integration:\n    pnpm template:test:integration\n', "") -!%>
+<%!- include "Justfile" -!%>
+<%!- endfilter -!%>

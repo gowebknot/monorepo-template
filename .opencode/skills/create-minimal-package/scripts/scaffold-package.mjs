@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 process.on("uncaughtException", (error) => {
@@ -41,20 +41,7 @@ if (!/^[a-z0-9-]+$/.test(projectName)) {
   throw new Error("Project name must be lowercase kebab-case");
 }
 
-const rootPackageJsonPath = path.join(root, "package.json");
-const rootPackageJson = JSON.parse(await readFile(rootPackageJsonPath, "utf8"));
-const rootProjectName = rootPackageJson.name
-  ?.replace(/^@/, "")
-  .split("/")
-  .at(-1);
-
-if (!rootProjectName || !/^[a-z0-9-]+$/.test(rootProjectName)) {
-  throw new Error(
-    "Root package.json name must be lowercase kebab-case to derive package scope"
-  );
-}
-
-const packageName = `@${rootProjectName}/${projectName}`;
+const packageName = `@repo/${projectName}`;
 const packageDirName = projectName;
 const packageDir = path.join(root, "packages", packageDirName);
 
@@ -151,7 +138,7 @@ const agents = `# AGENTS.md
 ## Rules
 
 - Keep this package focused on reusable library code.
-- Do not read \`process.env\` directly in this package. Runtime configuration should be passed in by consumers or imported from \`@${rootProjectName}/env\` when appropriate.
+- Do not read \`process.env\` directly in this package. Runtime configuration should be passed in by consumers or imported from \`@repo/env\` when appropriate.
 - Keep runtime-only peer dependencies external in \`vite.config.ts\`.
 - Add package-specific rules here when this package gains concrete responsibilities.
 

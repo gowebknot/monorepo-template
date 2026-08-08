@@ -1,4 +1,4 @@
-# @monorepo-template/query-client
+# @repo/query-client
 
 Shared workspace package for `query-client`.
 
@@ -7,13 +7,13 @@ Shared workspace package for `query-client`.
 Export public APIs from `src/index.ts`, then import them from the package root:
 
 ```ts
-import { example } from "@monorepo-template/query-client";
+import { example } from "@repo/query-client";
 ```
 
 ## Development
 
 ```sh
-pnpm --filter @monorepo-template/query-client build
-pnpm --filter @monorepo-template/query-client typecheck
-pnpm --filter @monorepo-template/query-client lint
+pnpm --filter @repo/query-client build
+pnpm --filter @repo/query-client typecheck
+pnpm --filter @repo/query-client lint
 ```

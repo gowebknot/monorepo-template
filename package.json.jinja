@@ -1,0 +1,7 @@
+<%!- set project_slug = project_name | lower | regex_replace('[^a-z0-9]+', '-') | regex_replace('^-+|-+$', '') -!%>
+<%!- filter replace("monorepo-template", project_slug)
+  | replace('    "core:test": "node --test core/test/core-packages.test.js",\n', "")
+  | replace('    "template:test": "pnpm core:test && pnpm --filter create-mono-stack test",\n', "")
+  | replace('    "template:test:integration": "pnpm --filter create-mono-stack test:integration",\n', "") -!%>
+<%!- include "package.json" -!%>
+<%!- endfilter -!%>

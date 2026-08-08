@@ -1,11 +1,11 @@
 import { Global, Inject, Module } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
-import { createExampleDb, users } from '@monorepo-template/db/example';
+import { createExampleDb, users } from '@repo/db/example';
 
 import { EXAMPLE_DB } from './database.constants';
 
 // Demo-only schema bootstrap: a real project applies migrations via
-// `pnpm --filter @monorepo-template/db db:generate` / `db:migrate` instead.
+// `pnpm --filter @repo/db db:generate` / `db:migrate` instead.
 const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,

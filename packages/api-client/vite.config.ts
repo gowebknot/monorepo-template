@@ -20,11 +20,7 @@ export default defineConfig({
       fileName: (_format: string, entryName: string) => `${entryName}.js`
     },
     rollupOptions: {
-      external: [
-        "axios",
-        "@monorepo-template/entities",
-        "@monorepo-template/entities/example"
-      ]
+      external: ["axios", "@repo/entities", "@repo/entities/example"]
     }
   },
   resolve: {

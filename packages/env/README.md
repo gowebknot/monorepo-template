@@ -1,4 +1,4 @@
-# @monorepo-template/env
+# @repo/env
 
 Workspace environment validation package built with T3 env and Zod.
 
@@ -7,20 +7,20 @@ Workspace environment validation package built with T3 env and Zod.
 Import parsed app envs from subpaths:
 
 ```ts
-import { serverEnv } from "@monorepo-template/env/server";
-import { webEnv } from "@monorepo-template/env/web";
+import { serverEnv } from "@repo/env/server";
+import { webEnv } from "@repo/env/web";
 ```
 
 Import validators and factory functions from the package root:
 
 ```ts
-import { createServerEnv, globalEnv } from "@monorepo-template/env";
+import { createServerEnv, globalEnv } from "@repo/env";
 ```
 
 ## Development
 
 ```sh
-pnpm --filter @monorepo-template/env build
-pnpm --filter @monorepo-template/env typecheck
-pnpm --filter @monorepo-template/env lint
+pnpm --filter @repo/env build
+pnpm --filter @repo/env typecheck
+pnpm --filter @repo/env lint
 ```

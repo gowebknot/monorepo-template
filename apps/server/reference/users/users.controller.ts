@@ -7,10 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import type {
-  CreateUserInput,
-  UpdateUserInput,
-} from '@monorepo-template/db/example';
+import type { CreateUserInput, UpdateUserInput } from '@repo/db/example';
 
 import { UsersService } from './users.service';
 

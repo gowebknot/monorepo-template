@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { referenceServerEnv } from '@monorepo-template/env/reference-server';
+import { referenceServerEnv } from '@repo/env/reference-server';
 
 import { ReferenceAppModule } from './app.module';
 

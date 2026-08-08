@@ -1,0 +1,4 @@
+<%!- set project_slug = project_name | lower | regex_replace('[^a-z0-9]+', '-') | regex_replace('^-+|-+$', '') -!%>
+<%!- filter replace("monorepo-template", project_slug) -!%>
+<%!- include "packages/config/src/index.ts" -!%>
+<%!- endfilter -!%>
