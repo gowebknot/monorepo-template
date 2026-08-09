@@ -6,11 +6,25 @@ Package-manager launcher for the Go Webknot monorepo Copier template. This packa
 ## Requirements
 
 - Node.js 20 or newer
-- Python 3.10 or newer
+- Python 3.10 or newer, or consent for setup to install the latest Python
 - Git and SSH access to `git@github.com:gowebknot/monorepo-template.git`
 
 The launcher creates a temporary Python virtual environment, installs the pinned Copier requirements,
-generates the project, and removes the environment. It does not use Docker or install global tools.
+generates the project, initializes the project's persistent `.venv` for future template updates, and
+removes the temporary environment. It does not use Docker or install global Python packages.
+
+If Python is unavailable, setup first asks whether it may install Python. After consent, an existing
+mise installation is preferred. If mise is unavailable, setup separately asks to install it; declining
+mise uses the native platform package manager instead. Declining the Python installation stops setup
+before project files are created and prints manual installation guidance.
+
+The native fallback installs the platform's current Python package, then revalidates the version and
+virtual-environment support. Older distributions that cannot provide Python 3.10 or newer stop with
+manual installation guidance instead of continuing with an unsupported runtime.
+
+Python discovery disables automatic installs from runtime-manager shims. Setup uses the launcher's
+packaged Copier requirements for both virtual environments and removes generated output if a later
+setup step fails.
 
 ## Usage
 
@@ -38,12 +52,14 @@ Options:
 --vcs-ref <ref>     Use a specific template tag, branch, or commit
 ```
 
-The destination must not contain files. Install project dependencies after generation.
+The destination must not contain files. Setup initializes Git on `main` without creating a commit.
+Install project dependencies and create the baseline commit after generation.
 
 ## Template Updates
 
-Generated projects include `pnpm template:update`. Developers who require an SSH alias configure it
-once per clone after initializing Git:
+Generated projects include `pnpm template:update`, a `mise.toml` declaration for the latest Python,
+and a ready-to-use `.venv` with pinned Copier dependencies. Developers who require an SSH alias
+configure it once per clone after creating the initial commit:
 
 ```sh
 git config --local mono-stack.template-host-alias github-webknot

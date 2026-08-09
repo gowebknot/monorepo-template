@@ -8,15 +8,20 @@ This repository is also a [Copier](https://copier.readthedocs.io/) template. Cop
 template version in the generated project and can apply later template changes without blindly
 overwriting the entire project.
 
-Use the `create-mono-stack` package to install pinned Copier dependencies into a temporary virtual
-environment and render the newest stable template version. Node.js 20+, Python 3.10+, Git, and SSH
-access to `gowebknot/monorepo-template` are required. Docker and global Python packages are not used.
+Use the `create-mono-stack` package to render the newest stable template version. Node.js 20+, Python
+3.10+, Git, and SSH access to `gowebknot/monorepo-template` are required. When Python is unavailable,
+setup asks before installing it through mise or the native platform package manager. Docker and global
+Python packages are not used.
 
 ```sh
 pnpm create mono-stack my-project --name "My Project"
 cd my-project
 pnpm install
+git add .
+git commit -m "chore: initialize project"
 ```
+
+Setup initializes the repository on `main` but intentionally leaves the first commit to you.
 
 If your SSH configuration uses a host alias for the template repository, apply it only to the
 creation process. Copier still records the generic source URL for other developers:
@@ -39,13 +44,10 @@ node core/create-mono-stack/bin/create-mono-stack.js ../my-project \
 Copier selects the newest stable PEP 440-compatible Git tag by default. Publish immutable tags such
 as `v1.0.0` and `v1.1.0` so generated projects can update predictably.
 
-The generated project records its template source and version in `.copier-answers.yml`. To update it,
-install the pinned tool into the project-local `.venv`, then run Copier from the project root:
-
-```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install --requirement requirements/copier.txt
-```
+Setup installs the pinned Copier toolchain into the generated project's `.venv`, while `mise.toml`
+declares the latest Python runtime. The project records its template source and version in
+`.copier-answers.yml`, so no separate updater bootstrap is required. Create the initial Git commit
+before applying a template update.
 
 When this clone requires an SSH host alias, store it once in the clone's local Git configuration. The
 setting remains in `.git/config` and is not committed:

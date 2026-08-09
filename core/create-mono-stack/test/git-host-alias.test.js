@@ -50,8 +50,8 @@ test("uses an SSH alias without changing Copier's recorded source", async () => 
     },
     {
       environment: {
-        GIT_CONFIG_COUNT: "1",
-        GIT_CONFIG_KEY_0: "credential.helper",
+        Git_Config_Count: "1",
+        git_config_key_0: "credential.helper",
         GIT_CONFIG_VALUE_0: ""
       },
       mkdtemp: async () => temporaryRoot,
@@ -60,6 +60,20 @@ test("uses an SSH alias without changing Copier's recorded source", async () => 
       rm: async () => {},
       runCommand: async (command, args, options = {}) => {
         calls.push({ args, command, options });
+        if (command === "git" && args[0] === "--version") {
+          return { stderr: "", stdout: "git version 2.50.0\n" };
+        }
+        if (command === "git" && args.includes("--verify")) {
+          const error = new Error("unknown revision HEAD");
+          error.exitCode = 1;
+          throw error;
+        }
+        if (command === "git" && args.includes("symbolic-ref")) {
+          return { stderr: "", stdout: "main\n" };
+        }
+        if (command === "git" && args.includes("rev-parse")) {
+          return { stderr: "", stdout: ".git\n" };
+        }
         return options.capture
           ? { stderr: "", stdout: "3.14.7\n" }
           : { stderr: "", stdout: "" };
@@ -68,12 +82,15 @@ test("uses an SSH alias without changing Copier's recorded source", async () => 
     }
   );
 
-  assert.deepEqual(calls[0], {
-    command: "/custom/python",
-    args: ["-c", versionScript],
-    options: { capture: true }
-  });
-  assert.deepEqual(calls.at(-1), {
+  const pythonProbe = calls.find(
+    ({ args, command }) => command === "/custom/python" && args[0] === "-c"
+  );
+  assert.equal(pythonProbe.args[1], versionScript);
+  assert.equal(pythonProbe.options.capture, true);
+  const copierCall = calls.find(
+    ({ args }) => args[0] === "-m" && args[1] === "copier"
+  );
+  assert.deepEqual(copierCall, {
     command: `${temporaryRoot}/venv/bin/python`,
     args: [
       "-m",
@@ -88,9 +105,12 @@ test("uses an SSH alias without changing Copier's recorded source", async () => 
     options: {
       env: {
         GIT_CONFIG_COUNT: "2",
+        GIT_CONFIG_KEY_0: "credential.helper",
         GIT_CONFIG_KEY_1: "url.git@github-webknot:.insteadOf",
+        GIT_CONFIG_VALUE_0: "",
         GIT_CONFIG_VALUE_1: "git@github.com:"
-      }
+      },
+      replaceEnvironment: true
     }
   });
 });

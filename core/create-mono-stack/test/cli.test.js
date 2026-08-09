@@ -52,12 +52,18 @@ test("records local template sources as absolute paths", () => {
   );
 });
 
-test("creates a project through an isolated pinned Copier environment", async () => {
+test("creates a project through isolated pinned Copier environments", async () => {
   const calls = [];
   const removals = [];
   const temporaryRoot = "/tmp/create-mono-stack-fixture";
   const destination = "/workspace/acme-platform";
   const dependencies = {
+    environment: {
+      CUSTOM_ENV: "kept",
+      GIT_DIR: "/tmp/wrong-repository",
+      GIT_WORK_TREE: "/tmp/wrong-worktree",
+      PATH: "/usr/bin"
+    },
     mkdtemp: async (prefix) => {
       assert.equal(prefix, "/tmp/create-mono-stack-");
       return temporaryRoot;
@@ -67,6 +73,20 @@ test("creates a project through an isolated pinned Copier environment", async ()
     rm: async (...args) => removals.push(args),
     runCommand: async (command, args, options = {}) => {
       calls.push({ args, command, options });
+      if (command === "git" && args[0] === "--version") {
+        return { stderr: "", stdout: "git version 2.50.0\n" };
+      }
+      if (command === "git" && args.includes("--verify")) {
+        const error = new Error("unknown revision HEAD");
+        error.exitCode = 1;
+        throw error;
+      }
+      if (command === "git" && args.includes("rev-parse")) {
+        return { stderr: "", stdout: ".git\n" };
+      }
+      if (command === "git" && args.includes("symbolic-ref")) {
+        return { stderr: "", stdout: "main\n" };
+      }
       return options.capture
         ? { stderr: "", stdout: "3.14.7\n" }
         : { stderr: "", stdout: "" };
@@ -87,30 +107,45 @@ test("creates a project through an isolated pinned Copier environment", async ()
 
   const virtualEnvironment = join(temporaryRoot, "venv");
   const virtualPython = join(virtualEnvironment, "bin/python");
-  assert.deepEqual(calls, [
-    {
-      command: "/custom/python",
-      args: ["-c", versionScript],
-      options: { capture: true }
-    },
-    {
-      command: "/custom/python",
-      args: ["-m", "venv", virtualEnvironment],
-      options: {}
-    },
-    {
-      command: virtualPython,
-      args: [
-        "-m",
-        "pip",
-        "install",
-        "--disable-pip-version-check",
-        "--no-input",
-        "--requirement",
-        join(repositoryRoot, "core/create-mono-stack/requirements/copier.txt")
-      ],
-      options: {}
-    },
+  const projectVirtualEnvironment = join(destination, ".venv");
+  const projectPython = join(projectVirtualEnvironment, "bin/python");
+  const packagedRequirements = join(
+    repositoryRoot,
+    "core/create-mono-stack/requirements/copier.txt"
+  );
+  const pythonProbe = calls.find(
+    ({ args, command }) => command === "/custom/python" && args[0] === "-c"
+  );
+  assert.equal(pythonProbe.args[1], versionScript);
+  assert.equal(pythonProbe.options.env.MISE_AUTO_INSTALL, "0");
+  assert.equal(
+    pythonProbe.options.env.PYTHON_MANAGER_AUTOMATIC_INSTALL,
+    "false"
+  );
+  assert.deepEqual(
+    calls.filter(({ args }) => args[0] === "-m" && args[1] === "venv"),
+    [
+      {
+        command: "/custom/python",
+        args: ["-m", "venv", virtualEnvironment],
+        options: {}
+      },
+      {
+        command: "/custom/python",
+        args: ["-m", "venv", projectVirtualEnvironment],
+        options: {}
+      }
+    ]
+  );
+  const pipCalls = calls.filter(
+    ({ args }) => args[0] === "-m" && args[1] === "pip"
+  );
+  assert.deepEqual(
+    pipCalls.map(({ args }) => args.at(-1)),
+    [packagedRequirements, packagedRequirements]
+  );
+  assert.deepEqual(
+    calls.find(({ args }) => args[0] === "-m" && args[1] === "copier"),
     {
       command: virtualPython,
       args: [
@@ -125,40 +160,16 @@ test("creates a project through an isolated pinned Copier environment", async ()
         "/workspace/template",
         destination
       ],
-      options: {}
+      options: {
+        env: { CUSTOM_ENV: "kept", PATH: "/usr/bin" },
+        replaceEnvironment: true
+      }
     }
-  ]);
+  );
+  assert.equal(pipCalls.at(-1).command, projectPython);
   assert.deepEqual(removals, [
     [temporaryRoot, { force: true, recursive: true }]
   ]);
-});
-
-test("rejects an explicitly selected Python older than 3.10", async () => {
-  let createdTemporaryDirectory = false;
-
-  await assert.rejects(
-    createProject(
-      {
-        destination: "/workspace/acme-platform",
-        projectName: "Acme Platform",
-        python: "python3",
-        template: DEFAULT_TEMPLATE_SOURCE,
-        vcsRef: undefined
-      },
-      {
-        mkdtemp: async () => {
-          createdTemporaryDirectory = true;
-        },
-        platform: "darwin",
-        readdir: async () => missingPath(),
-        rm: async () => {},
-        runCommand: async () => ({ stderr: "", stdout: "3.9.6\n" }),
-        temporaryDirectory: "/tmp"
-      }
-    ),
-    /Python 3\.10 or newer/
-  );
-  assert.equal(createdTemporaryDirectory, false);
 });
 
 test("refuses to modify a non-empty destination", async () => {
@@ -192,7 +203,6 @@ test("refuses to modify a non-empty destination", async () => {
 
 test("removes the temporary environment when Copier fails", async () => {
   const removed = [];
-  let commandCount = 0;
 
   await assert.rejects(
     createProject(
@@ -208,12 +218,16 @@ test("removes the temporary environment when Copier fails", async () => {
         platform: "darwin",
         readdir: async () => missingPath(),
         rm: async (...args) => removed.push(args),
-        runCommand: async (_command, _args, options = {}) => {
-          commandCount += 1;
+        runCommand: async (command, args, options = {}) => {
+          if (command === "git" && args[0] === "--version") {
+            return { stderr: "", stdout: "git version 2.50.0\n" };
+          }
           if (options.capture) {
             return { stderr: "", stdout: "3.14.7\n" };
           }
-          if (commandCount === 4) throw new Error("Copier failed");
+          if (args[0] === "-m" && args[1] === "copier") {
+            throw new Error("Copier failed");
+          }
           return { stderr: "", stdout: "" };
         },
         temporaryDirectory: "/tmp"
@@ -222,6 +236,47 @@ test("removes the temporary environment when Copier fails", async () => {
     /Copier failed/
   );
   assert.deepEqual(removed, [
+    ["/workspace/acme-platform", { force: true, recursive: true }],
     ["/tmp/create-mono-stack-failure", { force: true, recursive: true }]
+  ]);
+});
+
+test("reports Git initialization failures after project setup", async () => {
+  const removed = [];
+
+  await assert.rejects(
+    createProject(
+      {
+        destination: "/workspace/acme-platform",
+        projectName: "Acme Platform",
+        python: "python3",
+        template: DEFAULT_TEMPLATE_SOURCE,
+        vcsRef: undefined
+      },
+      {
+        mkdtemp: async () => "/tmp/create-mono-stack-git-failure",
+        platform: "darwin",
+        readdir: async () => missingPath(),
+        rm: async (...args) => removed.push(args),
+        runCommand: async (command, args, options = {}) => {
+          if (command === "git" && args[0] === "--version") {
+            return { stderr: "", stdout: "git version 2.50.0\n" };
+          }
+          if (options.capture) {
+            return { stderr: "", stdout: "3.14.7\n" };
+          }
+          if (command === "git" && args[0] === "init") {
+            throw new Error("Git is unavailable");
+          }
+          return { stderr: "", stdout: "" };
+        },
+        temporaryDirectory: "/tmp"
+      }
+    ),
+    /Git initialization failed: Git is unavailable/
+  );
+  assert.deepEqual(removed, [
+    ["/workspace/acme-platform", { force: true, recursive: true }],
+    ["/tmp/create-mono-stack-git-failure", { force: true, recursive: true }]
   ]);
 });

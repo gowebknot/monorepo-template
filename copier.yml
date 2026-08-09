@@ -42,11 +42,14 @@ project_name:
     <%!- endif -!%>
 
 _message_after_copy: |
-  Project "<%= project_name =%>" created successfully.
+  Project files generated for "<%= project_name =%>".
+  When using create-mono-stack, wait for its setup-complete message before continuing.
 
   Next steps:
     cd <%= _copier_conf.dst_path =%>
     pnpm install
+    git add .
+    git commit -m "chore: initialize project"
     pnpm dev
 
 _message_after_update: |

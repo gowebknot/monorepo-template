@@ -48,14 +48,21 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
     await readFile(join(projectRoot, "LICENSE"), "utf8"),
     await readFile(join(templateRoot, "LICENSE"), "utf8")
   );
+  assert.equal(
+    await readFile(join(projectRoot, "mise.toml"), "utf8"),
+    await readFile(join(templateRoot, "mise.toml"), "utf8")
+  );
 
   const generatedReadme = await readFile(
     join(projectRoot, "README.md"),
     "utf8"
   );
   assert.match(generatedReadme, /## Template updates/);
+  assert.match(generatedReadme, /mise\.toml declares the latest Python/);
+  assert.match(generatedReadme, /create the baseline commit/);
   assert.match(generatedReadme, /mono-stack\.template-host-alias/);
   assert.match(generatedReadme, /pnpm template:update/);
+  assert.doesNotMatch(generatedReadme, /python3 -m venv/);
   assert.doesNotMatch(generatedReadme, /copier copy/);
   assert.doesNotMatch(generatedReadme, /core\/create-mono-stack/);
 

@@ -46,7 +46,7 @@ const templateAdapters = new Map([
     "README.md.jinja",
     `<%!- filter replace("# Monorepo Template", "# " ~ project_name)
   | replace('- \`core/create-mono-stack\`: source-only npm launcher and Copier tests\\n', "")
-  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nThis project records its Copier source and version in .copier-answers.yml. Run updates from a clean working tree with Python 3.10 or newer:\\n\\n    python3 -m venv .venv\\n    .venv/bin/python -m pip install --requirement requirements/copier.txt\\n\\nWhen this clone requires an SSH host alias, store it once in the local Git configuration:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nThe setting remains in .git/config and is not committed. Omit it when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
+  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nProject setup creates .venv with pinned Copier dependencies, and mise.toml declares the latest Python runtime. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml. Run updates from a clean working tree.\\n\\nWhen this clone requires an SSH host alias, store it once in the local Git configuration:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nThe setting remains in .git/config and is not committed. Omit it when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
 <%!- include "README.md" -!%>
 <%!- endfilter -!%>
 `
@@ -82,6 +82,10 @@ test("uses Copier-native project identity rendering", async () => {
   assert.equal(config.project_slug, undefined);
   assert.match(config.project_name.validator, /letter or number/);
   assert.match(config.project_name.validator, /214 characters/);
+  assert.match(config._message_after_copy, /files generated/i);
+  assert.doesNotMatch(config._message_after_copy, /created successfully/i);
+  assert.match(config._message_after_copy, /git add \./);
+  assert.match(config._message_after_copy, /chore: initialize project/);
   assert.ok(config._exclude.includes("copier.yml"));
   assert.ok(config._exclude.includes("core"));
   assert.ok(config._exclude.includes(".npmrc"));
@@ -105,6 +109,13 @@ test("builds workspace dependencies before starting development", async () => {
   assert.deepEqual(turbo.tasks.dev.dependsOn, ["^build"]);
   assert.deepEqual(turbo.tasks["dev:reference"].dependsOn, ["^build"]);
   assert.match(gitignore, /^\.npmrc$/m);
+});
+
+test("declares the latest Python runtime through mise", async () => {
+  assert.equal(
+    await readFile(join(root, "mise.toml"), "utf8"),
+    '[tools]\npython = "latest"\n'
+  );
 });
 
 test("keeps core tooling in the source workspace only", async () => {

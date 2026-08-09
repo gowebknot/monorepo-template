@@ -5,13 +5,18 @@ import { basename, isAbsolute, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 
+import {
+  initializeGit,
+  preflightGit,
+  sanitizeGitEnvironment
+} from "./git-setup.js";
+import { cleanupFailedProject } from "./project-cleanup.js";
+import { confirmInstallation, requirePython } from "./python-runtime.js";
+
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
 
-const minimumPythonVersion = [3, 10];
 const genericGitHubSshPrefix = "git@github.com:";
-const pythonVersionScript =
-  "import sys; print('.'.join(map(str, sys.version_info[:3])))";
 const requirementsPath = fileURLToPath(
   new URL("../requirements/copier.txt", import.meta.url)
 );
@@ -27,17 +32,24 @@ Options:
   -h, --help              Show this help
 `;
 
-function commandError(command, stderr, signal) {
+function commandError(command, stderr, signal, exitCode) {
   const detail = stderr.trim();
   const reason = signal ? ` terminated by ${signal}` : " failed";
-  return new Error(`${command}${reason}${detail ? `: ${detail}` : ""}`);
+  const error = new Error(`${command}${reason}${detail ? `: ${detail}` : ""}`);
+  error.exitCode = exitCode;
+  error.signal = signal;
+  return error;
 }
 
 function runCommand(command, args, options = {}) {
   return new Promise((resolvePromise, reject) => {
     const capture = options.capture === true;
     const child = spawn(command, args, {
-      env: options.env ? { ...process.env, ...options.env } : undefined,
+      env: options.env
+        ? options.replaceEnvironment
+          ? options.env
+          : { ...process.env, ...options.env }
+        : undefined,
       stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit"
     });
     let stderr = "";
@@ -67,13 +79,16 @@ function runCommand(command, args, options = {}) {
         resolvePromise({ stderr, stdout });
         return;
       }
-      reject(commandError(command, stderr, signal));
+      reject(commandError(command, stderr, signal, code));
     });
   });
 }
 
 const systemDependencies = {
+  confirmMiseInstall: confirmInstallation,
+  confirmPythonInstall: confirmInstallation,
   environment: process.env,
+  isAdministrator: process.getuid?.() === 0,
   mkdtemp,
   platform: process.platform,
   readdir,
@@ -109,38 +124,6 @@ function gitHostAliasEnvironment(alias, environment) {
   };
 }
 
-function pythonCandidates(platform) {
-  const versioned = ["3.14", "3.13", "3.12", "3.11", "3.10"];
-  if (platform === "win32") {
-    return [
-      { command: "python", prefixArgs: [] },
-      ...versioned.map((version) => ({
-        command: "py",
-        prefixArgs: [`-${version}`]
-      }))
-    ];
-  }
-  return [
-    { command: "python3", prefixArgs: [] },
-    { command: "python", prefixArgs: [] },
-    ...versioned.map((version) => ({
-      command: `python${version}`,
-      prefixArgs: []
-    }))
-  ];
-}
-
-function isSupportedPython(version) {
-  const match = /^(\d+)\.(\d+)(?:\.\d+)?$/.exec(version.trim());
-  if (!match) return false;
-  const major = Number(match[1]);
-  const minor = Number(match[2]);
-  return (
-    major > minimumPythonVersion[0] ||
-    (major === minimumPythonVersion[0] && minor >= minimumPythonVersion[1])
-  );
-}
-
 function resolveTemplateSource(source, cwd) {
   if (!source) return DEFAULT_TEMPLATE_SOURCE;
   const hasProtocol = /^[a-z][a-z\d+.-]*:/i.test(source);
@@ -150,46 +133,15 @@ function resolveTemplateSource(source, cwd) {
     : resolve(cwd, source);
 }
 
-async function inspectPython(candidate, execute) {
-  try {
-    const result = await execute(
-      candidate.command,
-      [...candidate.prefixArgs, "-c", pythonVersionScript],
-      { capture: true }
-    );
-    return isSupportedPython(result.stdout) ? candidate : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-async function selectPython(requestedPython, dependencies) {
-  if (requestedPython) {
-    const candidate = { command: requestedPython, prefixArgs: [] };
-    const selected = await inspectPython(candidate, dependencies.runCommand);
-    if (selected) return selected;
-    throw new Error(
-      `Python 3.10 or newer is required; ${requestedPython} is unavailable or unsupported.`
-    );
-  }
-
-  for (const candidate of pythonCandidates(dependencies.platform)) {
-    const selected = await inspectPython(candidate, dependencies.runCommand);
-    if (selected) return selected;
-  }
-  throw new Error(
-    "Python 3.10 or newer is required. Install it or pass --python <path>."
-  );
-}
-
 async function ensureDestinationIsAvailable(destination, dependencies) {
   try {
     const entries = await dependencies.readdir(destination);
     if (entries.length > 0) {
       throw new Error(`Destination directory is not empty: ${destination}`);
     }
+    return true;
   } catch (error) {
-    if (error?.code === "ENOENT") return;
+    if (error?.code === "ENOENT") return false;
     throw error;
   }
 }
@@ -234,8 +186,12 @@ export async function createProject(
   options,
   dependencies = systemDependencies
 ) {
-  await ensureDestinationIsAvailable(options.destination, dependencies);
-  const python = await selectPython(options.python, dependencies);
+  const destinationExisted = await ensureDestinationIsAvailable(
+    options.destination,
+    dependencies
+  );
+  await preflightGit(dependencies);
+  const python = await requirePython(options.python, dependencies);
   const temporaryRoot = await dependencies.mkdtemp(
     join(dependencies.temporaryDirectory, "create-mono-stack-")
   );
@@ -249,7 +205,7 @@ export async function createProject(
     await dependencies.runCommand(python.command, [
       ...python.prefixArgs,
       "-m",
-      "venv",
+      python.venvModule,
       virtualEnvironment
     ]);
     await dependencies.runCommand(virtualPython, [
@@ -274,18 +230,51 @@ export async function createProject(
       copierArguments.push("--vcs-ref", options.vcsRef);
     }
     copierArguments.push(options.template, options.destination);
-    const env = gitHostAliasEnvironment(
+    const environment = sanitizeGitEnvironment(dependencies.environment);
+    const aliasEnvironment = gitHostAliasEnvironment(
       options.gitHostAlias,
-      dependencies.environment ?? process.env
+      environment
     );
-    await dependencies.runCommand(
-      virtualPython,
-      copierArguments,
-      env ? { env } : {}
+    await dependencies.runCommand(virtualPython, copierArguments, {
+      env: aliasEnvironment
+        ? { ...environment, ...aliasEnvironment }
+        : environment,
+      replaceEnvironment: true
+    });
+
+    const projectVirtualEnvironment = join(options.destination, ".venv");
+    const projectPython = join(
+      projectVirtualEnvironment,
+      dependencies.platform === "win32" ? "Scripts/python.exe" : "bin/python"
     );
-  } finally {
-    await dependencies.rm(temporaryRoot, { force: true, recursive: true });
+    await dependencies.runCommand(python.command, [
+      ...python.prefixArgs,
+      "-m",
+      python.venvModule,
+      projectVirtualEnvironment
+    ]);
+    await dependencies.runCommand(projectPython, [
+      "-m",
+      "pip",
+      "install",
+      "--disable-pip-version-check",
+      "--no-input",
+      "--requirement",
+      requirementsPath
+    ]);
+    await initializeGit(options.destination, dependencies);
+  } catch (setupError) {
+    await cleanupFailedProject(
+      {
+        destination: options.destination,
+        destinationExisted,
+        setupError,
+        temporaryRoot
+      },
+      dependencies
+    );
   }
+  await dependencies.rm(temporaryRoot, { force: true, recursive: true });
 }
 
 export async function main(args = process.argv.slice(2)) {
@@ -295,4 +284,7 @@ export async function main(args = process.argv.slice(2)) {
     return;
   }
   await createProject(options);
+  console.log(
+    "Project setup complete. Git is initialized on main; create the initial commit before template updates."
+  );
 }

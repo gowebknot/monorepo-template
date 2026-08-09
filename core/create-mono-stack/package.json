@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "node --test test/cli.test.js test/copier-template.test.js test/git-host-alias.test.js test/template-update.test.js",
+    "test": "node --test test/cli.test.js test/copier-template.test.js test/git-host-alias.test.js test/git-setup.test.js test/project-cleanup.test.js test/python-runtime.test.js test/runtime-installers.test.js test/template-update.test.js",
     "test:integration": "node --test test/copier-template.integration.test.js"
   },
   "engines": {
