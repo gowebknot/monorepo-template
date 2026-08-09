@@ -6,10 +6,12 @@
       "outputs": ["dist/**"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },
     "dev:reference": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },

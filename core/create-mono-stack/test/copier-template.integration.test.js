@@ -13,7 +13,10 @@ import { dirname, join, relative, sep } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { assertGeneratedProject } from "./copier-template.integration.helpers.js";
+import {
+  assertDevelopmentTaskGraph,
+  assertGeneratedProject
+} from "./copier-template.integration.helpers.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const temporaryRoot = join(root, ".tmp");
@@ -99,6 +102,7 @@ test("creates and updates a customized project with Copier", async (t) => {
 
   const excludedDirectories = new Set([
     ".git",
+    ".npmrc",
     ".tmp",
     ".turbo",
     ".venv",
@@ -281,6 +285,13 @@ test("creates and updates a customized project with Copier", async (t) => {
   stage("install.started");
   run("pnpm", ["install", "--frozen-lockfile"], { cwd: projectRoot });
   stage("install.completed");
+  assertDevelopmentTaskGraph(
+    JSON.parse(
+      run("pnpm", ["exec", "turbo", "run", "dev", "--dry=json"], {
+        cwd: projectRoot
+      })
+    )
+  );
   stage("build.started");
   run("pnpm", ["build"], { cwd: projectRoot, timeout: 180_000 });
   stage("build.completed");

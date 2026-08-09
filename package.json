@@ -8,8 +8,8 @@
   "scripts": {
     "build": "turbo build",
     "core:test": "node --test core/test/core-packages.test.js",
-    "dev": "turbo dev --parallel",
-    "dev:reference": "turbo dev:reference --parallel",
+    "dev": "turbo dev",
+    "dev:reference": "turbo dev:reference",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo lint && eslint \"scripts/*.mjs\"",

@@ -27,7 +27,7 @@ ephemeral runner that does not persist a global installation.
 
 ```sh
 pnpm build          # turbo build (topological, cached)
-pnpm dev            # turbo dev --parallel (persistent, never cached)
+pnpm dev            # build upstream packages, then start persistent development tasks
 pnpm lint           # turbo package lint + root scripts (requires upstream build first)
 pnpm package:create <name>  # scaffold packages/<name> as @repo/<name>
 pnpm typecheck      # turbo typecheck (requires upstream build first)

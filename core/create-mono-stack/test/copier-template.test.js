@@ -84,12 +84,27 @@ test("uses Copier-native project identity rendering", async () => {
   assert.match(config.project_name.validator, /214 characters/);
   assert.ok(config._exclude.includes("copier.yml"));
   assert.ok(config._exclude.includes("core"));
+  assert.ok(config._exclude.includes(".npmrc"));
   assert.ok(config._exclude.includes(".venv"));
   assert.ok(!config._exclude.includes(".github"));
 
   await assert.rejects(
     access(join(root, "scripts/configure-template-project.mjs"))
   );
+});
+
+test("builds workspace dependencies before starting development", async () => {
+  const rootPackage = JSON.parse(
+    await readFile(join(root, "package.json"), "utf8")
+  );
+  const turbo = JSON.parse(await readFile(join(root, "turbo.json"), "utf8"));
+  const gitignore = await readFile(join(root, ".gitignore"), "utf8");
+
+  assert.equal(rootPackage.scripts.dev, "turbo dev");
+  assert.equal(rootPackage.scripts["dev:reference"], "turbo dev:reference");
+  assert.deepEqual(turbo.tasks.dev.dependsOn, ["^build"]);
+  assert.deepEqual(turbo.tasks["dev:reference"].dependsOn, ["^build"]);
+  assert.match(gitignore, /^\.npmrc$/m);
 });
 
 test("keeps core tooling in the source workspace only", async () => {
@@ -102,6 +117,10 @@ test("keeps core tooling in the source workspace only", async () => {
 
   assert.ok(workspace.packages.includes("core/*"));
   assert.equal(corePackage.name, "create-mono-stack");
+  assert.equal(
+    corePackage.bin["create-mono-stack"],
+    "bin/create-mono-stack.js"
+  );
   assert.equal(
     await readFile(
       join(root, "core/create-mono-stack/requirements/copier.txt"),

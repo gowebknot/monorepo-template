@@ -28,6 +28,7 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
   );
   await assert.rejects(readFile(join(projectRoot, "copier.yml"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "core"), "utf8"));
+  await assert.rejects(readFile(join(projectRoot, ".npmrc"), "utf8"));
   assert.doesNotMatch(
     await readFile(join(projectRoot, "pnpm-workspace.yaml"), "utf8"),
     /core\/\*/
@@ -68,4 +69,27 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
     await readFile(join(projectRoot, "scripts/update-template.mjs"), "utf8"),
     /mono-stack\.template-host-alias/
   );
+}
+
+export function assertDevelopmentTaskGraph(graph) {
+  const tasks = new Map(graph.tasks.map((task) => [task.taskId, task]));
+  const expectedDependencies = new Map([
+    [
+      "web#dev",
+      [
+        "@repo/api-client#build",
+        "@repo/entities#build",
+        "@repo/env#build",
+        "@repo/query-client#build"
+      ]
+    ],
+    ["server#dev", ["@repo/db#build", "@repo/env#build"]]
+  ]);
+
+  for (const [taskId, dependencies] of expectedDependencies) {
+    const task = tasks.get(taskId);
+    assert.ok(task, `Missing ${taskId} from Turbo's development graph`);
+    assert.deepEqual(task.resolvedTaskDefinition.dependsOn, ["^build"]);
+    assert.deepEqual([...task.dependencies].sort(), [...dependencies].sort());
+  }
 }

@@ -25,6 +25,7 @@ _exclude:
   - "**/dist"
   - .venv
   - .env
+  - .npmrc
   - .env.local
   - .env.*.local
 
