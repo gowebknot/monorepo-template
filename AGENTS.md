@@ -14,7 +14,7 @@ packages/
   entities/    # @repo/entities — shared API Zod contracts + inferred types
   api-client/  # @repo/api-client — shared Axios API client helpers
 skills/        # canonical source for portable agent skills (see below)
-scripts/       # skills.mjs CLI + skills.test.mjs (Node built-in test runner)
+scripts/       # portable skills tooling and generated-project template update wrapper
 ```
 
 Package manager: `pnpm@9.15.4`. Root `"type": "module"` — ESM throughout.
@@ -28,7 +28,7 @@ ephemeral runner that does not persist a global installation.
 ```sh
 pnpm build          # turbo build (topological, cached)
 pnpm dev            # turbo dev --parallel (persistent, never cached)
-pnpm lint           # turbo lint (requires upstream build first)
+pnpm lint           # turbo package lint + root scripts (requires upstream build first)
 pnpm package:create <name>  # scaffold packages/<name> as @repo/<name>
 pnpm typecheck      # turbo typecheck (requires upstream build first)
 pnpm format         # prettier --write . (root-level only, not per-package)

@@ -9,6 +9,7 @@ export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
 
 const minimumPythonVersion = [3, 10];
+const genericGitHubSshPrefix = "git@github.com:";
 const pythonVersionScript =
   "import sys; print('.'.join(map(str, sys.version_info[:3])))";
 const requirementsPath = fileURLToPath(
@@ -18,6 +19,8 @@ const help = `Usage: create-mono-stack <destination> [options]
 
 Options:
   -n, --name <name>       Project display name (defaults to destination name)
+      --git-host-alias <alias>
+                          SSH host alias for github.com template access
       --python <path>     Python 3.10+ executable
       --template <source> Copier template Git URL or local path
       --vcs-ref <ref>     Copier template Git revision
@@ -34,6 +37,7 @@ function runCommand(command, args, options = {}) {
   return new Promise((resolvePromise, reject) => {
     const capture = options.capture === true;
     const child = spawn(command, args, {
+      env: options.env ? { ...process.env, ...options.env } : undefined,
       stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit"
     });
     let stderr = "";
@@ -69,6 +73,7 @@ function runCommand(command, args, options = {}) {
 }
 
 const systemDependencies = {
+  environment: process.env,
   mkdtemp,
   platform: process.platform,
   readdir,
@@ -76,6 +81,33 @@ const systemDependencies = {
   runCommand,
   temporaryDirectory: tmpdir()
 };
+
+function validateGitHostAlias(alias) {
+  if (
+    alias !== undefined &&
+    (alias.length > 255 || !/^[a-z\d][a-z\d._-]*$/i.test(alias))
+  ) {
+    throw new Error(`Not a valid SSH host alias: ${alias}`);
+  }
+  return alias;
+}
+
+function gitHostAliasEnvironment(alias, environment) {
+  if (!alias) return undefined;
+  const countValue = environment.GIT_CONFIG_COUNT ?? "0";
+  if (!/^\d+$/.test(countValue)) {
+    throw new Error("GIT_CONFIG_COUNT must be a non-negative integer.");
+  }
+  const index = Number(countValue);
+  if (!Number.isSafeInteger(index)) {
+    throw new Error("GIT_CONFIG_COUNT is too large.");
+  }
+  return {
+    GIT_CONFIG_COUNT: String(index + 1),
+    [`GIT_CONFIG_KEY_${index}`]: `url.git@${alias}:.insteadOf`,
+    [`GIT_CONFIG_VALUE_${index}`]: genericGitHubSshPrefix
+  };
+}
 
 function pythonCandidates(platform) {
   const versioned = ["3.14", "3.13", "3.12", "3.11", "3.10"];
@@ -168,6 +200,7 @@ export function parseArguments(args, cwd = process.cwd()) {
     args,
     options: {
       help: { short: "h", type: "boolean" },
+      "git-host-alias": { type: "string" },
       name: { short: "n", type: "string" },
       python: { type: "string" },
       template: { type: "string" },
@@ -189,6 +222,7 @@ export function parseArguments(args, cwd = process.cwd()) {
 
   return {
     destination,
+    gitHostAlias: validateGitHostAlias(values["git-host-alias"]),
     projectName,
     python: values.python,
     template: resolveTemplateSource(values.template, cwd),
@@ -240,7 +274,15 @@ export async function createProject(
       copierArguments.push("--vcs-ref", options.vcsRef);
     }
     copierArguments.push(options.template, options.destination);
-    await dependencies.runCommand(virtualPython, copierArguments);
+    const env = gitHostAliasEnvironment(
+      options.gitHostAlias,
+      dependencies.environment ?? process.env
+    );
+    await dependencies.runCommand(
+      virtualPython,
+      copierArguments,
+      env ? { env } : {}
+    );
   } finally {
     await dependencies.rm(temporaryRoot, { force: true, recursive: true });
   }

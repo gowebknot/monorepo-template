@@ -18,6 +18,15 @@ cd my-project
 pnpm install
 ```
 
+If your SSH configuration uses a host alias for the template repository, apply it only to the
+creation process. Copier still records the generic source URL for other developers:
+
+```sh
+pnpm create mono-stack my-project \
+  --name "My Project" \
+  --git-host-alias github-webknot
+```
+
 For local launcher development, point it at this checkout explicitly:
 
 ```sh
@@ -36,7 +45,20 @@ install the pinned tool into the project-local `.venv`, then run Copier from the
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install --requirement requirements/copier.txt
-.venv/bin/copier update
+```
+
+When this clone requires an SSH host alias, store it once in the clone's local Git configuration. The
+setting remains in `.git/config` and is not committed:
+
+```sh
+git config --local mono-stack.template-host-alias github-webknot
+```
+
+Omit that setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the
+generic source URL while Git uses the local alias when needed:
+
+```sh
+pnpm template:update
 ```
 
 Review and resolve any reported conflicts before running the project checks. Keep the generated

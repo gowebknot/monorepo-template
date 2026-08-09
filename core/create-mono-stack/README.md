@@ -18,16 +18,40 @@ generates the project, and removes the environment. It does not use Docker or in
 pnpm create mono-stack my-project --name "My Project"
 ```
 
+For an SSH configuration that uses a GitHub host alias, pass it as a transport-only override. Copier
+still records `git@github.com:gowebknot/monorepo-template.git` in the generated project:
+
+```sh
+pnpm create mono-stack my-project \
+  --name "My Project" \
+  --git-host-alias github-webknot
+```
+
 Options:
 
 ```text
 --name <name>       Project display name; defaults to the destination directory name
+--git-host-alias <alias>
+                     SSH host alias used only while Git accesses github.com
 --python <path>     Python 3.10+ executable
 --template <source> Override the canonical Git template source
 --vcs-ref <ref>     Use a specific template tag, branch, or commit
 ```
 
 The destination must not contain files. Install project dependencies after generation.
+
+## Template Updates
+
+Generated projects include `pnpm template:update`. Developers who require an SSH alias configure it
+once per clone after initializing Git:
+
+```sh
+git config --local mono-stack.template-host-alias github-webknot
+pnpm template:update
+```
+
+The local setting is not committed. The update wrapper applies it to Copier and its cached Git mirror
+without changing the generic `_src_path` in `.copier-answers.yml`.
 
 ## Local Development
 

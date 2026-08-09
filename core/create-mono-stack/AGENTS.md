@@ -9,6 +9,7 @@ Copier template. It is part of the root workspace but must never appear in gener
 
 - Package name and executable: `create-mono-stack`.
 - Default template source: `git@github.com:gowebknot/monorepo-template.git`.
+- Optional SSH aliases are transport-only and must never replace the generic source in Copier answers.
 - Require Node.js 20+ and Python 3.10+.
 - Create projects without Docker or global Python package installation.
 - Refuse non-empty destination directories.
@@ -17,6 +18,8 @@ Copier template. It is part of the root workspace but must never appear in gener
 
 - Keep the launcher dependency-free when Node built-ins are sufficient.
 - Execute Python and Copier with argument arrays; never interpolate user input into a shell command.
+- Validate SSH host aliases and append process-scoped Git configuration without replacing existing
+  `GIT_CONFIG_*` entries.
 - Install the pinned requirements into a temporary virtual environment and remove it on success or
   failure.
 - Keep `requirements/copier.txt` byte-for-byte synchronized with the repository-root copy.

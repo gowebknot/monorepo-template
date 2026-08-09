@@ -12,7 +12,7 @@
     "dev:reference": "turbo dev:reference --parallel",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "turbo lint",
+    "lint": "turbo lint && eslint \"scripts/*.mjs\"",
     "package:create": "node skills/create-minimal-package/scripts/scaffold-package.mjs",
     "prepare": "husky",
     "skills:check": "node scripts/skills.mjs check",
@@ -22,6 +22,7 @@
     "skills:test": "node --test scripts/skills.test.mjs",
     "template:test": "pnpm core:test && pnpm --filter create-mono-stack test",
     "template:test:integration": "pnpm --filter create-mono-stack test:integration",
+    "template:update": "node scripts/update-template.mjs",
     "typecheck": "turbo typecheck"
   },
   "lint-staged": {

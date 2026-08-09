@@ -10,7 +10,7 @@ export default defineConfig([
     ignores: ["**/dist/**", "**/node_modules/**"]
   },
   {
-    files: ["**/*.{js,ts}"],
+    files: ["**/*.{js,mjs,ts}"],
     languageOptions: {
       globals: globals.node
     }

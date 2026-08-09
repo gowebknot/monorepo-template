@@ -25,6 +25,7 @@ function missingPath() {
 test("parses a destination and uses the canonical GitHub template", () => {
   assert.deepEqual(parseArguments(["acme-platform"], "/workspace"), {
     destination: "/workspace/acme-platform",
+    gitHostAlias: undefined,
     projectName: "acme-platform",
     python: undefined,
     template: DEFAULT_TEMPLATE_SOURCE,

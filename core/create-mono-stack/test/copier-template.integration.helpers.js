@@ -14,6 +14,10 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
     undefined
   );
   assert.equal(
+    generatedPackage.scripts["template:update"],
+    "node scripts/update-template.mjs"
+  );
+  assert.equal(
     JSON.parse(
       await readFile(
         join(projectRoot, "packages/api-client/package.json"),
@@ -49,6 +53,8 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
     "utf8"
   );
   assert.match(generatedReadme, /## Template updates/);
+  assert.match(generatedReadme, /mono-stack\.template-host-alias/);
+  assert.match(generatedReadme, /pnpm template:update/);
   assert.doesNotMatch(generatedReadme, /copier copy/);
   assert.doesNotMatch(generatedReadme, /core\/create-mono-stack/);
 
@@ -58,4 +64,8 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
   );
   assert.doesNotMatch(generatedAgents, /core\/create-mono-stack/);
   assert.doesNotMatch(generatedAgents, /pnpm --filter create-mono-stack test/);
+  assert.match(
+    await readFile(join(projectRoot, "scripts/update-template.mjs"), "utf8"),
+    /mono-stack\.template-host-alias/
+  );
 }
