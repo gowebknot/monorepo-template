@@ -262,7 +262,11 @@ export async function createProject(
       "--requirement",
       requirementsPath
     ]);
-    await initializeGit(options.destination, dependencies);
+    await initializeGit(
+      options.destination,
+      dependencies,
+      options.gitHostAlias
+    );
   } catch (setupError) {
     await cleanupFailedProject(
       {

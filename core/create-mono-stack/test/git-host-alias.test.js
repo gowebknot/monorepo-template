@@ -6,6 +6,7 @@ import {
   createProject,
   parseArguments
 } from "../src/create-project.js";
+import { GIT_HOST_ALIAS_CONFIG_KEY } from "../../../scripts/update-template.mjs";
 
 const versionScript =
   "import sys; print('.'.join(map(str, sys.version_info[:3])))";
@@ -34,7 +35,7 @@ test("parses and validates an optional SSH host alias", () => {
   );
 });
 
-test("uses an SSH alias without changing Copier's recorded source", async () => {
+test("persists an SSH alias without changing Copier's recorded source", async () => {
   const calls = [];
   const temporaryRoot = "/tmp/create-mono-stack-alias";
   const destination = "/workspace/acme-platform";
@@ -113,4 +114,29 @@ test("uses an SSH alias without changing Copier's recorded source", async () => 
       replaceEnvironment: true
     }
   });
+  assert.deepEqual(
+    calls.find(
+      ({ args, command }) =>
+        command === "git" && args.includes(GIT_HOST_ALIAS_CONFIG_KEY)
+    ),
+    {
+      command: "git",
+      args: [
+        "-C",
+        destination,
+        "config",
+        "--local",
+        GIT_HOST_ALIAS_CONFIG_KEY,
+        "github-webknot"
+      ],
+      options: {
+        env: {
+          GIT_CONFIG_COUNT: "1",
+          GIT_CONFIG_KEY_0: "credential.helper",
+          GIT_CONFIG_VALUE_0: ""
+        },
+        replaceEnvironment: true
+      }
+    }
+  );
 });

@@ -23,8 +23,9 @@ git commit -m "chore: initialize project"
 
 Setup initializes the repository on `main` but intentionally leaves the first commit to you.
 
-If your SSH configuration uses a host alias for the template repository, apply it only to the
-creation process. Copier still records the generic source URL for other developers:
+If your SSH configuration uses a host alias for the template repository, pass it as a transport-only
+override. Setup stores it in the generated repository's local Git configuration, while Copier still
+records the generic source URL for other developers:
 
 ```sh
 pnpm create mono-stack my-project \
@@ -49,8 +50,9 @@ declares the latest Python runtime. The project records its template source and 
 `.copier-answers.yml`, so no separate updater bootstrap is required. Create the initial Git commit
 before applying a template update.
 
-When this clone requires an SSH host alias, store it once in the clone's local Git configuration. The
-setting remains in `.git/config` and is not committed:
+Setup stores an alias passed with `--git-host-alias` automatically. Because the setting remains in
+`.git/config` and is not committed, configure it once after cloning the project elsewhere or when
+repairing an older project:
 
 ```sh
 git config --local mono-stack.template-host-alias github-webknot

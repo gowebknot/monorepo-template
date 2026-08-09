@@ -32,8 +32,9 @@ setup step fails.
 pnpm create mono-stack my-project --name "My Project"
 ```
 
-For an SSH configuration that uses a GitHub host alias, pass it as a transport-only override. Copier
-still records `git@github.com:gowebknot/monorepo-template.git` in the generated project:
+For an SSH configuration that uses a GitHub host alias, pass it as a transport-only override. Setup
+stores the alias in the generated repository's local Git configuration, while Copier still records
+`git@github.com:gowebknot/monorepo-template.git` in the generated project:
 
 ```sh
 pnpm create mono-stack my-project \
@@ -58,16 +59,17 @@ Install project dependencies and create the baseline commit after generation.
 ## Template Updates
 
 Generated projects include `pnpm template:update`, a `mise.toml` declaration for the latest Python,
-and a ready-to-use `.venv` with pinned Copier dependencies. Developers who require an SSH alias
-configure it once per clone after creating the initial commit:
+and a ready-to-use `.venv` with pinned Copier dependencies. Setup stores any alias passed with
+`--git-host-alias` automatically. Because the local setting is not committed, configure it once after
+cloning the project elsewhere or when repairing an older project:
 
 ```sh
 git config --local mono-stack.template-host-alias github-webknot
 pnpm template:update
 ```
 
-The local setting is not committed. The update wrapper applies it to Copier and its cached Git mirror
-without changing the generic `_src_path` in `.copier-answers.yml`.
+The update wrapper applies the local setting to Copier and its cached Git mirror without changing the
+generic `_src_path` in `.copier-answers.yml`.
 
 ## Local Development
 

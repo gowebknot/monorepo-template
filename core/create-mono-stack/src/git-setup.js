@@ -9,6 +9,7 @@ const gitRoutingVariableNames = new Set(
   gitRoutingVariables.map((name) => name.toLowerCase())
 );
 const gitConfigVariablePattern = /^GIT_CONFIG_(?:COUNT|KEY_\d+|VALUE_\d+)$/i;
+const gitHostAliasConfigKey = "mono-stack.template-host-alias";
 
 export function sanitizeGitEnvironment(environment = process.env) {
   const env = {};
@@ -52,7 +53,7 @@ export async function preflightGit(dependencies) {
   }
 }
 
-export async function initializeGit(destination, dependencies) {
+export async function initializeGit(destination, dependencies, gitHostAlias) {
   try {
     const options = gitOptions(dependencies);
     await dependencies.runCommand(
@@ -88,6 +89,20 @@ export async function initializeGit(destination, dependencies) {
     }
     if (hasCommit) {
       throw new Error("Generated repository already contains a commit.");
+    }
+    if (gitHostAlias) {
+      await dependencies.runCommand(
+        "git",
+        [
+          "-C",
+          destination,
+          "config",
+          "--local",
+          gitHostAliasConfigKey,
+          gitHostAlias
+        ],
+        options
+      );
     }
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
