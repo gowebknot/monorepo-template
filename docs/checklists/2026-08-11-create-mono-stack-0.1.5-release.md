@@ -31,20 +31,20 @@
 - [x] Bump `core/create-mono-stack/package.json` from `0.1.4` to `0.1.5`.
 - [x] Run focused package tests, lint, formatting, and repository checks.
 - [x] Pack and inspect the npm artifact.
-- [ ] Inspect the complete diff and stage intended release changes.
-- [ ] Commit with the repository's Conventional Commit release convention.
-- [ ] Push `master` to `origin` and verify the remote commit.
-- [ ] Publish `create-mono-stack@0.1.5` with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify npm metadata and the published package version.
+- [x] Inspect the complete diff and stage intended release changes.
+- [x] Commit with the repository's Conventional Commit release convention.
+- [x] Push `master` to `origin` and verify the remote commit.
+- [x] Publish `create-mono-stack@0.1.5` with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify npm metadata and the published package version.
 
 ## Validation Cases
 
-- [ ] TEST-RELEASE-001: Package manifest reports exactly `0.1.5`.
-- [ ] TEST-RELEASE-002: Launcher test suite passes.
-- [ ] TEST-RELEASE-003: Lint, format, and repository checks pass.
-- [ ] TEST-RELEASE-004: Packed artifact contains the executable, source, README, license, and requirements.
-- [ ] TEST-RELEASE-005: Remote contains the release commit before publication.
-- [ ] TEST-RELEASE-006: npm `latest` resolves to `0.1.5` after publication.
+- [x] TEST-RELEASE-001: Package manifest reports exactly `0.1.5`.
+- [x] TEST-RELEASE-002: Launcher test suite passes.
+- [x] TEST-RELEASE-003: Lint, format, and repository checks pass.
+- [x] TEST-RELEASE-004: Packed artifact contains the executable, source, README, license, and requirements.
+- [x] TEST-RELEASE-005: Remote contains the release commit before publication.
+- [x] TEST-RELEASE-006: npm `latest` resolves to `0.1.5` after publication.
 
 ## Verification Notes
 
@@ -54,7 +54,9 @@ Record failures before correction and passing reruns afterward.
 - 2026-08-11: `npm pack --dry-run` produced the expected `create-mono-stack-0.1.5.tgz` contents.
 - 2026-08-11: `npm whoami` failed with `E401 Unauthorized`; publication is blocked until npm authentication is restored.
 - 2026-08-11: `just check` initially failed because the extracted `wizard-discovery.js` needed Prettier formatting; no functional check failed.
+- 2026-08-11: The package publish wrapper succeeded after registry authentication was available.
+- 2026-08-11: `pnpm view create-mono-stack version dist-tags --json` reported version `0.1.5` and `latest: 0.1.5`.
 
 ## Risks and Follow-Up
 
-- [ ] npm authentication or registry access may block publication.
+- [x] npm authentication or registry access may block publication. Authentication was available for the final publish.
