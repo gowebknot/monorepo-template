@@ -28,6 +28,7 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
   );
   await assert.rejects(readFile(join(projectRoot, "copier.yml"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "core"), "utf8"));
+  await assert.rejects(readFile(join(projectRoot, "docs/checklists"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, ".npmrc"), "utf8"));
   assert.doesNotMatch(
     await readFile(join(projectRoot, "pnpm-workspace.yaml"), "utf8"),

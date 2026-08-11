@@ -19,6 +19,7 @@ _exclude:
   - .DS_Store
   - .svn
   - core
+  - docs/checklists
   - .claude/worktrees
   - "**/.turbo"
   - "**/node_modules"

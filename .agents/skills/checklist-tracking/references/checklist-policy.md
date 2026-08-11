@@ -13,6 +13,12 @@ Match work to checklist items in this order:
 If a match is ambiguous, inspect surrounding context and report the ambiguity. Do not mark a
 checklist item based only on a broad keyword.
 
+## Plan Gate
+
+The implementation plan must be completed before a new checklist is created. The new checklist must
+capture that plan in detailed nested items before implementation begins. If the scope or approach
+changes, update the new checklist before making the corresponding implementation change.
+
 ## Task Lists
 
 Use the following states:
@@ -23,9 +29,9 @@ Use the following states:
 - [x] complete
 ```
 
-Nested items are independently tracked. A parent item may be marked complete only after all of its
-children are complete. If work is blocked or intentionally skipped, keep it incomplete and add a
-brief explanatory comment.
+Nested items at any depth are independently tracked. A parent item may be marked complete only after
+all of its children and descendants are complete. If work is blocked or intentionally skipped, keep it
+incomplete and add a brief explanatory comment.
 
 ## Status Tables
 
@@ -43,3 +49,10 @@ For test cases, use identifiers in the form `TEST-<AREA>-<NUMBER>`, for example:
 
 When a summary item references granular rows, the granular rows determine the summary status. Do not
 mark the summary complete while any referenced row remains incomplete, failed, or ambiguous.
+
+For related task checklists, use relative Markdown links in both directions. A new task checklist
+should link to the relevant prior checklist. For an active uncommitted checklist, update the existing
+file in place after replanning the same task and do not add `## Updates` for ordinary changes. For a
+later correction to committed prior work, append a dated entry at the bottom of the original checklist
+under `## Updates` and link the new checklist back to it. Keep all committed earlier plans, items, and
+statuses unchanged.
