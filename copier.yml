@@ -27,6 +27,7 @@ _exclude:
   - .venv
   - .env
   - .npmrc
+  - .npmrc.auth
   - .env.local
   - .env.*.local
 

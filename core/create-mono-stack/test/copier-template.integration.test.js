@@ -103,6 +103,7 @@ test("creates and updates a customized project with Copier", async (t) => {
   const excludedDirectories = new Set([
     ".git",
     ".npmrc",
+    ".npmrc.auth",
     ".tmp",
     ".turbo",
     ".venv",

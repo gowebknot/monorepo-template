@@ -89,6 +89,7 @@ test("uses Copier-native project identity rendering", async () => {
   assert.ok(config._exclude.includes("copier.yml"));
   assert.ok(config._exclude.includes("core"));
   assert.ok(config._exclude.includes(".npmrc"));
+  assert.ok(config._exclude.includes(".npmrc.auth"));
   assert.ok(config._exclude.includes(".venv"));
   assert.ok(!config._exclude.includes(".github"));
 
