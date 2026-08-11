@@ -69,3 +69,14 @@ Record failures before correction and passing reruns afterward.
 - 2026-08-11: `pnpm --filter create-mono-stack lint` passed.
 - 2026-08-11: `just check` passed; the existing web React Compiler warning remains non-failing.
 - 2026-08-11: Packed artifact `create-mono-stack-0.1.4.tgz` contains the executable, Ink source, package metadata, README, license, and Copier requirements.
+
+## Updates
+
+### 2026-08-11 - Release completed
+
+- Reason: Complete the explicitly authorized commit, push, and npm publication sequence.
+- Evidence: Commit `da6b509` changed the package to `0.1.4`; hooks passed; `origin/master` was verified at that SHA.
+- Impact: `create-mono-stack@0.1.4` is publicly available and npm `latest` now resolves to `0.1.4`.
+- Corrective action: None required.
+- Validation: `pnpm view create-mono-stack version dist-tags --json` reported version `0.1.4` and `latest: 0.1.4`.
+- Related checklist: None.
