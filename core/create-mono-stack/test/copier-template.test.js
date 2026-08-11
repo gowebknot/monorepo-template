@@ -33,7 +33,7 @@ const templateAdapters = new Map([
   ],
   [
     "pnpm-lock.yaml.jinja",
-    `<%!- filter replace('\\n  core/create-mono-stack: {}\\n', "") -!%>
+    `<%!- filter regex_replace('(?m)\\n  core/create-mono-stack:\\n(?: {4,}.*\\n)*', "") -!%>
 <%!- include "pnpm-lock.yaml" -!%>
 <%!- endfilter -!%>
 `
@@ -132,6 +132,13 @@ test("keeps core tooling in the source workspace only", async () => {
     corePackage.bin["create-mono-stack"],
     "bin/create-mono-stack.js"
   );
+  assert.deepEqual(corePackage.dependencies, {
+    ink: "^6.8.0",
+    "ink-select-input": "^6.2.0",
+    "ink-text-input": "^6.0.0",
+    react: "^19.2.0"
+  });
+  assert.equal(corePackage.devDependencies["ink-testing-library"], "^4.0.0");
   assert.equal(
     await readFile(
       join(root, "core/create-mono-stack/requirements/copier.txt"),

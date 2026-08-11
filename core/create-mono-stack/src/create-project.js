@@ -11,6 +11,7 @@ import {
   sanitizeGitEnvironment
 } from "./git-setup.js";
 import { cleanupFailedProject } from "./project-cleanup.js";
+import { promptForProjectArguments } from "./interactive-wizard.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
@@ -20,7 +21,11 @@ const genericGitHubSshPrefix = "git@github.com:";
 const requirementsPath = fileURLToPath(
   new URL("../requirements/copier.txt", import.meta.url)
 );
-const help = `Usage: create-mono-stack <destination> [options]
+const help = `Usage:
+  create-mono-stack
+  create-mono-stack <destination> [options]
+
+Run without arguments in a terminal to open interactive setup.
 
 Options:
   -n, --name <name>       Project display name (defaults to destination name)
@@ -281,14 +286,33 @@ export async function createProject(
   await dependencies.rm(temporaryRoot, { force: true, recursive: true });
 }
 
-export async function main(args = process.argv.slice(2)) {
-  const options = parseArguments(args);
+export async function main(args = process.argv.slice(2), dependencies = {}) {
+  const input = dependencies.input ?? process.stdin;
+  const output = dependencies.output ?? process.stdout;
+  const log = dependencies.log ?? console.log;
+  let effectiveArgs = args;
+
+  if (effectiveArgs.length === 0 && input.isTTY && output.isTTY) {
+    const openWizard =
+      dependencies.promptForProjectArguments ?? promptForProjectArguments;
+    effectiveArgs = await openWizard({ input, output });
+    if (!effectiveArgs) {
+      log("Project setup cancelled.");
+      return;
+    }
+  }
+
+  const options = parseArguments(
+    effectiveArgs,
+    dependencies.cwd ?? process.cwd()
+  );
   if (options.help) {
-    console.log(help);
+    log(help);
     return;
   }
-  await createProject(options);
-  console.log(
+  const setupProject = dependencies.createProject ?? createProject;
+  await setupProject(options);
+  log(
     "Project setup complete. Git is initialized on main; create the initial commit before template updates."
   );
 }

@@ -28,6 +28,19 @@ setup step fails.
 
 ## Usage
 
+Run without arguments in an interactive terminal to open the Ink-powered project setup TUI:
+
+```sh
+pnpm create mono-stack
+```
+
+Type values and press Enter to continue; use the arrow keys for choices, and press Escape or Ctrl+C
+to cancel before setup starts. The TUI collects the destination and project name, offers advanced
+template and runtime settings, then confirms the complete configuration. It exits before Python,
+Copier, or Git takes over the terminal.
+
+For scripts or direct configuration, pass the destination and options explicitly:
+
 ```sh
 pnpm create mono-stack my-project --name "My Project"
 ```

@@ -14,6 +14,14 @@ setup asks before installing it through mise or the native platform package mana
 Python packages are not used.
 
 ```sh
+pnpm create mono-stack
+```
+
+Running without arguments in an interactive terminal opens an Ink-powered setup TUI. Type values and
+press Enter to continue, use the arrow keys for choices, and press Escape or Ctrl+C to cancel. For
+scripts or direct configuration, pass the destination and options explicitly:
+
+```sh
 pnpm create mono-stack my-project --name "My Project"
 cd my-project
 pnpm install

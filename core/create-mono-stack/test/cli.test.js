@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   DEFAULT_TEMPLATE_SOURCE,
   createProject,
+  main,
   parseArguments
 } from "../src/create-project.js";
 
@@ -50,6 +51,108 @@ test("records local template sources as absolute paths", () => {
     ).template,
     "git@github.com:example/template.git"
   );
+});
+
+test("advertises the zero-argument interactive wizard in help", async () => {
+  const messages = [];
+
+  await main(["--help"], { log: (message) => messages.push(message) });
+
+  assert.equal(messages.length, 1);
+  assert.match(messages[0], /create-mono-stack\n/);
+  assert.match(messages[0], /without arguments.*interactive setup/i);
+});
+
+test("opens the project wizard when no arguments are passed in a TTY", async () => {
+  const input = { isTTY: true };
+  const output = { isTTY: true };
+  const messages = [];
+  let createdOptions;
+
+  await main([], {
+    createProject: async (options) => {
+      createdOptions = options;
+    },
+    cwd: "/workspace",
+    input,
+    log: (message) => messages.push(message),
+    output,
+    promptForProjectArguments: async (streams) => {
+      assert.deepEqual(streams, { input, output });
+      return ["--name=Acme Platform", "--", "acme-platform"];
+    }
+  });
+
+  assert.deepEqual(createdOptions, {
+    destination: "/workspace/acme-platform",
+    gitHostAlias: undefined,
+    projectName: "Acme Platform",
+    python: undefined,
+    template: DEFAULT_TEMPLATE_SOURCE,
+    vcsRef: undefined
+  });
+  assert.deepEqual(messages, [
+    "Project setup complete. Git is initialized on main; create the initial commit before template updates."
+  ]);
+});
+
+test("does not open the project wizard without an interactive terminal", async () => {
+  let wizardOpened = false;
+  let projectCreated = false;
+
+  await assert.rejects(
+    main([], {
+      createProject: async () => {
+        projectCreated = true;
+      },
+      input: { isTTY: false },
+      output: { isTTY: true },
+      promptForProjectArguments: async () => {
+        wizardOpened = true;
+        return ["should-not-run"];
+      }
+    }),
+    /Exactly one destination directory is required/
+  );
+  assert.equal(wizardOpened, false);
+  assert.equal(projectCreated, false);
+});
+
+test("cancels the project wizard before setup starts", async () => {
+  const messages = [];
+  let projectCreated = false;
+
+  await main([], {
+    createProject: async () => {
+      projectCreated = true;
+    },
+    input: { isTTY: true },
+    log: (message) => messages.push(message),
+    output: { isTTY: true },
+    promptForProjectArguments: async () => undefined
+  });
+
+  assert.equal(projectCreated, false);
+  assert.deepEqual(messages, ["Project setup cancelled."]);
+});
+
+test("keeps explicit CLI arguments non-interactive", async () => {
+  let createdOptions;
+
+  await main(["acme-platform", "--name", "Acme Platform"], {
+    createProject: async (options) => {
+      createdOptions = options;
+    },
+    cwd: "/workspace",
+    input: { isTTY: true },
+    log: () => {},
+    output: { isTTY: true },
+    promptForProjectArguments: async () =>
+      assert.fail("Explicit arguments must bypass the wizard")
+  });
+
+  assert.equal(createdOptions.destination, "/workspace/acme-platform");
+  assert.equal(createdOptions.projectName, "Acme Platform");
 });
 
 test("creates a project through isolated pinned Copier environments", async () => {
