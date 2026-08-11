@@ -46,6 +46,16 @@ pnpm --filter @repo/entities build
 pnpm --filter @repo/config typecheck
 ```
 
+Release `create-mono-stack` only after explicit user authorization. Follow the package-local release
+checklist and publish wrapper rather than calling the registry directly:
+
+```sh
+pnpm --filter create-mono-stack publish:package
+```
+
+The wrapper uses the ignored repository `.npmrc.auth` file, or `NPM_CONFIG_USERCONFIG` when set, and
+forwards publish arguments to `pnpm publish` from `core/create-mono-stack`.
+
 `just` with no args lists all recipes. `set dotenv-load := true` so `.env` is auto-loaded by Just.
 
 ## Creating packages

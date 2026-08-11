@@ -59,3 +59,17 @@ pnpm --filter create-mono-stack test
 pnpm --filter create-mono-stack lint
 pnpm --filter create-mono-stack test:integration
 ```
+
+## Release Workflow
+
+For an explicitly authorized npm release, use the package-local publish wrapper rather than invoking
+`npm publish` directly:
+
+```sh
+pnpm --filter create-mono-stack publish:package
+```
+
+The wrapper runs `pnpm publish` from this package with `NPM_CONFIG_USERCONFIG` set to the repository's
+ignored `.npmrc.auth`, or to an explicit `NPM_CONFIG_USERCONFIG` path. Verify the package version,
+run `just check`, inspect `npm pack --dry-run`, commit and push the release, then publish. Never add
+`.npmrc.auth` or registry credentials to Git.

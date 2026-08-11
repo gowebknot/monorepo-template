@@ -67,7 +67,8 @@ function isSupportedPython(version) {
   );
 }
 
-async function inspectPython(candidate, execute) {
+async function inspectPython(candidate, execute, includeVersion = false) {
+  let version;
   try {
     const result = await execute(
       candidate.command,
@@ -75,6 +76,7 @@ async function inspectPython(candidate, execute) {
       { capture: true, env: pythonDiscoveryEnvironment }
     );
     if (!isSupportedPython(result.stdout)) return undefined;
+    version = result.stdout.trim();
   } catch {
     return undefined;
   }
@@ -86,12 +88,57 @@ async function inspectPython(candidate, execute) {
         [...candidate.prefixArgs, "-c", capability.script],
         { capture: true, env: pythonDiscoveryEnvironment }
       );
-      return { ...candidate, venvModule: capability.module };
+      return {
+        ...candidate,
+        venvModule: capability.module,
+        ...(includeVersion ? { version } : {})
+      };
     } catch {
       continue;
     }
   }
   return undefined;
+}
+
+async function resolvePythonSource(command, platform, execute) {
+  try {
+    const locator = platform === "win32" ? "where.exe" : "which";
+    const result = await execute(locator, [command], { capture: true });
+    const path = result.stdout.trim().split("\n")[0];
+    if (path) {
+      const sourceName = path.includes("/.local/share/mise/")
+        ? "mise"
+        : path.includes("/.pyenv/")
+          ? "pyenv"
+          : "system";
+      return `${sourceName}: ${path}`;
+    }
+  } catch {
+    // Keep the executable visible even when its source path cannot be resolved.
+  }
+  return "source unavailable";
+}
+
+export async function discoverPythonOptions({ platform, runCommand }) {
+  const options = [];
+  const seen = new Set();
+  for (const candidate of pythonCandidates(platform)) {
+    if (candidate.prefixArgs.length > 0 || seen.has(candidate.command))
+      continue;
+    const selected = await inspectPython(candidate, runCommand, true);
+    if (!selected) continue;
+    seen.add(candidate.command);
+    const source = await resolvePythonSource(
+      candidate.command,
+      platform,
+      runCommand
+    );
+    options.push({
+      label: `${candidate.command} (${selected.version}; ${source})`,
+      value: candidate.command
+    });
+  }
+  return options;
 }
 
 async function findPython(requestedPython, dependencies) {

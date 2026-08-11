@@ -1,13 +1,38 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { requirePython } from "../src/python-runtime.js";
+import { discoverPythonOptions, requirePython } from "../src/python-runtime.js";
 
 function unavailable() {
   const error = new Error("missing");
   error.code = "ENOENT";
   throw error;
 }
+
+test("discovers supported Python executables for the interactive wizard", async () => {
+  const options = await discoverPythonOptions({
+    platform: "darwin",
+    runCommand: async (command, args) => {
+      if (args.at(-1).includes("sys.version_info")) {
+        if (command === "python3") return { stdout: "3.13.2\n", stderr: "" };
+        if (command === "python3.12") return { stdout: "3.12.8\n", stderr: "" };
+        return unavailable();
+      }
+      if (command === "which") {
+        return { stdout: "/opt/python3/bin/python3\n", stderr: "" };
+      }
+      if (command === "python3") return { stdout: "", stderr: "" };
+      return unavailable();
+    }
+  });
+
+  assert.deepEqual(options, [
+    {
+      label: "python3 (3.13.2; system: /opt/python3/bin/python3)",
+      value: "python3"
+    }
+  ]);
+});
 
 test("requests install consent for an explicitly selected unsupported Python", async () => {
   let probeOptions;

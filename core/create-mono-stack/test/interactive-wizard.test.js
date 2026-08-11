@@ -7,6 +7,7 @@ import { render } from "ink-testing-library";
 import {
   ProjectWizard,
   buildProjectArguments,
+  parseSshAliases,
   promptForProjectArguments
 } from "../src/interactive-wizard.js";
 import { parseArguments } from "../src/create-project.js";
@@ -28,7 +29,7 @@ async function sendInput(app, input, expectedFrame) {
   if (expectedFrame) {
     await waitFor(() => expectedFrame.test(app.lastFrame() ?? ""));
   }
-  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setTimeout(resolve, 10));
 }
 
 test("renders an Ink wizard and uses safe project defaults", async (t) => {
@@ -55,6 +56,58 @@ test("renders an Ink wizard and uses safe project defaults", async (t) => {
   assert.deepEqual(completed, [["--name=my-project", "--", "my-project"]]);
 });
 
+test("navigates backward through selectable wizard screens", async (t) => {
+  const completed = [];
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: (args) => completed.push(args)
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, /Back/);
+  await sendInput(app, enter, /Destination directory/);
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, /Back/);
+  await sendInput(app, enter, /Advanced options/);
+
+  assert.deepEqual(completed, []);
+});
+
+test("renders discovered Python choices in the advanced flow", async (t) => {
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: () => {},
+      options: {
+        python: [{ label: "pyenv-python (3.12.4)", value: "pyenv-python" }]
+      }
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, downArrow, /Configure advanced options/);
+  await sendInput(app, enter, /Git SSH host alias/);
+  await sendInput(app, enter, /Python executable/);
+
+  assert.match(app.lastFrame(), /pyenv-python \(3\.12\.4\)/);
+});
+
+test("parses concrete SSH aliases from SSH config", () => {
+  assert.deepEqual(
+    parseSshAliases(
+      `Host *\n  ForwardAgent no\nHost github-webknot work\n  HostName github.com\n`
+    ),
+    ["github-webknot", "work"]
+  );
+});
+
 test("collects advanced options through keyboard-driven Ink controls", async (t) => {
   const completed = [];
   const app = render(
@@ -64,17 +117,29 @@ test("collects advanced options through keyboard-driven Ink controls", async (t)
   );
   t.after(() => app.unmount());
 
+  await sendInput(app, downArrow, /Custom destination/);
+  await sendInput(app, enter);
   await sendInput(app, "apps/acme-platform", /apps\/acme-platform/);
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, downArrow, /Custom project name/);
   await sendInput(app, enter, /Project name/);
   await sendInput(app, "Acme Platform", /Acme Platform/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /\u276F Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
+  await sendInput(app, downArrow, /Custom alias/);
+  await sendInput(app, enter, /Git SSH host alias/);
   await sendInput(app, "github-webknot", /github-webknot/);
+  await sendInput(app, enter, /Python executable/);
+  await sendInput(app, downArrow, /Custom executable/);
   await sendInput(app, enter, /Python executable/);
   await sendInput(app, "/opt/python3", /\/opt\/python3/);
   await sendInput(app, enter, /Template source/);
+  await sendInput(app, downArrow, /Custom template source/);
+  await sendInput(app, enter, /Template source/);
   await sendInput(app, "../template", /\.\.\/template/);
+  await sendInput(app, enter, /Template revision/);
+  await sendInput(app, downArrow, /Custom revision/);
   await sendInput(app, enter, /Template revision/);
   await sendInput(app, "v1.2.3", /v1\.2\.3/);
   await sendInput(app, enter, /Ready to create/);
@@ -199,6 +264,7 @@ test("unmounts Ink before returning project arguments", async () => {
   });
 
   const result = promptForProjectArguments({
+    discoverOptions: async () => ({ python: [] }),
     input: { isTTY: true },
     output: { isTTY: true },
     renderApp(element, options) {
@@ -217,6 +283,7 @@ test("unmounts Ink before returning project arguments", async () => {
     }
   });
 
+  await new Promise((resolve) => setImmediate(resolve));
   completeWizard(expected);
 
   assert.deepEqual(await result, expected);
