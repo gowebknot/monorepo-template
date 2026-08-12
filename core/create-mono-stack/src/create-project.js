@@ -22,6 +22,7 @@ import {
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
+export const DEFAULT_TEMPLATE_REF = "master";
 
 const genericGitHubSshPrefix = "git@github.com:";
 const requirementsPath = fileURLToPath(
@@ -278,9 +279,7 @@ export async function createProject(
         copierArguments.push("--data", data);
       }
     }
-    if (options.vcsRef) {
-      copierArguments.push("--vcs-ref", options.vcsRef);
-    }
+    copierArguments.push("--vcs-ref", options.vcsRef ?? DEFAULT_TEMPLATE_REF);
     copierArguments.push(options.template, options.destination);
     const environment = sanitizeGitEnvironment(dependencies.environment);
     const aliasEnvironment = gitHostAliasEnvironment(
@@ -301,7 +300,8 @@ export async function createProject(
             ...nativeScaffoldDependencies({
               cp: dependencies.cp,
               readFile: dependencies.readFile,
-              rm: dependencies.rm
+              rm: dependencies.rm,
+              writeFile: dependencies.writeFile
             }),
             runCommand: dependencies.runCommand,
             temporaryRoot

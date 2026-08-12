@@ -19,7 +19,15 @@ test("scaffolds selected Vite and NestJS apps with native commands", async () =>
   const copied = [];
   const files = new Map([
     ["/tmp/native/vite-dashboard/package.json", '{"name":"dashboard"}'],
-    ["/tmp/native/nestjs-api/package.json", '{"name":"api"}']
+    [
+      "/tmp/native/nestjs-api/package.json",
+      '{"name":"api","scripts":{},"devDependencies":{}}'
+    ],
+    ["/tmp/native/nestjs-api/tsconfig.json", '{"compilerOptions":{}}'],
+    ["/workspace/project/apps/server/tsconfig.json", '{"compilerOptions":{}}'],
+    ["/workspace/project/apps/server/nest-cli.reference.json", "{}"],
+    ["/workspace/project/apps/server/reference", "{}"],
+    ["/workspace/project/apps/api/tsconfig.json", '{"compilerOptions":{}}']
   ]);
   const apps = await scaffoldNativeApps(
     {
@@ -32,6 +40,7 @@ test("scaffolds selected Vite and NestJS apps with native commands", async () =>
       cp: async (...args) => copied.push(args),
       readFile: async (path) => files.get(path),
       rm: async () => {},
+      writeFile: async () => {},
       runCommand: async (...args) => calls.push(args),
       temporaryRoot: "/tmp/native"
     }
@@ -79,7 +88,7 @@ test("scaffolds selected Vite and NestJS apps with native commands", async () =>
       reference: "nestjs"
     }
   ]);
-  assert.equal(copied.length, 2);
+  assert.equal(copied.length, 6);
 });
 
 test("provides native filesystem dependencies by default", () => {

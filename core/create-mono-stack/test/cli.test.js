@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   DEFAULT_TEMPLATE_SOURCE,
+  DEFAULT_TEMPLATE_REF,
   createProject,
   main,
   parseArguments
@@ -36,6 +37,10 @@ test("parses a destination and uses the canonical GitHub template", () => {
     DEFAULT_TEMPLATE_SOURCE,
     "git@github.com:gowebknot/monorepo-template.git"
   );
+});
+
+test("uses the current template branch when no revision is provided", () => {
+  assert.equal(DEFAULT_TEMPLATE_REF, "master");
 });
 
 test("records local template sources as absolute paths", () => {

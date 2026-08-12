@@ -1,4 +1,4 @@
-import { cp, readFile, rm } from "node:fs/promises";
+import { cp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const appDefinitions = [
@@ -78,6 +78,21 @@ export async function scaffoldNativeApps(options, dependencies) {
     const target = appPath(options.destination, name);
     const temporaryName = temporaryAppName(definition.generator, name);
     const temporaryTarget = join(dependencies.temporaryRoot, temporaryName);
+    const preservedReference = join(
+      dependencies.temporaryRoot,
+      `${temporaryName}-reference`
+    );
+    if (definition.id === "api-nest") {
+      await dependencies.cp(
+        join(options.destination, "apps", "server", "reference"),
+        join(preservedReference, "reference"),
+        { recursive: true }
+      );
+      await dependencies.cp(
+        join(options.destination, "apps", "server", "nest-cli.reference.json"),
+        join(preservedReference, "nest-cli.reference.json")
+      );
+    }
     const [command, args] = commandFor(definition.generator, temporaryName);
     await dependencies.runCommand(command, args, {
       cwd: dependencies.temporaryRoot,
@@ -100,6 +115,55 @@ export async function scaffoldNativeApps(options, dependencies) {
     }
     await dependencies.rm(target, { force: true, recursive: true });
     await dependencies.cp(temporaryTarget, target, { recursive: true });
+    if (definition.id === "api-nest") {
+      packageJson.devDependencies ??= {};
+      packageJson.scripts ??= {};
+      packageJson.devDependencies.typescript = "6.0.2";
+      packageJson.scripts["build:reference"] =
+        "nest build --config nest-cli.reference.json";
+      packageJson.scripts["dev:reference"] =
+        "nest start --config nest-cli.reference.json --watch";
+      packageJson.scripts["start:reference"] = "node dist/reference/main";
+      await dependencies.writeFile(
+        join(target, "package.json"),
+        `${JSON.stringify(packageJson, null, 2)}\n`
+      );
+      const tsconfig = JSON.parse(
+        await dependencies.readFile(join(target, "tsconfig.json"), "utf8")
+      );
+      tsconfig.compilerOptions.rootDir = "./src";
+      tsconfig.compilerOptions.types = ["node"];
+      tsconfig.compilerOptions.ignoreDeprecations = "6.0";
+      delete tsconfig.compilerOptions.baseUrl;
+      await dependencies.writeFile(
+        join(target, "tsconfig.json"),
+        `${JSON.stringify(tsconfig, null, 2)}\n`
+      );
+      await dependencies.cp(
+        join(preservedReference, "reference"),
+        join(target, "reference"),
+        {
+          recursive: true
+        }
+      );
+      await dependencies.cp(
+        join(preservedReference, "nest-cli.reference.json"),
+        join(target, "nest-cli.reference.json")
+      );
+      await dependencies.writeFile(
+        join(target, "tsconfig.reference.build.json"),
+        JSON.stringify(
+          {
+            extends: "./tsconfig.json",
+            compilerOptions: { rootDir: "./reference" },
+            include: ["reference/**/*.ts"],
+            exclude: ["node_modules", "dist"]
+          },
+          null,
+          2
+        ) + "\n"
+      );
+    }
     apps.push({
       generator: definition.generator,
       name,
@@ -114,11 +178,13 @@ export async function scaffoldNativeApps(options, dependencies) {
 export function nativeScaffoldDependencies({
   cp: copy,
   readFile: read,
-  rm: remove
+  rm: remove,
+  writeFile: write
 }) {
   return {
     cp: copy ?? cp,
     readFile: read ?? readFile,
-    rm: remove ?? rm
+    rm: remove ?? rm,
+    writeFile: write ?? writeFile
   };
 }

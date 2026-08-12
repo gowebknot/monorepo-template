@@ -101,6 +101,8 @@ test("persists an SSH alias without changing Copier's recorded source", async ()
       "--quiet",
       "--data",
       "project_name=Acme Platform",
+      "--vcs-ref",
+      "master",
       DEFAULT_TEMPLATE_SOURCE,
       destination
     ],
