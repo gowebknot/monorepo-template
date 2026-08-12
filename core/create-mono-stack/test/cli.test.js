@@ -109,7 +109,15 @@ test("opens the project wizard when no arguments are passed in a TTY", async () 
     vcsRef: undefined
   });
   assert.deepEqual(messages, [
-    "Project setup complete. Git is initialized on main; create the initial commit before template updates."
+    `Project setup complete. Native app scaffolding, dependencies, and Git initialization finished.
+
+What's next:
+  cd /workspace/acme-platform
+  git add .
+  git commit -m "chore: initialize project"
+  pnpm dev
+
+Git is initialized on main; create the initial commit before template updates.`
   ]);
 });
 
@@ -281,9 +289,9 @@ test("creates a project through isolated pinned Copier environments", async () =
         "--data",
         "feature_web_vite=true",
         "--data",
-        "feature_web_next=false",
-        "--data",
         "feature_api_nest=false",
+        "--data",
+        "feature_web_next=false",
         "--data",
         "feature_api_express=true",
         "--data",

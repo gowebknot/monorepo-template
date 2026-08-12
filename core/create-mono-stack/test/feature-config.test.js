@@ -17,10 +17,10 @@ test("normalizes the default stack when no features are supplied", () => {
 });
 
 test("normalizes multiple feature selections in catalog order", () => {
-  assert.deepEqual(
-    normalizeFeatures(["mobile-expo", "web-next", "api-express"]),
-    ["web-next", "api-express", "mobile-expo"]
-  );
+  assert.deepEqual(normalizeFeatures(["api-nest", "web-vite"]), [
+    "web-vite",
+    "api-nest"
+  ]);
 });
 
 test("rejects invalid feature selections", () => {
@@ -40,8 +40,8 @@ test("serializes feature flags and the manifest payload for Copier", () => {
   assert.deepEqual(serializeFeatureData(["web-vite", "api-nest"]), [
     'features_json="[\\"web-vite\\",\\"api-nest\\"]"',
     "feature_web_vite=true",
-    "feature_web_next=false",
     "feature_api_nest=true",
+    "feature_web_next=false",
     "feature_api_express=false",
     "feature_mobile_expo=false",
     "feature_mobile_react_native=false"

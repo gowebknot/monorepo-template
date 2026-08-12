@@ -1,13 +1,23 @@
 export const FEATURE_DEFINITIONS = [
-  { id: "web-vite", label: "Vite web app", default: true },
-  { id: "web-next", label: "Next.js web app", default: false },
-  { id: "api-nest", label: "NestJS API", default: true },
-  { id: "api-express", label: "Express API", default: false },
-  { id: "mobile-expo", label: "Expo React Native app", default: false },
   {
+    default: true,
+    defaultName: "web",
+    id: "web-vite",
+    label: "Vite web app"
+  },
+  {
+    default: true,
+    defaultName: "server",
+    id: "api-nest",
+    label: "NestJS API"
+  },
+  { defaultName: "next", id: "web-next", label: "Next.js web app" },
+  { defaultName: "express", id: "api-express", label: "Express API" },
+  { defaultName: "expo", id: "mobile-expo", label: "Expo React Native app" },
+  {
+    defaultName: "mobile",
     id: "mobile-react-native",
-    label: "Bare React Native app",
-    default: false
+    label: "Bare React Native app"
   }
 ];
 
@@ -16,6 +26,15 @@ const featureIds = new Set(FEATURE_DEFINITIONS.map(({ id }) => id));
 export const DEFAULT_FEATURES = FEATURE_DEFINITIONS.filter(
   ({ default: enabled }) => enabled
 ).map(({ id }) => id);
+
+export const DEFAULT_APP_NAMES = {
+  serverAppName: "server",
+  webAppName: "web"
+};
+
+export const DEFAULT_FEATURE_NAMES = Object.fromEntries(
+  FEATURE_DEFINITIONS.map(({ defaultName, id }) => [id, defaultName])
+);
 
 function invalidFeatures(value, reason) {
   throw new Error(`Invalid feature selection${reason ? `: ${reason}` : ""}.`);

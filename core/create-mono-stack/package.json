@@ -1,6 +1,6 @@
 {
   "name": "create-mono-stack",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license": "MIT",
   "description": "Create a project from the Go Webknot monorepo template",
   "type": "module",
@@ -17,7 +17,7 @@
   "scripts": {
     "lint": "eslint .",
     "publish:package": "node scripts/publish.mjs",
-    "test": "node --test test/cli.test.js test/copier-template.test.js test/feature-config.test.js test/git-host-alias.test.js test/git-setup.test.js test/interactive-wizard.test.js test/project-cleanup.test.js test/publish.test.js test/python-runtime.test.js test/runtime-installers.test.js test/template-update.test.js",
+    "test": "node --test test/cli.test.js test/copier-template.test.js test/feature-config.test.js test/git-host-alias.test.js test/git-setup.test.js test/interactive-wizard.test.js test/native-scaffold.test.js test/project-cleanup.test.js test/publish.test.js test/python-runtime.test.js test/runtime-installers.test.js test/template-update.test.js",
     "test:integration": "node --test test/copier-template.integration.test.js"
   },
   "engines": {

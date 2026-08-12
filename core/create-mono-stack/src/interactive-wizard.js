@@ -5,7 +5,12 @@ import { Box, Text, render, useApp, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import TextInput from "ink-text-input";
 import { createElement, useRef, useState } from "react";
-import { DEFAULT_FEATURES, FEATURE_DEFINITIONS } from "./feature-config.js";
+import {
+  DEFAULT_APP_NAMES,
+  DEFAULT_FEATURES,
+  DEFAULT_FEATURE_NAMES,
+  FEATURE_DEFINITIONS
+} from "./feature-config.js";
 import { discoverWizardOptions } from "./wizard-discovery.js";
 
 export { parseSshAliases } from "./wizard-discovery.js";
@@ -132,8 +137,17 @@ function WizardFrame({ children }) {
   );
 }
 
-function TextQuestion({ label, onSubmit, placeholder }) {
+function TextQuestion({ label, onBack, onSubmit, placeholder }) {
   const [value, setValue] = useState("");
+  const [backFocused, setBackFocused] = useState(false);
+
+  useInput((input, key) => {
+    if (key.tab) {
+      setBackFocused((current) => !current);
+      return;
+    }
+    if (backFocused && key.return) onBack?.();
+  });
 
   return h(
     Box,
@@ -143,13 +157,21 @@ function TextQuestion({ label, onSubmit, placeholder }) {
       Box,
       { marginTop: 1 },
       h(Text, { color: "cyan" }, "> "),
-      h(TextInput, {
-        onChange: setValue,
-        onSubmit,
-        placeholder,
-        value
-      })
-    )
+      backFocused
+        ? h(Text, { dimColor: true }, value || placeholder)
+        : h(TextInput, {
+            onChange: setValue,
+            onSubmit,
+            placeholder,
+            value
+          })
+    ),
+    h(
+      Text,
+      { color: backFocused ? "cyan" : undefined },
+      `${backFocused ? "❯" : " "} Back`
+    ),
+    h(Text, { dimColor: true }, "Tab focus Back | Enter submit/select")
   );
 }
 
@@ -226,6 +248,10 @@ function customStep(field) {
   return `custom:${field}`;
 }
 
+function featureNameStep(featureId) {
+  return `feature-name:${featureId}`;
+}
+
 function projectNameChoices(destination) {
   return [
     {
@@ -245,6 +271,10 @@ function Confirmation({ answers, onSelect }) {
     ["Destination", answers.destination],
     ["Project name", answers.projectName],
     ["Features", answers.features.join(", ")],
+    ...answers.features.map((featureId) => [
+      `${FEATURE_DEFINITIONS.find(({ id }) => id === featureId)?.label ?? featureId} name`,
+      answers.featureNames[featureId]
+    ]),
     ["SSH alias", answers.gitHostAlias || "none"],
     ["Python", answers.python || "auto-detect"],
     ["Template", answers.template || "latest stable"],
@@ -268,9 +298,13 @@ function Confirmation({ answers, onSelect }) {
 
 export function buildProjectArguments(answers) {
   const features = answers.features ?? DEFAULT_FEATURES;
+  const featureNames = answers.featureNames ?? DEFAULT_FEATURE_NAMES;
   const args = [
     `--name=${answers.projectName}`,
-    `--features=${features.join(",")}`
+    `--features=${features.join(",")}`,
+    ...features.map(
+      (featureId) => `--app-name=${featureId}:${featureNames[featureId]}`
+    )
   ];
   const options = [
     ["--git-host-alias", answers.gitHostAlias],
@@ -292,6 +326,9 @@ export function ProjectWizard({ onComplete, options = {} }) {
   const [answers, setAnswers] = useState({
     destination: "",
     features: DEFAULT_FEATURES,
+    featureNames: { ...DEFAULT_FEATURE_NAMES },
+    serverAppName: DEFAULT_APP_NAMES.serverAppName,
+    webAppName: DEFAULT_APP_NAMES.webAppName,
     gitHostAlias: "",
     projectName: "",
     python: "",
@@ -358,7 +395,9 @@ export function ProjectWizard({ onComplete, options = {} }) {
       },
       onSubmit(features) {
         setAnswers((current) => ({ ...current, features }));
-        setStep("advanced");
+        setStep(
+          features.length > 0 ? featureNameStep(features[0]) : "advanced"
+        );
       },
       selected: answers.features
     });
@@ -387,63 +426,94 @@ export function ProjectWizard({ onComplete, options = {} }) {
       }
     });
   } else {
-    const currentStep = steps.find(({ field }) => field === step);
-    if (currentStep) {
-      content = h(ChoiceQuestion, {
-        key: step,
-        items: currentStep.choices,
-        label: currentStep.label,
-        showBack: true,
-        onSelect(item) {
-          if (item.value === backChoice) {
-            setStep(currentStep.previous);
-            return;
-          }
-          if (item.value === customChoice) {
-            setStep(customStep(currentStep.field));
-            return;
-          }
-          setAnswers((current) => ({
-            ...current,
-            [currentStep.field]: item.value
-          }));
-          setStep(currentStep.next);
-        }
-      });
-    } else {
-      const customField = step.slice("custom:".length);
-      const customStepDefinition =
-        customField === "destination"
-          ? {
-              label: "Destination directory",
-              next: "projectName",
-              placeholder: defaultDestination
-            }
-          : customField === "projectName"
-            ? {
-                label: "Project name",
-                next: "features",
-                placeholder: basename(resolve(answers.destination))
-              }
-            : steps.find(({ field }) => field === customField);
+    const appNameStep = step.startsWith("feature-name:");
+    if (appNameStep) {
+      const featureId = step.slice("feature-name:".length);
+      const feature = FEATURE_DEFINITIONS.find(({ id }) => id === featureId);
+      const featureIndex = answers.features.indexOf(featureId);
+      const nextFeature = answers.features[featureIndex + 1];
       content = h(TextQuestion, {
         key: step,
-        label: customStepDefinition.label,
+        label: `${feature.label} name`,
+        onBack() {
+          setStep(
+            featureIndex === 0
+              ? "features"
+              : featureNameStep(answers.features[featureIndex - 1])
+          );
+        },
         onSubmit(value) {
-          const fallback =
-            customField === "destination"
-              ? defaultDestination
-              : customField === "projectName"
-                ? basename(resolve(answers.destination))
-                : "";
+          const fallback = DEFAULT_FEATURE_NAMES[featureId];
           setAnswers((current) => ({
             ...current,
-            [customField]: value.trim() || fallback
+            featureNames: {
+              ...current.featureNames,
+              [featureId]: value.trim() || fallback
+            }
           }));
-          setStep(customStepDefinition.next);
+          setStep(nextFeature ? featureNameStep(nextFeature) : "advanced");
         },
-        placeholder: customStepDefinition.placeholder
+        placeholder: DEFAULT_FEATURE_NAMES[featureId]
       });
+    } else {
+      const currentStep = steps.find(({ field }) => field === step);
+      if (currentStep) {
+        content = h(ChoiceQuestion, {
+          key: step,
+          items: currentStep.choices,
+          label: currentStep.label,
+          showBack: true,
+          onSelect(item) {
+            if (item.value === backChoice) {
+              setStep(currentStep.previous);
+              return;
+            }
+            if (item.value === customChoice) {
+              setStep(customStep(currentStep.field));
+              return;
+            }
+            setAnswers((current) => ({
+              ...current,
+              [currentStep.field]: item.value
+            }));
+            setStep(currentStep.next);
+          }
+        });
+      } else {
+        const customField = step.slice("custom:".length);
+        const customStepDefinition =
+          customField === "destination"
+            ? {
+                label: "Destination directory",
+                next: "projectName",
+                placeholder: defaultDestination
+              }
+            : customField === "projectName"
+              ? {
+                  label: "Project name",
+                  next: "features",
+                  placeholder: basename(resolve(answers.destination))
+                }
+              : steps.find(({ field }) => field === customField);
+        content = h(TextQuestion, {
+          key: step,
+          label: customStepDefinition.label,
+          onSubmit(value) {
+            const fallback =
+              customField === "destination"
+                ? defaultDestination
+                : customField === "projectName"
+                  ? basename(resolve(answers.destination))
+                  : "";
+            setAnswers((current) => ({
+              ...current,
+              [customField]: value.trim() || fallback
+            }));
+            setStep(customStepDefinition.next);
+          },
+          placeholder: customStepDefinition.placeholder
+        });
+      }
     }
   }
 

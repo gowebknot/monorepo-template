@@ -99,10 +99,7 @@ test("uses Copier-native project identity rendering", async () => {
   assert.equal(config.feature_mobile_react_native.default, false);
   assert.match(config.project_name.validator, /letter or number/);
   assert.match(config.project_name.validator, /214 characters/);
-  assert.match(config._message_after_copy, /files generated/i);
-  assert.doesNotMatch(config._message_after_copy, /created successfully/i);
-  assert.match(config._message_after_copy, /git add \./);
-  assert.match(config._message_after_copy, /chore: initialize project/);
+  assert.equal(config._message_after_copy, "");
   assert.ok(config._exclude.includes("copier.yml"));
   assert.ok(config._exclude.includes("core"));
   assert.ok(config._exclude.includes(".npmrc"));

@@ -72,16 +72,7 @@ feature_mobile_react_native:
   type: bool
   default: false
 
-_message_after_copy: |
-  Project files generated for "<%= project_name =%>".
-  When using create-mono-stack, wait for its setup-complete message before continuing.
-
-  Next steps:
-    cd <%= _copier_conf.dst_path =%>
-    pnpm install
-    git add .
-    git commit -m "chore: initialize project"
-    pnpm dev
+_message_after_copy: ""
 
 _message_after_update: |
   Project "<%= project_name =%>" updated successfully.

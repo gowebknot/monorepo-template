@@ -95,6 +95,29 @@ export function readStackConfig(cwd, readFile = readFileSync) {
     throw error;
   }
 
+  if (value?.schemaVersion === 2 && Array.isArray(value.apps)) {
+    if (
+      value.apps.length === 0 ||
+      value.apps.some(
+        (app) =>
+          !app ||
+          typeof app.name !== "string" ||
+          typeof app.path !== "string" ||
+          !["vite", "nestjs"].includes(app.generator)
+      )
+    ) {
+      throw new Error(
+        `Stack configuration is invalid: apps must contain valid Vite or NestJS app records.`
+      );
+    }
+    return {
+      ...value,
+      features: value.apps.map((app) =>
+        app.generator === "vite" ? "web-vite" : "api-nest"
+      )
+    };
+  }
+
   if (value?.schemaVersion !== 1 || !Array.isArray(value.features)) {
     throw new Error(
       `Stack configuration is invalid: ${path} must contain schemaVersion 1 and a features array.`

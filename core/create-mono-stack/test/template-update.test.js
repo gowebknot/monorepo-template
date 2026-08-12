@@ -24,6 +24,25 @@ test("reads and validates the generated stack manifest", () => {
   );
 });
 
+test("accepts native app manifest records without rerunning generators", () => {
+  assert.deepEqual(
+    readStackConfig(projectRoot, () =>
+      JSON.stringify({
+        schemaVersion: 2,
+        apps: [
+          {
+            generator: "vite",
+            name: "dashboard",
+            path: "apps/dashboard"
+          },
+          { generator: "nestjs", name: "api", path: "apps/api" }
+        ]
+      })
+    ).features,
+    ["web-vite", "api-nest"]
+  );
+});
+
 test("rejects malformed stack manifests", () => {
   for (const value of [
     "{}",

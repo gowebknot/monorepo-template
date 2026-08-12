@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, isAbsolute, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -14,6 +14,11 @@ import { cleanupFailedProject } from "./project-cleanup.js";
 import { promptForProjectArguments } from "./interactive-wizard.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
 import { normalizeFeatures, serializeFeatureData } from "./feature-config.js";
+import {
+  nativeScaffoldDependencies,
+  scaffoldNativeApps,
+  validateAppName
+} from "./native-scaffold.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
@@ -36,6 +41,10 @@ Options:
        --template <source> Copier template Git URL or local path
        --vcs-ref <ref>     Copier template Git revision
        --features <ids>    Comma-separated stack feature IDs
+       --web-app-name <name>
+                           Vite app name (default: web)
+       --server-app-name <name>
+                           NestJS app name (default: server)
   -h, --help              Show this help
 `;
 
@@ -97,10 +106,13 @@ const systemDependencies = {
   confirmPythonInstall: confirmInstallation,
   environment: process.env,
   isAdministrator: process.getuid?.() === 0,
+  cp: undefined,
+  readFile: undefined,
   mkdtemp,
   platform: process.platform,
   readdir,
   rm,
+  writeFile,
   runCommand,
   temporaryDirectory: tmpdir()
 };
@@ -165,7 +177,10 @@ export function parseArguments(args, cwd = process.cwd()) {
       python: { type: "string" },
       template: { type: "string" },
       "vcs-ref": { type: "string" },
-      features: { type: "string" }
+      features: { type: "string" },
+      "app-name": { type: "string", multiple: true },
+      "web-app-name": { type: "string" },
+      "server-app-name": { type: "string" }
     },
     strict: true
   });
@@ -181,6 +196,14 @@ export function parseArguments(args, cwd = process.cwd()) {
   const projectName = values.name ?? basename(destination);
   if (!projectName.trim()) throw new Error("Project name must not be empty.");
 
+  const appNames = values["app-name"]?.reduce((result, value) => {
+    const separator = value.indexOf(":");
+    if (separator <= 0) throw new Error(`Invalid app name mapping: ${value}`);
+    const featureId = value.slice(0, separator);
+    result[featureId] = validateAppName(value.slice(separator + 1));
+    return result;
+  }, {});
+
   return {
     destination,
     gitHostAlias: validateGitHostAlias(values["git-host-alias"]),
@@ -190,7 +213,18 @@ export function parseArguments(args, cwd = process.cwd()) {
     vcsRef: values["vcs-ref"],
     ...(values.features === undefined
       ? {}
-      : { features: normalizeFeatures(values.features) })
+      : { features: normalizeFeatures(values.features) }),
+    ...(values["web-app-name"] === undefined
+      ? {}
+      : {
+          webAppName: validateAppName(values["web-app-name"])
+        }),
+    ...(values["server-app-name"] === undefined
+      ? {}
+      : {
+          serverAppName: validateAppName(values["server-app-name"])
+        }),
+    ...(appNames ? { appNames } : {})
   };
 }
 
@@ -258,6 +292,27 @@ export async function createProject(
         : environment,
       replaceEnvironment: true
     });
+
+    const scaffold = dependencies.scaffoldNativeApps ?? scaffoldNativeApps;
+    const nativeApps =
+      options.webAppName || options.serverAppName
+        ? await scaffold(options, {
+            ...nativeScaffoldDependencies({
+              cp: dependencies.cp,
+              readFile: dependencies.readFile,
+              rm: dependencies.rm
+            }),
+            runCommand: dependencies.runCommand,
+            temporaryRoot
+          })
+        : [];
+
+    if (nativeApps.length > 0) {
+      await dependencies.writeFile(
+        join(options.destination, ".mono-stack.json"),
+        `${JSON.stringify({ schemaVersion: 2, apps: nativeApps }, null, 2)}\n`
+      );
+    }
 
     await dependencies.runCommand(
       "pnpm",
@@ -331,6 +386,14 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
   const setupProject = dependencies.createProject ?? createProject;
   await setupProject(options);
   log(
-    "Project setup complete. Git is initialized on main; create the initial commit before template updates."
+    `Project setup complete. Native app scaffolding, dependencies, and Git initialization finished.
+
+What's next:
+  cd ${options.destination}
+  git add .
+  git commit -m "chore: initialize project"
+  pnpm dev
+
+Git is initialized on main; create the initial commit before template updates.`
   );
 }
