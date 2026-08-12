@@ -98,6 +98,7 @@ test("persists an SSH alias without changing Copier's recorded source", async ()
       "copier",
       "copy",
       "--defaults",
+      "--quiet",
       "--data",
       "project_name=Acme Platform",
       DEFAULT_TEMPLATE_SOURCE,

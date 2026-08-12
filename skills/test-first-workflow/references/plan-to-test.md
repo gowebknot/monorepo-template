@@ -6,11 +6,16 @@
 2. For a new bug, scan and read relevant previous checklists, their updates, and the implementations
    and tests they describe before defining the fix.
 3. Define acceptance criteria, validation cases, implementation approach, dependencies, and risks.
-4. Create a new unique checklist under `docs/checklists/<YYYY-MM-DD>-<task-slug>.md` from the completed
-   plan. Never reuse an existing checklist for a new task.
-5. Add detailed nested work items and link the new checklist to every relevant previous checklist.
-6. Begin implementation only after the new checklist captures the plan.
-7. If later work finds committed previous work defective, append a dated update with the reason,
+4. When the workflow calls for a checklist, create a new unique checklist under
+   `docs/checklists/<YYYY-MM-DD>-<implementation-summary-slug>.md` from the completed plan. The slug
+   should describe the implementation included in the task. Never reuse an existing checklist for a
+   new task.
+5. For a commit or release checklist, add an `Implementation Description` section describing the
+   concrete implementation included in that commit or release. This does not require creating a
+   checklist for every commit or release.
+6. Add detailed nested work items and link the new checklist to every relevant previous checklist.
+7. Begin implementation only after the new checklist captures the plan.
+8. If later work finds committed previous work defective, append a dated update with the reason,
    evidence, impact, corrective action, validation, and a backlink to the bottom of the original
    checklist. Do not edit its prior plan, items, or statuses.
 

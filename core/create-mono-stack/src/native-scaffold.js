@@ -20,9 +20,13 @@ function appPath(root, name) {
   return join(root, "apps", name);
 }
 
+function temporaryAppName(generator, name) {
+  return `${generator}-${name}`;
+}
+
 function commandFor(generator, target) {
   return generator === "vite"
-    ? ["pnpm", ["create", "vite", target]]
+    ? ["pnpm", ["create", "vite", target, "--no-immediate"]]
     : [
         "pnpm",
         [
@@ -72,13 +76,11 @@ export async function scaffoldNativeApps(options, dependencies) {
       options.appNames?.[definition.id] ?? options[definition.nameKey]
     );
     const target = appPath(options.destination, name);
-    const temporaryTarget = join(
-      dependencies.temporaryRoot,
-      `${definition.generator}-${name}`
-    );
-    const [command, args] = commandFor(definition.generator, temporaryTarget);
+    const temporaryName = temporaryAppName(definition.generator, name);
+    const temporaryTarget = join(dependencies.temporaryRoot, temporaryName);
+    const [command, args] = commandFor(definition.generator, temporaryName);
     await dependencies.runCommand(command, args, {
-      cwd: options.destination,
+      cwd: dependencies.temporaryRoot,
       stdio: "inherit"
     });
     const packageJson = JSON.parse(

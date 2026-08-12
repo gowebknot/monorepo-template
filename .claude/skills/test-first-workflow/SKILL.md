@@ -26,11 +26,17 @@ implementation strategy.
 
 ## Create the Checklist From the Plan
 
-After planning is complete, create a new unique Markdown checklist for every task. Use
-`docs/checklists/<YYYY-MM-DD>-<task-slug>.md`; if that path exists, add a unique suffix instead of
-reusing an existing checklist. Copy the completed plan into detailed nested checklist items, including
-acceptance criteria, validation cases, implementation steps, verification commands, dependencies, and
-risks. Use as many nesting levels as the work requires.
+After planning is complete, when the workflow calls for a checklist, create a new unique Markdown
+checklist for the task. Use `docs/checklists/<YYYY-MM-DD>-<implementation-summary-slug>.md`; if that
+path exists, add a unique suffix instead of reusing an existing checklist. The slug must describe the
+implementation covered by the task rather than use a generic label. Copy the completed plan into
+detailed nested checklist items, including acceptance criteria, validation cases, implementation
+steps, verification commands, dependencies, and risks. Use as many nesting levels as the work
+requires.
+
+When creating a checklist for a commit or release, include an `Implementation Description` section
+that summarizes the concrete implementation included in that commit or release. This section is a
+checklist content requirement, not a requirement to create a checklist for every commit or release.
 
 1. Record a stable checklist ID and links to every relevant previous checklist.
 2. Keep the new checklist as the source of truth for implementation and validation.

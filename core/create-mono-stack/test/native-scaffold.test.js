@@ -40,9 +40,9 @@ test("scaffolds selected Vite and NestJS apps with native commands", async () =>
   assert.deepEqual(calls, [
     [
       "pnpm",
-      ["create", "vite", "/tmp/native/vite-dashboard"],
+      ["create", "vite", "vite-dashboard", "--no-immediate"],
       {
-        cwd: "/workspace/project",
+        cwd: "/tmp/native",
         stdio: "inherit"
       }
     ],
@@ -52,13 +52,13 @@ test("scaffolds selected Vite and NestJS apps with native commands", async () =>
         "dlx",
         "@nestjs/cli",
         "new",
-        "/tmp/native/nestjs-api",
+        "nestjs-api",
         "--skip-git",
         "--package-manager",
         "pnpm"
       ],
       {
-        cwd: "/workspace/project",
+        cwd: "/tmp/native",
         stdio: "inherit"
       }
     ]

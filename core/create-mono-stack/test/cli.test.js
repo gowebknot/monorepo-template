@@ -282,6 +282,7 @@ test("creates a project through isolated pinned Copier environments", async () =
         "copier",
         "copy",
         "--defaults",
+        "--quiet",
         "--data",
         "project_name=Acme Platform; not a shell command",
         "--data",
@@ -325,6 +326,56 @@ test("creates a project through isolated pinned Copier environments", async () =
   assert.deepEqual(removals, [
     [temporaryRoot, { force: true, recursive: true }]
   ]);
+});
+
+test("runs native scaffolding for wizard-shaped app names", async () => {
+  let scaffoldOptions;
+  await createProject(
+    {
+      appNames: { "web-vite": "dashboard", "api-nest": "api" },
+      destination: "/workspace/acme-platform",
+      features: ["web-vite", "api-nest"],
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    {
+      environment: { PATH: "/usr/bin" },
+      mkdtemp: async () => "/tmp/create-mono-stack-native",
+      platform: "darwin",
+      readdir: async () => missingPath(),
+      rm: async () => {},
+      runCommand: async (command, args, options = {}) => {
+        if (options.capture && command !== "git") {
+          return { stderr: "", stdout: "3.14.7\n" };
+        }
+        if (command === "git" && args[0] === "--version") {
+          return { stderr: "", stdout: "git version 2.50.0\n" };
+        }
+        if (command === "git" && args.includes("--verify")) {
+          const error = new Error("unknown revision HEAD");
+          error.exitCode = 1;
+          throw error;
+        }
+        if (command === "git" && args.includes("rev-parse")) {
+          return { stderr: "", stdout: ".git\n" };
+        }
+        if (command === "git" && args.includes("symbolic-ref")) {
+          return { stderr: "", stdout: "main\n" };
+        }
+        return { stderr: "", stdout: "" };
+      },
+      scaffoldNativeApps: async (options) => {
+        scaffoldOptions = options;
+        return [];
+      },
+      temporaryDirectory: "/tmp"
+    }
+  );
+  assert.deepEqual(scaffoldOptions.appNames, {
+    "web-vite": "dashboard",
+    "api-nest": "api"
+  });
 });
 
 test("refuses to modify a non-empty destination", async () => {

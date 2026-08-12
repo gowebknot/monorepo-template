@@ -74,7 +74,8 @@ Package source convention: use absolute `@/...` imports in implementation files,
 
 ## TypeScript quirks
 
-`packages/entities` (`@repo/entities`) and `packages/env` (`@repo/env`) use **TypeScript 6** (`~6.0.2`), not the root `^5.7.2`.
+The workspace uses **TypeScript 7**. Packages that generate declarations with `unplugin-dts` also
+declare `@typescript/typescript6` so the TypeScript 6 compiler API remains available to that tooling.
 
 - Their `tsconfig.json` files do **not** extend `tsconfig.base.json`; they are fully standalone.
 - `erasableSyntaxOnly: true` (TS6-only) — bans enums, decorators, and namespaces. Do not add them.

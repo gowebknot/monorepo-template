@@ -1,6 +1,6 @@
 # <Task Type>: <Task Title>
 
-- Checklist ID: CHECKLIST-<YYYYMMDD>-<task-slug>
+- Checklist ID: CHECKLIST-<YYYYMMDD>-<implementation-summary-slug>
 - Created: <YYYY-MM-DD>
 - Planning completed: <YYYY-MM-DD>
 - Type: <Task | Bug | Documentation | Configuration | Other>
@@ -26,6 +26,13 @@
 - [ ] Record relevant existing behavior.
   - [ ] Record constraints and non-goals.
   - [ ] Record affected package, application, module, and public boundaries.
+
+## Implementation Description
+
+For a checklist covering a commit or release, describe the concrete implementation included in that
+commit or release here. A commit or release does not require a checklist solely because it exists.
+
+- <Implementation summary, or `Not applicable` for other checklist types>
 
 ## Acceptance Criteria
 

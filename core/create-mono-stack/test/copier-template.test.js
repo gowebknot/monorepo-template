@@ -62,7 +62,7 @@ const templateAdapters = new Map([
   ],
   [
     "AGENTS.md.jinja",
-    '<%!- filter replace(" + template-test", "")\n  | replace("core/\\n  create-mono-stack/ # source-only npm launcher and Copier test owner; excluded from generated projects\\n", "")\n  | replace("pnpm --filter create-mono-stack test\\n", "") -!%>\n<%!- include "AGENTS.md" -!%>\n<%!- endfilter -!%>\n'
+    '<%!- filter replace(" + template-test", "")\n  | regex_replace(\'(?m)^core/\\n  create-mono-stack/.*\\n\', "")\n  | regex_replace(\'(?m)^.*create-mono-stack.*\\n\', "") -!%>\n<%!- include "AGENTS.md" -!%>\n<%!- endfilter -!%>\n'
   ]
 ]);
 

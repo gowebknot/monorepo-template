@@ -269,6 +269,7 @@ export async function createProject(
       "copier",
       "copy",
       "--defaults",
+      "--quiet",
       "--data",
       `project_name=${options.projectName}`
     ];
@@ -295,7 +296,7 @@ export async function createProject(
 
     const scaffold = dependencies.scaffoldNativeApps ?? scaffoldNativeApps;
     const nativeApps =
-      options.webAppName || options.serverAppName
+      options.appNames || options.webAppName || options.serverAppName
         ? await scaffold(options, {
             ...nativeScaffoldDependencies({
               cp: dependencies.cp,

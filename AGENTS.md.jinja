@@ -1,5 +1,5 @@
 <%!- filter replace(" + template-test", "")
-  | replace("core/\n  create-mono-stack/ # source-only npm launcher and Copier test owner; excluded from generated projects\n", "")
-  | replace("pnpm --filter create-mono-stack test\n", "") -!%>
+  | regex_replace('(?m)^core/\n  create-mono-stack/.*\n', "")
+  | regex_replace('(?m)^.*create-mono-stack.*\n', "") -!%>
 <%!- include "AGENTS.md" -!%>
 <%!- endfilter -!%>
