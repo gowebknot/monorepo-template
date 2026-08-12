@@ -15,14 +15,14 @@
 - [x] Persist selected features in `.mono-stack.json` and reuse them during template updates.
 - [x] Refresh generated npm dependencies and the lockfile after project generation.
 - [x] Preserve setup cleanup, Git alias, Python environment, and generated-project exclusions.
-- [ ] Deliver the complete change as a commit pushed to `origin`.
+- [x] Deliver the complete change as a commit pushed to `origin`.
 
 ## Acceptance Criteria
 
-- [ ] All current tracked and untracked implementation, test, and documentation work is included in one commit.
+- [x] All current tracked and untracked implementation, test, and documentation work is included in one commit.
 - [x] Repository validation passes, with the known environment-independent generated `AGENTS.md` exclusion assertion documented.
-- [ ] The commit uses the repository's Conventional Commit format.
-- [ ] The resulting commit is pushed to `origin` and verified on the remote branch.
+- [x] The commit uses the repository's Conventional Commit format.
+- [x] The resulting commit is pushed to `origin` and verified on the remote branch.
 
 ## Validation
 
@@ -38,4 +38,5 @@
 - 2026-08-12: Package tests reported one timeout in the custom project-name wizard path; the test was corrected to account for the text-input state transition.
 - 2026-08-12: Focused wizard rerun passed, followed by the complete package suite at 76/76 passing.
 - 2026-08-12: `just check`, package lint, and `git diff --check` passed.
+- 2026-08-12: Commit `21006e8` passed commit hooks and was pushed to `origin/master`; local and remote revisions match.
 - 2026-08-12: Copier integration reproduced the documented generated `AGENTS.md` exclusion failure after successfully reaching manifest validation.
