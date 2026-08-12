@@ -72,7 +72,8 @@ Install project dependencies and create the baseline commit after generation.
 ## Template Updates
 
 Generated projects include `pnpm template:update`, a `mise.toml` declaration for the latest Python,
-and a ready-to-use `.venv` with pinned Copier dependencies. Setup stores any alias passed with
+and a ready-to-use `.venv` with pinned Copier dependencies. It also refreshes generated npm
+dependencies to their latest releases and updates the pnpm lockfile. Setup stores any alias passed with
 `--git-host-alias` automatically. Because the local setting is not committed, configure it once after
 cloning the project elsewhere or when repairing an older project:
 

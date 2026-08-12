@@ -18,8 +18,10 @@ pnpm create mono-stack
 ```
 
 Running without arguments in an interactive terminal opens an Ink-powered setup TUI. Type values and
-press Enter to continue, use the arrow keys for choices, and press Escape or Ctrl+C to cancel. For
-scripts or direct configuration, pass the destination and options explicitly:
+press Enter to continue, use the arrow keys for choices, Space to toggle stack features, and press
+Escape or Ctrl+C to cancel. The default stack includes the Vite web app and NestJS API. Optional
+Next.js, Express, Expo, and bare React Native features can be selected during setup. For scripts or
+direct configuration, pass the destination and options explicitly:
 
 ```sh
 pnpm create mono-stack my-project --name "My Project"
@@ -27,6 +29,13 @@ cd my-project
 pnpm install
 git add .
 git commit -m "chore: initialize project"
+```
+
+Feature selections can also be supplied non-interactively:
+
+```sh
+pnpm create mono-stack my-project \
+  --features web-vite,api-express,mobile-expo
 ```
 
 Setup initializes the repository on `main` but intentionally leaves the first commit to you.
@@ -53,10 +62,11 @@ node core/create-mono-stack/bin/create-mono-stack.js ../my-project \
 Copier selects the newest stable PEP 440-compatible Git tag by default. Publish immutable tags such
 as `v1.0.0` and `v1.1.0` so generated projects can update predictably.
 
-Setup installs the pinned Copier toolchain into the generated project's `.venv`, while `mise.toml`
-declares the latest Python runtime. The project records its template source and version in
-`.copier-answers.yml`, so no separate updater bootstrap is required. Create the initial Git commit
-before applying a template update.
+Setup refreshes npm dependencies to their latest releases and installs the pinned Copier toolchain
+into the generated project's `.venv`, while `mise.toml` declares the latest Python runtime. The
+project records its template source and version in `.copier-answers.yml`, and its selected stack in
+`.mono-stack.json`, so no separate updater bootstrap is required. Create the initial Git commit before
+applying a template update.
 
 Setup stores an alias passed with `--git-host-alias` automatically. Because the setting remains in
 `.git/config` and is not committed, configure it once after cloning the project elsewhere or when

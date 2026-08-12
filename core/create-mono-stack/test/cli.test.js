@@ -53,6 +53,23 @@ test("records local template sources as absolute paths", () => {
   );
 });
 
+test("parses an explicit feature selection", () => {
+  assert.deepEqual(
+    parseArguments(
+      ["acme-platform", "--features", "web-vite,api-express,mobile-expo"],
+      "/workspace"
+    ).features,
+    ["web-vite", "api-express", "mobile-expo"]
+  );
+});
+
+test("rejects invalid feature selections before setup", () => {
+  assert.throws(
+    () => parseArguments(["acme-platform", "--features", "web-vite,unknown"]),
+    /unknown feature ID/
+  );
+});
+
 test("advertises the zero-argument interactive wizard in help", async () => {
   const messages = [];
 
@@ -203,7 +220,8 @@ test("creates a project through isolated pinned Copier environments", async () =
       projectName: "Acme Platform; not a shell command",
       python: "/custom/python",
       template: "/workspace/template",
-      vcsRef: "HEAD"
+      vcsRef: "HEAD",
+      features: ["web-vite", "api-express"]
     },
     dependencies
   );
@@ -258,6 +276,20 @@ test("creates a project through isolated pinned Copier environments", async () =
         "--defaults",
         "--data",
         "project_name=Acme Platform; not a shell command",
+        "--data",
+        'features_json="[\\"web-vite\\",\\"api-express\\"]"',
+        "--data",
+        "feature_web_vite=true",
+        "--data",
+        "feature_web_next=false",
+        "--data",
+        "feature_api_nest=false",
+        "--data",
+        "feature_api_express=true",
+        "--data",
+        "feature_mobile_expo=false",
+        "--data",
+        "feature_mobile_react_native=false",
         "--vcs-ref",
         "HEAD",
         "/workspace/template",
@@ -270,6 +302,18 @@ test("creates a project through isolated pinned Copier environments", async () =
     }
   );
   assert.equal(pipCalls.at(-1).command, projectPython);
+  assert.deepEqual(
+    calls.find(({ command }) => command === "pnpm"),
+    {
+      command: "pnpm",
+      args: ["update", "--latest", "--recursive", "--lockfile-only"],
+      options: { cwd: destination }
+    }
+  );
+  assert.ok(
+    calls.findIndex(({ command }) => command === "pnpm") >
+      calls.findIndex(({ args }) => args[0] === "-m" && args[1] === "copier")
+  );
   assert.deepEqual(removals, [
     [temporaryRoot, { force: true, recursive: true }]
   ]);
@@ -341,6 +385,45 @@ test("removes the temporary environment when Copier fails", async () => {
   assert.deepEqual(removed, [
     ["/workspace/acme-platform", { force: true, recursive: true }],
     ["/tmp/create-mono-stack-failure", { force: true, recursive: true }]
+  ]);
+});
+
+test("removes generated output when dependency refresh fails", async () => {
+  const removed = [];
+
+  await assert.rejects(
+    createProject(
+      {
+        destination: "/workspace/acme-platform",
+        projectName: "Acme Platform",
+        python: "python3",
+        template: DEFAULT_TEMPLATE_SOURCE,
+        vcsRef: undefined
+      },
+      {
+        mkdtemp: async () => "/tmp/create-mono-stack-dependency-failure",
+        platform: "darwin",
+        readdir: async () => missingPath(),
+        rm: async (...args) => removed.push(args),
+        runCommand: async (command, args, options = {}) => {
+          if (command === "git" && args[0] === "--version") {
+            return { stderr: "", stdout: "git version 2.50.0\n" };
+          }
+          if (options.capture) return { stderr: "", stdout: "3.14.7\n" };
+          if (command === "pnpm") throw new Error("Registry unavailable");
+          return { stderr: "", stdout: "" };
+        },
+        temporaryDirectory: "/tmp"
+      }
+    ),
+    /Registry unavailable/
+  );
+  assert.deepEqual(removed, [
+    ["/workspace/acme-platform", { force: true, recursive: true }],
+    [
+      "/tmp/create-mono-stack-dependency-failure",
+      { force: true, recursive: true }
+    ]
   ]);
 });
 

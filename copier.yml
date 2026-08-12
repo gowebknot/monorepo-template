@@ -41,7 +41,36 @@ project_name:
     Project name must contain at least one letter or number.
     <%!- elif slug | length > 214 -!%>
     Project slug must not exceed 214 characters.
-    <%!- endif -!%>
+     <%!- endif -!%>
+
+features_json:
+  type: str
+  help: Selected stack features as JSON
+  default: '["web-vite", "api-nest"]'
+
+feature_web_vite:
+  type: bool
+  default: true
+
+feature_web_next:
+  type: bool
+  default: false
+
+feature_api_nest:
+  type: bool
+  default: true
+
+feature_api_express:
+  type: bool
+  default: false
+
+feature_mobile_expo:
+  type: bool
+  default: false
+
+feature_mobile_react_native:
+  type: bool
+  default: false
 
 _message_after_copy: |
   Project files generated for "<%= project_name =%>".

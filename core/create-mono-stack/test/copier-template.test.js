@@ -46,7 +46,7 @@ const templateAdapters = new Map([
     "README.md.jinja",
     `<%!- filter replace("# Monorepo Template", "# " ~ project_name)
   | replace('- \`core/create-mono-stack\`: source-only npm launcher and Copier tests\\n', "")
-  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nProject setup creates .venv with pinned Copier dependencies, and mise.toml declares the latest Python runtime. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml. Run updates from a clean working tree.\\n\\nProject setup stores any --git-host-alias value in the local Git configuration automatically. Because .git/config is not committed, configure the alias once after cloning the project elsewhere or when repairing an older project:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nOmit the setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
+  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nProject setup refreshes npm dependencies to their latest releases and creates .venv with pinned Copier dependencies. mise.toml declares the latest Python runtime. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml and its selected stack in .mono-stack.json. Run updates from a clean working tree.\\n\\nProject setup stores any --git-host-alias value in the local Git configuration automatically. Because .git/config is not committed, configure the alias once after cloning the project elsewhere or when repairing an older project:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nOmit that setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
 <%!- include "README.md" -!%>
 <%!- endfilter -!%>
 `
@@ -66,6 +66,16 @@ const templateAdapters = new Map([
   ]
 ]);
 
+templateAdapters.set(
+  "README.md.jinja",
+  templateAdapters
+    .get("README.md.jinja")
+    .replace(
+      "Omit that setting when generic GitHub SSH works.",
+      "Omit the setting when generic GitHub SSH works."
+    )
+);
+
 test("uses Copier-native project identity rendering", async () => {
   const config = parse(await readFile(join(root, "copier.yml"), "utf8"));
 
@@ -80,6 +90,13 @@ test("uses Copier-native project identity rendering", async () => {
     comment_end_string: "#%>"
   });
   assert.equal(config.project_slug, undefined);
+  assert.equal(config.features_json.default, '["web-vite", "api-nest"]');
+  assert.equal(config.feature_web_vite.default, true);
+  assert.equal(config.feature_api_nest.default, true);
+  assert.equal(config.feature_web_next.default, false);
+  assert.equal(config.feature_api_express.default, false);
+  assert.equal(config.feature_mobile_expo.default, false);
+  assert.equal(config.feature_mobile_react_native.default, false);
   assert.match(config.project_name.validator, /letter or number/);
   assert.match(config.project_name.validator, /214 characters/);
   assert.match(config._message_after_copy, /files generated/i);

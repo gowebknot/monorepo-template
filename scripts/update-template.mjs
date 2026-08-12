@@ -1,9 +1,20 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const GIT_HOST_ALIAS_CONFIG_KEY = "mono-stack.template-host-alias";
+export const STACK_CONFIG_FILENAME = ".mono-stack.json";
+
+const stackFeatureIds = [
+  "web-vite",
+  "web-next",
+  "api-nest",
+  "api-express",
+  "mobile-expo",
+  "mobile-react-native"
+];
+const stackFeatureIdSet = new Set(stackFeatureIds);
 
 const genericGitHubSshPrefix = "git@github.com:";
 const gitRoutingVariableNames = new Set(
@@ -64,6 +75,60 @@ function commandError(command, result) {
   );
 }
 
+export function readStackConfig(cwd, readFile = readFileSync) {
+  const path = join(cwd, STACK_CONFIG_FILENAME);
+  let value;
+  try {
+    value = JSON.parse(readFile(path, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error(
+        `Stack configuration is missing at ${path}. Recreate the project manifest before running a template update.`,
+        { cause: error }
+      );
+    }
+    if (error instanceof SyntaxError) {
+      throw new Error(`Stack configuration is not valid JSON: ${path}.`, {
+        cause: error
+      });
+    }
+    throw error;
+  }
+
+  if (value?.schemaVersion !== 1 || !Array.isArray(value.features)) {
+    throw new Error(
+      `Stack configuration is invalid: ${path} must contain schemaVersion 1 and a features array.`
+    );
+  }
+  if (
+    value.features.length === 0 ||
+    value.features.some(
+      (feature) =>
+        typeof feature !== "string" || !stackFeatureIdSet.has(feature)
+    )
+  ) {
+    throw new Error(
+      `Stack configuration is invalid: features must contain known non-empty feature IDs.`
+    );
+  }
+  if (new Set(value.features).size !== value.features.length) {
+    throw new Error(
+      `Stack configuration is invalid: features must not contain duplicates.`
+    );
+  }
+  return value;
+}
+
+function stackFeatureData(config) {
+  const selected = new Set(config.features);
+  return [
+    `features_json=${JSON.stringify(JSON.stringify(config.features))}`,
+    ...stackFeatureIds.map(
+      (id) => `feature_${id.replaceAll("-", "_")}=${selected.has(id)}`
+    )
+  ];
+}
+
 function missingEnvironmentError(python, platform) {
   const localPython =
     platform === "win32" ? ".\\.venv\\Scripts\\python.exe" : ".venv/bin/python";
@@ -87,6 +152,9 @@ export function updateTemplate(args, dependencies = {}) {
   );
   const execute = dependencies.execute ?? spawnSync;
   const exists = dependencies.exists ?? existsSync;
+  const stackConfig = dependencies.readFile
+    ? readStackConfig(cwd, dependencies.readFile)
+    : undefined;
   const platform = dependencies.platform ?? process.platform;
   const python = join(
     cwd,
@@ -119,11 +187,18 @@ export function updateTemplate(args, dependencies = {}) {
   const env = alias
     ? { ...environment, ...gitHostAliasEnvironment(alias, environment) }
     : environment;
-  const result = execute(python, ["-m", "copier", "update", ...args], {
-    cwd,
-    env,
-    stdio: "inherit"
-  });
+  const featureArguments = stackConfig
+    ? stackFeatureData(stackConfig).flatMap((data) => ["--data", data])
+    : [];
+  const result = execute(
+    python,
+    ["-m", "copier", "update", ...featureArguments, ...args],
+    {
+      cwd,
+      env,
+      stdio: "inherit"
+    }
+  );
   if (result.error?.code === "ENOENT") {
     throw missingEnvironmentError(python, platform);
   }

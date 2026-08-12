@@ -5,6 +5,7 @@ import { Box, Text, render, useApp, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import TextInput from "ink-text-input";
 import { createElement, useRef, useState } from "react";
+import { DEFAULT_FEATURES, FEATURE_DEFINITIONS } from "./feature-config.js";
 import { discoverWizardOptions } from "./wizard-discovery.js";
 
 export { parseSshAliases } from "./wizard-discovery.js";
@@ -127,7 +128,7 @@ function WizardFrame({ children }) {
       h(Text, { dimColor: true }, "Interactive project setup"),
       h(Box, { flexDirection: "column", marginTop: 1 }, children)
     ),
-    h(Text, { dimColor: true }, "Enter select | Esc cancel")
+    h(Text, { dimColor: true }, "Enter select | Space toggle | Esc cancel")
   );
 }
 
@@ -164,6 +165,63 @@ function ChoiceQuestion({ items, label, onSelect, showBack = false }) {
   );
 }
 
+function FeatureQuestion({ onBack, onSubmit, selected }) {
+  const [cursor, setCursor] = useState(0);
+  const [current, setCurrent] = useState(() => new Set(selected));
+
+  useInput((input, key) => {
+    if (key.upArrow) {
+      setCursor((value) =>
+        value === 0 ? FEATURE_DEFINITIONS.length - 1 : value - 1
+      );
+      return;
+    }
+    if (key.downArrow) {
+      setCursor((value) => (value + 1) % FEATURE_DEFINITIONS.length);
+      return;
+    }
+    if (input === " ") {
+      setCurrent((value) => {
+        const next = new Set(value);
+        const id = FEATURE_DEFINITIONS[cursor].id;
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+      return;
+    }
+    if (key.leftArrow) {
+      onBack();
+      return;
+    }
+    if (key.return) {
+      onSubmit(
+        FEATURE_DEFINITIONS.filter(({ id }) => current.has(id)).map(
+          ({ id }) => id
+        )
+      );
+    }
+  });
+
+  return h(
+    Box,
+    { flexDirection: "column" },
+    h(Text, { bold: true }, "Stack features"),
+    h(
+      Box,
+      { flexDirection: "column", marginTop: 1 },
+      ...FEATURE_DEFINITIONS.map(({ id, label }, index) =>
+        h(
+          Text,
+          { key: id, color: index === cursor ? "cyan" : undefined },
+          `${index === cursor ? "❯" : " "} [${current.has(id) ? "x" : " "}] ${label}`
+        )
+      )
+    ),
+    h(Text, { dimColor: true }, "Space toggle | Enter continue | Left go back")
+  );
+}
+
 function customStep(field) {
   return `custom:${field}`;
 }
@@ -186,6 +244,7 @@ function Confirmation({ answers, onSelect }) {
   const lines = [
     ["Destination", answers.destination],
     ["Project name", answers.projectName],
+    ["Features", answers.features.join(", ")],
     ["SSH alias", answers.gitHostAlias || "none"],
     ["Python", answers.python || "auto-detect"],
     ["Template", answers.template || "latest stable"],
@@ -208,7 +267,11 @@ function Confirmation({ answers, onSelect }) {
 }
 
 export function buildProjectArguments(answers) {
-  const args = [`--name=${answers.projectName}`];
+  const features = answers.features ?? DEFAULT_FEATURES;
+  const args = [
+    `--name=${answers.projectName}`,
+    `--features=${features.join(",")}`
+  ];
   const options = [
     ["--git-host-alias", answers.gitHostAlias],
     ["--python", answers.python],
@@ -228,6 +291,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
   const [step, setStep] = useState("destination");
   const [answers, setAnswers] = useState({
     destination: "",
+    features: DEFAULT_FEATURES,
     gitHostAlias: "",
     projectName: "",
     python: "",
@@ -284,8 +348,19 @@ export function ProjectWizard({ onComplete, options = {} }) {
           return;
         }
         setAnswers((current) => ({ ...current, projectName: item.value }));
-        setStep("advanced");
+        setStep("features");
       }
+    });
+  } else if (step === "features") {
+    content = h(FeatureQuestion, {
+      onBack() {
+        setStep("projectName");
+      },
+      onSubmit(features) {
+        setAnswers((current) => ({ ...current, features }));
+        setStep("advanced");
+      },
+      selected: answers.features
     });
   } else if (step === "advanced") {
     content = h(ChoiceQuestion, {
@@ -294,7 +369,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
       showBack: true,
       onSelect(item) {
         if (item.value === backChoice) {
-          setStep("projectName");
+          setStep("features");
           return;
         }
         setStep(item.value ? steps[0].field : "confirm");
@@ -347,7 +422,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
           : customField === "projectName"
             ? {
                 label: "Project name",
-                next: "advanced",
+                next: "features",
                 placeholder: basename(resolve(answers.destination))
               }
             : steps.find(({ field }) => field === customField);

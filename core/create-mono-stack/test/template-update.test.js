@@ -3,10 +3,107 @@ import test from "node:test";
 
 import {
   GIT_HOST_ALIAS_CONFIG_KEY,
+  STACK_CONFIG_FILENAME,
+  readStackConfig,
   updateTemplate
 } from "../../../scripts/update-template.mjs";
 
 const projectRoot = "/workspace/project";
+const stackConfig = JSON.stringify({
+  schemaVersion: 1,
+  features: ["web-vite", "api-express", "mobile-expo"]
+});
+
+test("reads and validates the generated stack manifest", () => {
+  assert.deepEqual(
+    readStackConfig(projectRoot, (path) => {
+      assert.equal(path, `${projectRoot}/${STACK_CONFIG_FILENAME}`);
+      return stackConfig;
+    }),
+    JSON.parse(stackConfig)
+  );
+});
+
+test("rejects malformed stack manifests", () => {
+  for (const value of [
+    "{}",
+    '{"schemaVersion":1,"features":[]}',
+    '{"schemaVersion":1,"features":["unknown"]}',
+    '{"schemaVersion":1,"features":["web-vite","web-vite"]}',
+    "not-json"
+  ]) {
+    assert.throws(
+      () => readStackConfig(projectRoot, () => value),
+      /Stack configuration is invalid|not valid JSON/
+    );
+  }
+});
+
+test("passes generated stack features to Copier during updates", () => {
+  const calls = [];
+  const execute = (command, args, options) => {
+    calls.push({ args, command, options });
+    return command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+  };
+
+  assert.equal(
+    updateTemplate(["--defaults"], {
+      cwd: projectRoot,
+      environment: { PATH: "/usr/bin" },
+      execute,
+      exists: () => true,
+      platform: "darwin",
+      readFile: () => stackConfig
+    }),
+    0
+  );
+  assert.deepEqual(calls.at(-1).args, [
+    "-m",
+    "copier",
+    "update",
+    "--data",
+    'features_json="[\\"web-vite\\",\\"api-express\\",\\"mobile-expo\\"]"',
+    "--data",
+    "feature_web_vite=true",
+    "--data",
+    "feature_web_next=false",
+    "--data",
+    "feature_api_nest=false",
+    "--data",
+    "feature_api_express=true",
+    "--data",
+    "feature_mobile_expo=true",
+    "--data",
+    "feature_mobile_react_native=false",
+    "--defaults"
+  ]);
+});
+
+test("rejects a missing stack manifest before invoking Copier", () => {
+  let copierCalled = false;
+  assert.throws(
+    () =>
+      updateTemplate([], {
+        cwd: projectRoot,
+        environment: {},
+        execute: () => {
+          copierCalled = true;
+          return { status: 0 };
+        },
+        exists: () => true,
+        platform: "darwin",
+        readFile: () => {
+          const error = new Error("missing");
+          error.code = "ENOENT";
+          throw error;
+        }
+      }),
+    /Stack configuration is missing/
+  );
+  assert.equal(copierCalled, false);
+});
 
 test("updates through the SSH alias stored in local Git config", () => {
   const calls = [];

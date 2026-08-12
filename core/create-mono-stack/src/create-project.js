@@ -13,6 +13,7 @@ import {
 import { cleanupFailedProject } from "./project-cleanup.js";
 import { promptForProjectArguments } from "./interactive-wizard.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
+import { normalizeFeatures, serializeFeatureData } from "./feature-config.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
@@ -32,8 +33,9 @@ Options:
       --git-host-alias <alias>
                           SSH host alias for github.com template access
       --python <path>     Python 3.10+ executable
-      --template <source> Copier template Git URL or local path
-      --vcs-ref <ref>     Copier template Git revision
+       --template <source> Copier template Git URL or local path
+       --vcs-ref <ref>     Copier template Git revision
+       --features <ids>    Comma-separated stack feature IDs
   -h, --help              Show this help
 `;
 
@@ -50,6 +52,7 @@ function runCommand(command, args, options = {}) {
   return new Promise((resolvePromise, reject) => {
     const capture = options.capture === true;
     const child = spawn(command, args, {
+      cwd: options.cwd,
       env: options.env
         ? options.replaceEnvironment
           ? options.env
@@ -161,7 +164,8 @@ export function parseArguments(args, cwd = process.cwd()) {
       name: { short: "n", type: "string" },
       python: { type: "string" },
       template: { type: "string" },
-      "vcs-ref": { type: "string" }
+      "vcs-ref": { type: "string" },
+      features: { type: "string" }
     },
     strict: true
   });
@@ -183,7 +187,10 @@ export function parseArguments(args, cwd = process.cwd()) {
     projectName,
     python: values.python,
     template: resolveTemplateSource(values.template, cwd),
-    vcsRef: values["vcs-ref"]
+    vcsRef: values["vcs-ref"],
+    ...(values.features === undefined
+      ? {}
+      : { features: normalizeFeatures(values.features) })
   };
 }
 
@@ -231,6 +238,11 @@ export async function createProject(
       "--data",
       `project_name=${options.projectName}`
     ];
+    if (options.features !== undefined) {
+      for (const data of serializeFeatureData(options.features)) {
+        copierArguments.push("--data", data);
+      }
+    }
     if (options.vcsRef) {
       copierArguments.push("--vcs-ref", options.vcsRef);
     }
@@ -246,6 +258,12 @@ export async function createProject(
         : environment,
       replaceEnvironment: true
     });
+
+    await dependencies.runCommand(
+      "pnpm",
+      ["update", "--latest", "--recursive", "--lockfile-only"],
+      { cwd: options.destination }
+    );
 
     const projectVirtualEnvironment = join(options.destination, ".venv");
     const projectPython = join(

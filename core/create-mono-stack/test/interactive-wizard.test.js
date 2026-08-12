@@ -45,7 +45,7 @@ test("renders an Ink wizard and uses safe project defaults", async (t) => {
   assert.match(app.lastFrame(), /Destination directory/);
 
   await sendInput(app, enter, /Project name/);
-  assert.match(app.lastFrame(), /Project name/);
+  await sendInput(app, enter, /Stack features/);
   await sendInput(app, enter, /Advanced options/);
   assert.match(app.lastFrame(), /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -53,7 +53,37 @@ test("renders an Ink wizard and uses safe project defaults", async (t) => {
   await sendInput(app, enter);
   await waitFor(() => completed.length === 1);
 
-  assert.deepEqual(completed, [["--name=my-project", "--", "my-project"]]);
+  assert.deepEqual(completed, [
+    ["--name=my-project", "--features=web-vite,api-nest", "--", "my-project"]
+  ]);
+});
+
+test("selects additional stack features through the multiselect screen", async (t) => {
+  const completed = [];
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: (args) => completed.push(args)
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, downArrow);
+  await sendInput(app, " ");
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+  await sendInput(app, enter);
+  await waitFor(() => completed.length === 1);
+
+  assert.deepEqual(completed, [
+    [
+      "--name=my-project",
+      "--features=web-vite,web-next,api-nest",
+      "--",
+      "my-project"
+    ]
+  ]);
 });
 
 test("navigates backward through selectable wizard screens", async (t) => {
@@ -70,6 +100,7 @@ test("navigates backward through selectable wizard screens", async (t) => {
   await sendInput(app, downArrow, /Back/);
   await sendInput(app, enter, /Destination directory/);
   await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, downArrow);
@@ -91,6 +122,7 @@ test("renders discovered Python choices in the advanced flow", async (t) => {
   t.after(() => app.unmount());
 
   await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
@@ -124,6 +156,7 @@ test("collects advanced options through keyboard-driven Ink controls", async (t)
   await sendInput(app, downArrow, /Custom project name/);
   await sendInput(app, enter, /Project name/);
   await sendInput(app, "Acme Platform", /Acme Platform/);
+  await sendInput(app, enter, /Stack features/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /\u276F Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
@@ -151,6 +184,7 @@ test("collects advanced options through keyboard-driven Ink controls", async (t)
   assert.deepEqual(completed, [
     [
       "--name=Acme Platform",
+      "--features=web-vite,api-nest",
       "--git-host-alias=github-webknot",
       "--python=/opt/python3",
       "--template=../template",
@@ -201,6 +235,7 @@ test("cancels from the confirmation menu", async (t) => {
   t.after(() => app.unmount());
 
   await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, downArrow, /\u276F Cancel/);
@@ -226,12 +261,15 @@ test("remains interactive in Ink screen-reader mode", async (t) => {
   t.after(() => app.unmount());
 
   await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, enter);
   await waitFor(() => completed.length === 1);
 
-  assert.deepEqual(completed, [["--name=my-project", "--", "my-project"]]);
+  assert.deepEqual(completed, [
+    ["--name=my-project", "--features=web-vite,api-nest", "--", "my-project"]
+  ]);
 });
 
 test("preserves leading hyphens in wizard values", () => {
@@ -239,6 +277,7 @@ test("preserves leading hyphens in wizard values", () => {
     destination: "--help",
     gitHostAlias: "github-work",
     projectName: "-Acme Platform",
+    features: ["web-vite", "api-nest"],
     python: "--python3",
     template: "--template",
     vcsRef: "--revision"
@@ -248,6 +287,7 @@ test("preserves leading hyphens in wizard values", () => {
     destination: "/workspace/--help",
     gitHostAlias: "github-work",
     projectName: "-Acme Platform",
+    features: ["web-vite", "api-nest"],
     python: "--python3",
     template: "/workspace/--template",
     vcsRef: "--revision"

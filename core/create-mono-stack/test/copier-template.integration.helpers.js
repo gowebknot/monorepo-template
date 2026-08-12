@@ -26,6 +26,10 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
     ).name,
     "@repo/api-client"
   );
+  assert.deepEqual(
+    JSON.parse(await readFile(join(projectRoot, ".mono-stack.json"))),
+    { schemaVersion: 1, features: ["web-vite", "api-nest"] }
+  );
   await assert.rejects(readFile(join(projectRoot, "copier.yml"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "core"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "docs/checklists"), "utf8"));
@@ -59,8 +63,13 @@ export async function assertGeneratedProject({ projectRoot, templateRoot }) {
     "utf8"
   );
   assert.match(generatedReadme, /## Template updates/);
+  assert.match(
+    generatedReadme,
+    /refreshes npm dependencies to their latest releases/
+  );
   assert.match(generatedReadme, /mise\.toml declares the latest Python/);
   assert.match(generatedReadme, /create the baseline commit/);
+  assert.match(generatedReadme, /selected stack in \.mono-stack\.json/);
   assert.match(generatedReadme, /mono-stack\.template-host-alias/);
   assert.match(generatedReadme, /pnpm template:update/);
   assert.doesNotMatch(generatedReadme, /python3 -m venv/);
