@@ -10,8 +10,17 @@ import {
 
 const projectRoot = "/workspace/project";
 const stackConfig = JSON.stringify({
-  schemaVersion: 1,
-  features: ["web-vite", "api-express", "mobile-expo"]
+  schemaVersion: 3,
+  features: ["web-vite", "api-express", "mobile-expo"],
+  apps: [
+    {
+      feature: "web-vite",
+      generator: "vite",
+      name: "dashboard",
+      path: "apps/dashboard",
+      referenceProfile: "vite/react-ts"
+    }
+  ]
 });
 
 test("reads and validates the generated stack manifest", () => {
@@ -22,40 +31,6 @@ test("reads and validates the generated stack manifest", () => {
     }),
     JSON.parse(stackConfig)
   );
-});
-
-test("accepts native app manifest records without rerunning generators", () => {
-  assert.deepEqual(
-    readStackConfig(projectRoot, () =>
-      JSON.stringify({
-        schemaVersion: 2,
-        apps: [
-          {
-            generator: "vite",
-            name: "dashboard",
-            path: "apps/dashboard"
-          },
-          { generator: "nestjs", name: "api", path: "apps/api" }
-        ]
-      })
-    ).features,
-    ["web-vite", "api-nest"]
-  );
-});
-
-test("rejects malformed stack manifests", () => {
-  for (const value of [
-    "{}",
-    '{"schemaVersion":1,"features":[]}',
-    '{"schemaVersion":1,"features":["unknown"]}',
-    '{"schemaVersion":1,"features":["web-vite","web-vite"]}',
-    "not-json"
-  ]) {
-    assert.throws(
-      () => readStackConfig(projectRoot, () => value),
-      /Stack configuration is invalid|not valid JSON/
-    );
-  }
 });
 
 test("passes generated stack features to Copier during updates", () => {

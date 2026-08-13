@@ -77,6 +77,9 @@ dependencies to their latest releases and updates the pnpm lockfile. Setup store
 `--git-host-alias` automatically. Because the local setting is not committed, configure it once after
 cloning the project elsewhere or when repairing an older project:
 
+Native CLI versions win for overlapping packages, template-only packages are added, and profile overlays
+support Vite React TypeScript and the NestJS reference.
+
 ```sh
 git config --local mono-stack.template-host-alias github-webknot
 pnpm template:update

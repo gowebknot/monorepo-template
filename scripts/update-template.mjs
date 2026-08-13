@@ -1,10 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { readStackConfig } from "./stack-config.mjs";
+
+export { STACK_CONFIG_FILENAME, readStackConfig } from "./stack-config.mjs";
+
 export const GIT_HOST_ALIAS_CONFIG_KEY = "mono-stack.template-host-alias";
-export const STACK_CONFIG_FILENAME = ".mono-stack.json";
 
 const stackFeatureIds = [
   "web-vite",
@@ -14,8 +17,6 @@ const stackFeatureIds = [
   "mobile-expo",
   "mobile-react-native"
 ];
-const stackFeatureIdSet = new Set(stackFeatureIds);
-
 const genericGitHubSshPrefix = "git@github.com:";
 const gitRoutingVariableNames = new Set(
   [
@@ -73,73 +74,6 @@ function commandError(command, result) {
   return new Error(
     result.error?.message || result.stderr?.trim() || `${command} failed.`
   );
-}
-
-export function readStackConfig(cwd, readFile = readFileSync) {
-  const path = join(cwd, STACK_CONFIG_FILENAME);
-  let value;
-  try {
-    value = JSON.parse(readFile(path, "utf8"));
-  } catch (error) {
-    if (error?.code === "ENOENT") {
-      throw new Error(
-        `Stack configuration is missing at ${path}. Recreate the project manifest before running a template update.`,
-        { cause: error }
-      );
-    }
-    if (error instanceof SyntaxError) {
-      throw new Error(`Stack configuration is not valid JSON: ${path}.`, {
-        cause: error
-      });
-    }
-    throw error;
-  }
-
-  if (value?.schemaVersion === 2 && Array.isArray(value.apps)) {
-    if (
-      value.apps.length === 0 ||
-      value.apps.some(
-        (app) =>
-          !app ||
-          typeof app.name !== "string" ||
-          typeof app.path !== "string" ||
-          !["vite", "nestjs"].includes(app.generator)
-      )
-    ) {
-      throw new Error(
-        `Stack configuration is invalid: apps must contain valid Vite or NestJS app records.`
-      );
-    }
-    return {
-      ...value,
-      features: value.apps.map((app) =>
-        app.generator === "vite" ? "web-vite" : "api-nest"
-      )
-    };
-  }
-
-  if (value?.schemaVersion !== 1 || !Array.isArray(value.features)) {
-    throw new Error(
-      `Stack configuration is invalid: ${path} must contain schemaVersion 1 and a features array.`
-    );
-  }
-  if (
-    value.features.length === 0 ||
-    value.features.some(
-      (feature) =>
-        typeof feature !== "string" || !stackFeatureIdSet.has(feature)
-    )
-  ) {
-    throw new Error(
-      `Stack configuration is invalid: features must contain known non-empty feature IDs.`
-    );
-  }
-  if (new Set(value.features).size !== value.features.length) {
-    throw new Error(
-      `Stack configuration is invalid: features must not contain duplicates.`
-    );
-  }
-  return value;
 }
 
 function stackFeatureData(config) {

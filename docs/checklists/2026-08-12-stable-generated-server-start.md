@@ -29,3 +29,13 @@
 - 2026-08-12: Final `just check` reached format validation and found only `pnpm-lock.yaml` formatting drift from dependency installation.
 - 2026-08-12: Formatted `pnpm-lock.yaml`; final `just check`, 85 launcher tests, Copier integration, and `git diff --check` passed.
 - 2026-08-12: Version `0.1.8` prepared for the generated-server reliability release.
+
+## Updates
+
+- 2026-08-12: The clean-start validation covered a partial NestJS reference overlay but did not prove
+  that the final generated Vite app retained its template source/configuration or that either app
+  retained all workspace dependencies. The replacement manifests therefore still made
+  `pnpm install && pnpm dev:reference` unreliable. The corrective implementation and complete
+  generated-output checks are tracked in
+  [Hybrid Native Reference Profiles](./2026-08-12-hybrid-native-reference-profiles.md). Validation is
+  pending in that checklist.

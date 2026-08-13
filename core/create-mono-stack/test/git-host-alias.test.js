@@ -59,6 +59,7 @@ test("persists an SSH alias without changing Copier's recorded source", async ()
       platform: "darwin",
       readdir: async () => missingPath(),
       rm: async () => {},
+      scaffoldNativeApps: async () => [],
       runCommand: async (command, args, options = {}) => {
         calls.push({ args, command, options });
         if (command === "git" && args[0] === "--version") {
@@ -79,7 +80,8 @@ test("persists an SSH alias without changing Copier's recorded source", async ()
           ? { stderr: "", stdout: "3.14.7\n" }
           : { stderr: "", stdout: "" };
       },
-      temporaryDirectory: "/tmp"
+      temporaryDirectory: "/tmp",
+      writeFile: async () => {}
     }
   );
 

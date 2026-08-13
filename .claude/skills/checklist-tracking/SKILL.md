@@ -21,6 +21,10 @@ checklists, implementations, tests, and updates for a new bug. After planning, c
 checklist under `docs/checklists/` from that plan and before implementation. Do not reuse an existing
 checklist. Link the new checklist to the prior records.
 
+If the user explicitly requires a read-only review, explanation, or research task, perform the same
+planning, decomposition, and validation design in memory. Do not create or update a checklist, and do
+not edit repository files. Report findings and validation gaps directly.
+
 ## Checklist Lifecycle
 
 Treat a checklist that is staged or unstaged but not committed as an active working document. For the
@@ -47,11 +51,53 @@ recorded, and link the original and new checklists in both directions.
 Nested checklist items may continue to any depth required by the work. Track every level
 independently and do not flatten meaningful dependencies or implementation detail.
 
+Split a broad item into smaller child items until each smallest item has one clear result that can be
+tested on its own. Split it again when two parts could pass or fail separately. A broad parent such as
+"build the feature," "handle validation," or "add tests" is a summary and stays incomplete until all
+of its exact child items are complete.
+
+Use plain English for every checklist item, test case, result, effect, reason, and question. If a
+technical term is unavoidable, explain it in simple words the first time it appears.
+
 ## Test Checklists
 
 Use `TEST-<AREA>-<NUMBER>` identifiers for test cases, such as `TEST-API-001` or
 `TEST-SERVER-002`. Do not use project-specific identifier prefixes unless the repository explicitly
 defines them.
+
+## Exact Test Case Rules
+
+Every case must contain these fields: `Small task:`, `Source:`, `Test place:`, `Starting state:`,
+`Exact input or fixture:`, `Interaction steps:`, `Main behavior:`, `Expected result:`, `Must change:`,
+`Must not happen:`, `Planned command:`, `Expected result before the code change:`,
+`First observed run:`, and `Passing rerun:`.
+
+During planning, fill in `Planned command:` and `Expected result before the code change:`. Fill in
+`First observed run:` only after its command has run. Fill in `Passing rerun:` only after its command
+has run. Do not invent test results before running the command.
+
+If trusted sources disagree, check which source wins under repository guidance. If no rule answers
+that question, record the conflict, ask the user, and block the affected work.
+
+If no trusted source defines the expected behavior, search the repository. If the answer is still
+unknown, record the open question, ask the user, and block the affected work until it is resolved.
+
+A broad test heading does not count as a test case. Keep it as an incomplete parent and add one child
+case for every exact situation that could pass or fail separately. Use these fields for every case:
+`Small task:`, `Source:`, `Test place:`, `Starting state:`, `Exact input or fixture:`,
+`Interaction steps:`, `Main behavior:`, `Expected result:`, `Must change:`, `Must not happen:`,
+`Planned command:`, `Expected result before the code change:`, `First observed run:`, and
+`Passing rerun:`. A table-based test may group similar rows in code, but each row must remain linked to
+its own test ID and expected result.
+
+Leave observed results pending during planning. Fill them only after their commands run.
+Do not invent test results before running the command. If trusted sources disagree, check which source
+wins under repository guidance. If no rule answers that question, record the conflict, ask the user,
+and block the affected work until it is resolved.
+
+Before implementation, confirm every smallest task item and every known rule maps to one or more test
+IDs. For common test areas without a case, require a plain-English reason they do not apply. Keep the
+parent test heading incomplete while any exact case is missing, unresolved, failed, or incomplete.
 
 ## Historical Updates
 

@@ -62,9 +62,10 @@ node core/create-mono-stack/bin/create-mono-stack.js ../my-project \
 Copier selects the newest stable PEP 440-compatible Git tag by default. Publish immutable tags such
 as `v1.0.0` and `v1.1.0` so generated projects can update predictably.
 
-Setup refreshes npm dependencies to their latest releases and installs the pinned Copier toolchain
-into the generated project's `.venv`, while `mise.toml` declares the latest Python runtime. The
-project records its template source and version in `.copier-answers.yml`, and its selected stack in
+Setup installs the pinned Copier toolchain into the generated project's `.venv`, while `mise.toml`
+declares the latest Python runtime. Native CLI versions win for overlapping packages, template-only
+packages are added, and profile scripts provide the Vite React TypeScript and NestJS reference overlays.
+The project records its template source and version in `.copier-answers.yml`, and its selected stack in
 `.mono-stack.json`, so no separate updater bootstrap is required. Create the initial Git commit before
 applying a template update.
 

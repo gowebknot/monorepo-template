@@ -204,6 +204,7 @@ test("creates a project through isolated pinned Copier environments", async () =
     platform: "darwin",
     readdir: async () => missingPath(),
     rm: async (...args) => removals.push(args),
+    scaffoldNativeApps: async () => [],
     runCommand: async (command, args, options = {}) => {
       calls.push({ args, command, options });
       if (command === "git" && args[0] === "--version") {
@@ -224,7 +225,8 @@ test("creates a project through isolated pinned Copier environments", async () =
         ? { stderr: "", stdout: "3.14.7\n" }
         : { stderr: "", stdout: "" };
     },
-    temporaryDirectory: "/tmp"
+    temporaryDirectory: "/tmp",
+    writeFile: async () => {}
   };
 
   await createProject(
@@ -320,7 +322,7 @@ test("creates a project through isolated pinned Copier environments", async () =
     calls.find(({ command }) => command === "pnpm"),
     {
       command: "pnpm",
-      args: ["update", "--latest", "--recursive", "--lockfile-only"],
+      args: ["install", "--lockfile-only"],
       options: { cwd: destination }
     }
   );
@@ -374,7 +376,8 @@ test("runs native scaffolding for wizard-shaped app names", async () => {
         scaffoldOptions = options;
         return [];
       },
-      temporaryDirectory: "/tmp"
+      temporaryDirectory: "/tmp",
+      writeFile: async () => {}
     }
   );
   assert.deepEqual(scaffoldOptions.appNames, {
@@ -429,6 +432,7 @@ test("removes the temporary environment when Copier fails", async () => {
         platform: "darwin",
         readdir: async () => missingPath(),
         rm: async (...args) => removed.push(args),
+        scaffoldNativeApps: async () => [],
         runCommand: async (command, args, options = {}) => {
           if (command === "git" && args[0] === "--version") {
             return { stderr: "", stdout: "git version 2.50.0\n" };
@@ -441,7 +445,8 @@ test("removes the temporary environment when Copier fails", async () => {
           }
           return { stderr: "", stdout: "" };
         },
-        temporaryDirectory: "/tmp"
+        temporaryDirectory: "/tmp",
+        writeFile: async () => {}
       }
     ),
     /Copier failed/
@@ -452,7 +457,8 @@ test("removes the temporary environment when Copier fails", async () => {
   ]);
 });
 
-test("removes generated output when dependency refresh fails", async () => {
+test("TEST-CREATE-002 cleans up when final lockfile generation fails", async () => {
+  const commands = [];
   const removed = [];
 
   await assert.rejects(
@@ -469,15 +475,24 @@ test("removes generated output when dependency refresh fails", async () => {
         platform: "darwin",
         readdir: async () => missingPath(),
         rm: async (...args) => removed.push(args),
+        scaffoldNativeApps: async () => [],
         runCommand: async (command, args, options = {}) => {
+          commands.push({ args, command });
           if (command === "git" && args[0] === "--version") {
             return { stderr: "", stdout: "git version 2.50.0\n" };
           }
           if (options.capture) return { stderr: "", stdout: "3.14.7\n" };
-          if (command === "pnpm") throw new Error("Registry unavailable");
+          if (
+            command === "pnpm" &&
+            args[0] === "install" &&
+            args[1] === "--lockfile-only"
+          ) {
+            throw new Error("Registry unavailable");
+          }
           return { stderr: "", stdout: "" };
         },
-        temporaryDirectory: "/tmp"
+        temporaryDirectory: "/tmp",
+        writeFile: async () => {}
       }
     ),
     /Registry unavailable/
@@ -489,6 +504,19 @@ test("removes generated output when dependency refresh fails", async () => {
       { force: true, recursive: true }
     ]
   ]);
+  assert.equal(
+    commands.some(
+      ({ args, command }) =>
+        command === "python3" && args.includes("/workspace/acme-platform/.venv")
+    ),
+    false
+  );
+  assert.equal(
+    commands.some(
+      ({ args, command }) => command === "git" && args[0] === "init"
+    ),
+    false
+  );
 });
 
 test("reports Git initialization failures after project setup", async () => {
@@ -508,6 +536,7 @@ test("reports Git initialization failures after project setup", async () => {
         platform: "darwin",
         readdir: async () => missingPath(),
         rm: async (...args) => removed.push(args),
+        scaffoldNativeApps: async () => [],
         runCommand: async (command, args, options = {}) => {
           if (command === "git" && args[0] === "--version") {
             return { stderr: "", stdout: "git version 2.50.0\n" };
@@ -520,7 +549,8 @@ test("reports Git initialization failures after project setup", async () => {
           }
           return { stderr: "", stdout: "" };
         },
-        temporaryDirectory: "/tmp"
+        temporaryDirectory: "/tmp",
+        writeFile: async () => {}
       }
     ),
     /Git initialization failed: Git is unavailable/

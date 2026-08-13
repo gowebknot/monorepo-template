@@ -65,3 +65,13 @@ Record failures before correcting them and passing reruns afterward.
   lint then found an unused `DEFAULT_APP_NAMES` import before correction.
 - 2026-08-12: The combined final formatting command failed because `README.md.jinja` has no
   configured Prettier parser; rerun formatting excludes Jinja adapter files.
+
+## Updates
+
+- 2026-08-12: Later generated-project testing found that native CLI output replaced the complete
+  Copier-rendered Vite and NestJS app directories instead of integrating their source, reference
+  code, scripts, and workspace dependencies. This broke the stated reference-integration acceptance
+  criterion even though the original mock-based tests passed. The corrective work introduces
+  matching hybrid reference profiles and filesystem-level regression coverage in
+  [Hybrid Native Reference Profiles](./2026-08-12-hybrid-native-reference-profiles.md). Validation is
+  pending in that checklist.

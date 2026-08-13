@@ -1,19 +1,35 @@
 import { cp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import {
+  REFERENCE_PROFILES,
+  detectViteReferenceProfile,
+  mergeProfilePackageJson
+} from "./reference-profiles.js";
+
 const appDefinitions = [
   {
+    canonicalName: "web",
+    feature: "web-vite",
     generator: "vite",
-    id: "web-vite",
-    nameKey: "webAppName",
-    path: "apps"
+    nameKey: "webAppName"
   },
   {
+    canonicalName: "server",
+    feature: "api-nest",
     generator: "nestjs",
-    id: "api-nest",
-    nameKey: "serverAppName",
-    path: "apps"
+    nameKey: "serverAppName"
   }
+];
+
+const temporaryArtifacts = [
+  ".git",
+  "bun.lock",
+  "bun.lockb",
+  "node_modules",
+  "package-lock.json",
+  "pnpm-lock.yaml",
+  "yarn.lock"
 ];
 
 function appPath(root, name) {
@@ -36,7 +52,8 @@ function commandFor(generator, target) {
           target,
           "--skip-git",
           "--package-manager",
-          "pnpm"
+          "pnpm",
+          "--skip-install"
         ]
       ];
 }
@@ -50,129 +67,134 @@ export function validateAppName(name) {
   return name;
 }
 
-export async function scaffoldNativeApps(options, dependencies) {
+function selectedDefinitions(options) {
   const selected = new Set(options.features ?? []);
-  const apps = [];
-  const selectedDefinitions = new Set(
-    appDefinitions.filter(({ id }) => selected.has(id)).map(({ path }) => path)
+  const definitions = appDefinitions
+    .filter(({ feature }) => selected.has(feature))
+    .map((definition) => ({
+      ...definition,
+      name: validateAppName(
+        options.appNames?.[definition.feature] ?? options[definition.nameKey]
+      )
+    }));
+  const duplicate = definitions.find(
+    ({ name }, index) =>
+      definitions.findIndex((definition) => definition.name === name) !== index
   );
-  for (const definition of appDefinitions) {
-    if (selectedDefinitions.has(definition.path)) continue;
-    await dependencies.rm(
-      join(
-        options.destination,
-        definition.path,
-        definition.id === "web-vite" ? "web" : "server"
-      ),
-      {
-        force: true,
-        recursive: true
-      }
-    );
+  if (duplicate) {
+    throw new Error(`App names must be unique: ${duplicate.name}`);
   }
-  for (const definition of appDefinitions) {
-    if (!selected.has(definition.id)) continue;
-    const name = validateAppName(
-      options.appNames?.[definition.id] ?? options[definition.nameKey]
+  return definitions;
+}
+
+async function removeTemporaryArtifacts(root, dependencies) {
+  for (const artifact of temporaryArtifacts) {
+    await dependencies.rm(join(root, artifact), {
+      force: true,
+      recursive: true
+    });
+  }
+}
+
+async function applyReferenceProfile(
+  { name, nativeTarget, profileId, templateTarget },
+  dependencies
+) {
+  const nativePackage = JSON.parse(
+    await dependencies.readFile(join(nativeTarget, "package.json"), "utf8")
+  );
+  if (!profileId) {
+    const packageJson = mergeProfilePackageJson(nativePackage, {}, name);
+    await dependencies.writeFile(
+      join(nativeTarget, "package.json"),
+      `${JSON.stringify(packageJson, null, 2)}\n`
     );
-    const target = appPath(options.destination, name);
-    const temporaryName = temporaryAppName(definition.generator, name);
-    const temporaryTarget = join(dependencies.temporaryRoot, temporaryName);
-    const preservedReference = join(
-      dependencies.temporaryRoot,
-      `${temporaryName}-reference`
+    return;
+  }
+
+  const profile = REFERENCE_PROFILES[profileId];
+  const templatePackage = JSON.parse(
+    await dependencies.readFile(join(templateTarget, "package.json"), "utf8")
+  );
+  for (const entry of profile.overlayEntries) {
+    const destination = join(nativeTarget, entry);
+    await dependencies.rm(destination, { force: true, recursive: true });
+    await dependencies.cp(join(templateTarget, entry), destination, {
+      recursive: true
+    });
+  }
+  const packageJson = mergeProfilePackageJson(
+    nativePackage,
+    templatePackage,
+    name
+  );
+  await dependencies.writeFile(
+    join(nativeTarget, "package.json"),
+    `${JSON.stringify(packageJson, null, 2)}\n`
+  );
+}
+
+export async function scaffoldNativeApps(options, dependencies) {
+  const selected = selectedDefinitions(options);
+  const stagedApps = [];
+
+  for (const definition of selected) {
+    const temporaryName = temporaryAppName(
+      definition.generator,
+      definition.name
     );
-    if (definition.id === "api-nest") {
-      await dependencies.cp(
-        join(options.destination, "apps", "server", "reference"),
-        join(preservedReference, "reference"),
-        { recursive: true }
-      );
-      await dependencies.cp(
-        join(options.destination, "apps", "server", "nest-cli.reference.json"),
-        join(preservedReference, "nest-cli.reference.json")
-      );
-    }
+    const nativeTarget = join(dependencies.temporaryRoot, temporaryName);
     const [command, args] = commandFor(definition.generator, temporaryName);
     await dependencies.runCommand(command, args, {
       cwd: dependencies.temporaryRoot,
       stdio: "inherit"
     });
-    const packageJson = JSON.parse(
-      await dependencies.readFile(join(temporaryTarget, "package.json"), "utf8")
+    await removeTemporaryArtifacts(nativeTarget, dependencies);
+    const nativePackage = JSON.parse(
+      await dependencies.readFile(join(nativeTarget, "package.json"), "utf8")
     );
-    if (definition.id === "web-vite" && name !== "web") {
-      await dependencies.rm(join(options.destination, "apps", "web"), {
-        force: true,
-        recursive: true
-      });
-    }
-    if (definition.id === "api-nest" && name !== "server") {
-      await dependencies.rm(join(options.destination, "apps", "server"), {
-        force: true,
-        recursive: true
-      });
-    }
-    await dependencies.rm(target, { force: true, recursive: true });
-    await dependencies.cp(temporaryTarget, target, { recursive: true });
-    if (definition.id === "api-nest") {
-      packageJson.devDependencies ??= {};
-      packageJson.scripts ??= {};
-      packageJson.devDependencies.typescript = "6.0.2";
-      packageJson.scripts["build:reference"] =
-        "nest build --config nest-cli.reference.json";
-      packageJson.scripts["dev:reference"] =
-        "nest start --config nest-cli.reference.json --watch";
-      packageJson.scripts["start:reference"] = "node dist/reference/main";
-      await dependencies.writeFile(
-        join(target, "package.json"),
-        `${JSON.stringify(packageJson, null, 2)}\n`
-      );
-      const tsconfig = JSON.parse(
-        await dependencies.readFile(join(target, "tsconfig.json"), "utf8")
-      );
-      tsconfig.compilerOptions.rootDir = "./src";
-      tsconfig.compilerOptions.types = ["node"];
-      tsconfig.compilerOptions.ignoreDeprecations = "6.0";
-      delete tsconfig.compilerOptions.baseUrl;
-      await dependencies.writeFile(
-        join(target, "tsconfig.json"),
-        `${JSON.stringify(tsconfig, null, 2)}\n`
-      );
-      await dependencies.cp(
-        join(preservedReference, "reference"),
-        join(target, "reference"),
-        {
-          recursive: true
-        }
-      );
-      await dependencies.cp(
-        join(preservedReference, "nest-cli.reference.json"),
-        join(target, "nest-cli.reference.json")
-      );
-      await dependencies.writeFile(
-        join(target, "tsconfig.reference.build.json"),
-        JSON.stringify(
-          {
-            extends: "./tsconfig.json",
-            compilerOptions: { rootDir: "./reference" },
-            include: ["reference/**/*.ts"],
-            exclude: ["node_modules", "dist"]
-          },
-          null,
-          2
-        ) + "\n"
-      );
-    }
-    apps.push({
-      generator: definition.generator,
-      name,
-      packageName: packageJson.name,
-      path: `apps/${name}`,
-      reference: definition.id === "web-vite" ? "vite-react" : "nestjs"
+    const referenceProfile =
+      definition.generator === "vite"
+        ? await detectViteReferenceProfile(
+            { appRoot: nativeTarget, packageJson: nativePackage },
+            dependencies
+          )
+        : "nestjs/default";
+    await applyReferenceProfile(
+      {
+        name: definition.name,
+        nativeTarget,
+        profileId: referenceProfile,
+        templateTarget: appPath(options.destination, definition.canonicalName)
+      },
+      dependencies
+    );
+    stagedApps.push({
+      definition,
+      nativeTarget,
+      record: {
+        feature: definition.feature,
+        generator: definition.generator,
+        name: definition.name,
+        path: `apps/${definition.name}`,
+        referenceProfile
+      }
     });
   }
-  return apps;
+
+  for (const { canonicalName } of appDefinitions) {
+    await dependencies.rm(appPath(options.destination, canonicalName), {
+      force: true,
+      recursive: true
+    });
+  }
+  for (const { definition, nativeTarget } of stagedApps) {
+    const target = appPath(options.destination, definition.name);
+    await dependencies.rm(target, { force: true, recursive: true });
+    await dependencies.cp(nativeTarget, target, { recursive: true });
+  }
+
+  return stagedApps.map(({ record }) => record);
 }
 
 export function nativeScaffoldDependencies({

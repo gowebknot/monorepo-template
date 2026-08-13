@@ -94,3 +94,19 @@
 - Corrective action: None; the requested workflow order is now implemented.
 - Validation: Passed `pnpm skills:sync`, `pnpm skills:check`, `pnpm skills:test` (4/4), targeted Prettier validation, `git diff --check`, and the exact-reference scan.
 - Related checklist: [Workflow order correction](./2026-08-11-plan-before-checklist-workflow.md)
+
+### 2026-08-12 - Require small tasks and exact test cases
+
+- Reason: The workflow still allowed broad plans such as "add focused tests" without splitting the
+  work or listing every exact test situation.
+- Evidence: The skill asked for focused tests and broad case areas, but it did not require each small
+  task, rule, input, limit, and expected result to have its own detailed case.
+- Impact: An agent could test only the main success and failure paths while missing separate rules,
+  empty values, exact limits, state changes, errors, and work that must not happen.
+- Corrective action: The new workflow keeps splitting work until each item can be tested on its own,
+  requires exact test details for every item, and blocks coding until all known rules map to test IDs.
+- Validation: Passed all 77 skill tests, all 16 portable skill copy checks, targeted Prettier, and
+  `git diff --check`. Repository lint, typecheck, and 86 template tests passed; the full `just check`
+  remains blocked only by unrelated formatting in
+  `docs/checklists/2026-08-12-hybrid-native-reference-profiles.md`.
+- Related checklist: [Detailed Test Planning](./2026-08-12-detailed-test-planning.md)

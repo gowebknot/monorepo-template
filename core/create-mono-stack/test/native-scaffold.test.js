@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
@@ -6,6 +7,20 @@ import {
   scaffoldNativeApps,
   validateAppName
 } from "../src/native-scaffold.js";
+import {
+  createNativeScaffoldFixture,
+  pathExists,
+  vueTypeScriptNativeTree
+} from "./native-scaffold.helpers.js";
+
+function dependencies(fixture, overrides = {}) {
+  return {
+    ...nativeScaffoldDependencies({}),
+    runCommand: fixture.runCommand,
+    temporaryRoot: fixture.temporaryRoot,
+    ...overrides
+  };
+}
 
 test("validates safe native app names", () => {
   assert.equal(validateAppName("admin-dashboard"), "admin-dashboard");
@@ -14,86 +29,118 @@ test("validates safe native app names", () => {
   }
 });
 
-test("scaffolds selected Vite and NestJS apps with native commands", async () => {
-  const calls = [];
-  const copied = [];
-  const files = new Map([
-    ["/tmp/native/vite-dashboard/package.json", '{"name":"dashboard"}'],
-    [
-      "/tmp/native/nestjs-api/package.json",
-      '{"name":"api","scripts":{},"devDependencies":{}}'
-    ],
-    ["/tmp/native/nestjs-api/tsconfig.json", '{"compilerOptions":{}}'],
-    ["/workspace/project/apps/server/tsconfig.json", '{"compilerOptions":{}}'],
-    ["/workspace/project/apps/server/nest-cli.reference.json", "{}"],
-    ["/workspace/project/apps/server/reference", "{}"],
-    ["/workspace/project/apps/api/tsconfig.json", '{"compilerOptions":{}}']
-  ]);
-  const apps = await scaffoldNativeApps(
+test("TEST-COMMAND-001 invokes interactive Vite without a template", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+
+  await scaffoldNativeApps(
     {
-      destination: "/workspace/project",
-      features: ["web-vite", "api-nest"],
-      serverAppName: "api",
-      webAppName: "dashboard"
+      appNames: { "web-vite": "dashboard" },
+      destination: fixture.destination,
+      features: ["web-vite"]
     },
-    {
-      cp: async (...args) => copied.push(args),
-      readFile: async (path) => files.get(path),
-      rm: async () => {},
-      writeFile: async () => {},
-      runCommand: async (...args) => calls.push(args),
-      temporaryRoot: "/tmp/native"
-    }
+    dependencies(fixture)
   );
 
-  assert.deepEqual(calls, [
-    [
-      "pnpm",
-      ["create", "vite", "vite-dashboard", "--no-immediate"],
-      {
-        cwd: "/tmp/native",
-        stdio: "inherit"
-      }
-    ],
-    [
-      "pnpm",
-      [
+  assert.deepEqual(fixture.calls, [
+    {
+      command: "pnpm",
+      args: ["create", "vite", "vite-dashboard", "--no-immediate"],
+      options: { cwd: fixture.temporaryRoot, stdio: "inherit" }
+    }
+  ]);
+  assert.equal(fixture.calls[0].args.includes("--template"), false);
+});
+
+test("TEST-COMMAND-002 skips the nested NestJS install", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "api-nest": "api" },
+      destination: fixture.destination,
+      features: ["api-nest"]
+    },
+    dependencies(fixture)
+  );
+
+  assert.deepEqual(fixture.calls, [
+    {
+      command: "pnpm",
+      args: [
         "dlx",
         "@nestjs/cli",
         "new",
         "nestjs-api",
         "--skip-git",
         "--package-manager",
-        "pnpm"
+        "pnpm",
+        "--skip-install"
       ],
-      {
-        cwd: "/tmp/native",
-        stdio: "inherit"
-      }
-    ]
-  ]);
-  assert.deepEqual(apps, [
-    {
-      generator: "vite",
-      name: "dashboard",
-      packageName: "dashboard",
-      path: "apps/dashboard",
-      reference: "vite-react"
-    },
-    {
-      generator: "nestjs",
-      name: "api",
-      packageName: "api",
-      path: "apps/api",
-      reference: "nestjs"
+      options: { cwd: fixture.temporaryRoot, stdio: "inherit" }
     }
   ]);
-  assert.equal(copied.length, 6);
+});
+
+test("TEST-COMMAND-003 leaves rendered apps untouched after CLI failure", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+  const calls = [];
+
+  await assert.rejects(
+    scaffoldNativeApps(
+      {
+        appNames: { "web-vite": "web" },
+        destination: fixture.destination,
+        features: ["web-vite"]
+      },
+      dependencies(fixture, {
+        runCommand: async (...args) => {
+          calls.push(args);
+          throw new Error("Vite failed");
+        }
+      })
+    ),
+    /Vite failed/
+  );
+
+  assert.equal(
+    await pathExists(
+      join(fixture.destination, "apps/web/src/template-only.tsx")
+    ),
+    true
+  );
+  assert.equal(calls.length, 1);
+});
+
+test("TEST-COMMAND-004 removes temporary install artifacts", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t, {
+    nativeVite: {
+      ...vueTypeScriptNativeTree,
+      "node_modules/native.txt": "temporary dependency",
+      "package-lock.json": "{}",
+      "pnpm-lock.yaml": "lockfileVersion: '9.0'"
+    }
+  });
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "web-vite": "portal" },
+      destination: fixture.destination,
+      features: ["web-vite"]
+    },
+    dependencies(fixture)
+  );
+
+  const appRoot = join(fixture.destination, "apps/portal");
+  assert.equal(await pathExists(join(appRoot, "src/main.ts")), true);
+  assert.equal(await pathExists(join(appRoot, "node_modules")), false);
+  assert.equal(await pathExists(join(appRoot, "package-lock.json")), false);
+  assert.equal(await pathExists(join(appRoot, "pnpm-lock.yaml")), false);
 });
 
 test("provides native filesystem dependencies by default", () => {
-  const dependencies = nativeScaffoldDependencies({});
-  assert.equal(typeof dependencies.cp, "function");
-  assert.equal(typeof dependencies.readFile, "function");
-  assert.equal(typeof dependencies.rm, "function");
+  const provided = nativeScaffoldDependencies({});
+  assert.equal(typeof provided.cp, "function");
+  assert.equal(typeof provided.readFile, "function");
+  assert.equal(typeof provided.rm, "function");
+  assert.equal(typeof provided.writeFile, "function");
 });

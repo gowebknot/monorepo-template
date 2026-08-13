@@ -48,3 +48,13 @@
 
 - [ ] Network access is required during project creation; failures must be explicit rather than silently producing stale versions.
 - [ ] The integration test must remain deterministic with respect to its existing controlled fixture and lockfile.
+
+## Updates
+
+- 2026-08-12: Native scaffolding introduced a second dependency authority. Recursively rewriting all
+  manifests with `pnpm update --latest` after combining native and template apps can replace both the
+  CLI-selected versions and the template-only tested ranges. The hybrid policy now keeps native
+  versions for overlapping packages, adds template-only packages at their authored ranges, and
+  regenerates only the lockfile. The correction is tracked in
+  [Hybrid Native Reference Profiles](./2026-08-12-hybrid-native-reference-profiles.md); validation is
+  pending there.

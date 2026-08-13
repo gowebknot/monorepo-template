@@ -13,7 +13,11 @@ import {
 import { cleanupFailedProject } from "./project-cleanup.js";
 import { promptForProjectArguments } from "./interactive-wizard.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
-import { normalizeFeatures, serializeFeatureData } from "./feature-config.js";
+import {
+  DEFAULT_FEATURE_NAMES,
+  normalizeFeatures,
+  serializeFeatureData
+} from "./feature-config.js";
 import {
   nativeScaffoldDependencies,
   scaffoldNativeApps,
@@ -233,6 +237,17 @@ export async function createProject(
   options,
   dependencies = systemDependencies
 ) {
+  const features = normalizeFeatures(options.features);
+  const appNames = Object.fromEntries(
+    features.map((feature) => [
+      feature,
+      options.appNames?.[feature] ??
+        (feature === "web-vite" ? options.webAppName : undefined) ??
+        (feature === "api-nest" ? options.serverAppName : undefined) ??
+        DEFAULT_FEATURE_NAMES[feature]
+    ])
+  );
+  const scaffoldOptions = { ...options, appNames, features };
   const destinationExisted = await ensureDestinationIsAvailable(
     options.destination,
     dependencies
@@ -294,32 +309,29 @@ export async function createProject(
     });
 
     const scaffold = dependencies.scaffoldNativeApps ?? scaffoldNativeApps;
-    const nativeApps =
-      options.appNames || options.webAppName || options.serverAppName
-        ? await scaffold(options, {
-            ...nativeScaffoldDependencies({
-              cp: dependencies.cp,
-              readFile: dependencies.readFile,
-              rm: dependencies.rm,
-              writeFile: dependencies.writeFile
-            }),
-            runCommand: dependencies.runCommand,
-            temporaryRoot
-          })
-        : [];
+    const nativeApps = await scaffold(scaffoldOptions, {
+      ...nativeScaffoldDependencies({
+        cp: dependencies.cp,
+        readFile: dependencies.readFile,
+        rm: dependencies.rm,
+        writeFile: dependencies.writeFile
+      }),
+      runCommand: dependencies.runCommand,
+      temporaryRoot
+    });
 
-    if (nativeApps.length > 0) {
-      await dependencies.writeFile(
-        join(options.destination, ".mono-stack.json"),
-        `${JSON.stringify({ schemaVersion: 2, apps: nativeApps }, null, 2)}\n`
-      );
-    }
-
-    await dependencies.runCommand(
-      "pnpm",
-      ["update", "--latest", "--recursive", "--lockfile-only"],
-      { cwd: options.destination }
+    await dependencies.writeFile(
+      join(options.destination, ".mono-stack.json"),
+      `${JSON.stringify(
+        { schemaVersion: 3, features, apps: nativeApps },
+        null,
+        2
+      )}\n`
     );
+
+    await dependencies.runCommand("pnpm", ["install", "--lockfile-only"], {
+      cwd: options.destination
+    });
 
     const projectVirtualEnvironment = join(options.destination, ".venv");
     const projectPython = join(
@@ -346,6 +358,7 @@ export async function createProject(
       dependencies,
       options.gitHostAlias
     );
+    scaffoldOptions.generatedStack = { apps: nativeApps, features };
   } catch (setupError) {
     await cleanupFailedProject(
       {
@@ -358,6 +371,7 @@ export async function createProject(
     );
   }
   await dependencies.rm(temporaryRoot, { force: true, recursive: true });
+  return scaffoldOptions.generatedStack;
 }
 
 export async function main(args = process.argv.slice(2), dependencies = {}) {
@@ -385,9 +399,20 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
     return;
   }
   const setupProject = dependencies.createProject ?? createProject;
-  await setupProject(options);
+  const generatedStack = await setupProject(options);
+  const unsupportedViteApps = generatedStack?.apps?.filter(
+    (app) => app.generator === "vite" && app.referenceProfile === null
+  );
+  const referenceNotice = unsupportedViteApps?.length
+    ? `\n\n${unsupportedViteApps
+        .map(
+          ({ name }) =>
+            `Web reference mode was skipped for ${name} because only Vite React TypeScript is supported.`
+        )
+        .join("\n")}`
+    : "";
   log(
-    `Project setup complete. Native app scaffolding, dependencies, and Git initialization finished.
+    `Project setup complete. Native app scaffolding, dependencies, and Git initialization finished.${referenceNotice}
 
 What's next:
   cd ${options.destination}

@@ -46,7 +46,7 @@ const templateAdapters = new Map([
     "README.md.jinja",
     `<%!- filter replace("# Monorepo Template", "# " ~ project_name)
   | replace('- \`core/create-mono-stack\`: source-only npm launcher and Copier tests\\n', "")
-  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nProject setup refreshes npm dependencies to their latest releases and creates .venv with pinned Copier dependencies. mise.toml declares the latest Python runtime. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml and its selected stack in .mono-stack.json. Run updates from a clean working tree.\\n\\nProject setup stores any --git-host-alias value in the local Git configuration automatically. Because .git/config is not committed, configure the alias once after cloning the project elsewhere or when repairing an older project:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nOmit that setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
+  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nProject setup creates .venv with pinned Copier dependencies and keeps the latest Python declaration in mise.toml. Native CLI versions win for overlapping packages, template-only packages are added, and profile overlays support Vite React TypeScript and the NestJS reference. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml and its selected stack in .mono-stack.json. Run updates from a clean working tree.\\n\\nProject setup stores any --git-host-alias value in the local Git configuration automatically. Because .git/config is not committed, configure the alias once after cloning the project elsewhere or when repairing an older project:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nOmit that setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
 <%!- include "README.md" -!%>
 <%!- endfilter -!%>
 `
@@ -110,6 +110,37 @@ test("uses Copier-native project identity rendering", async () => {
   await assert.rejects(
     access(join(root, "scripts/configure-template-project.mjs"))
   );
+});
+
+test("TEST-MANIFEST-036 keeps stack metadata launcher-owned", async () => {
+  await assert.rejects(access(join(root, ".mono-stack.json.jinja")));
+  await access(join(root, "scripts/stack-config.mjs"));
+  assert.match(
+    await readFile(join(root, "scripts/update-template.mjs"), "utf8"),
+    /from "\.\/stack-config\.mjs"/
+  );
+});
+
+test("TEST-DOCS-001 documents hybrid reference profiles", async () => {
+  const launcherReadme = await readFile(
+    join(root, "core/create-mono-stack/README.md"),
+    "utf8"
+  );
+  const generatedReadmeAdapter = await readFile(
+    join(root, "README.md.jinja"),
+    "utf8"
+  );
+
+  for (const contents of [launcherReadme, generatedReadmeAdapter]) {
+    assert.match(contents, /native CLI versions win/i);
+    assert.match(contents, /template-only packages/i);
+    assert.match(contents, /Vite React TypeScript/i);
+    assert.match(contents, /NestJS reference/i);
+    assert.doesNotMatch(
+      contents,
+      /refreshes npm dependencies to their latest releases/i
+    );
+  }
 });
 
 test("builds workspace dependencies before starting development", async () => {
