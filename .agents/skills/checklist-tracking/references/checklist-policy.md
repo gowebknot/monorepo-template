@@ -19,10 +19,6 @@ The implementation plan must be completed before a new checklist is created. The
 capture that plan in detailed nested items before implementation begins. If the scope or approach
 changes, update the new checklist before making the corresponding implementation change.
 
-If the user explicitly requires a read-only review, explanation, or research task, perform the same
-planning, decomposition, and validation design in memory. Do not create or update a checklist, and do
-not edit repository files. Report findings and validation gaps directly.
-
 ## Task Lists
 
 Use the following states:
@@ -69,9 +65,6 @@ has run. Do not invent test results before running the command.
 
 If trusted sources disagree, check which source wins under repository guidance. If no rule answers
 that question, record the conflict, ask the user, and block the affected work.
-
-If no trusted source defines the expected behavior, search the repository. If the answer is still
-unknown, record the open question, ask the user, and block the affected work until it is resolved.
 
 A broad row such as "test invalid requests" is not enough. Add a separate row or checklist item for
 each exact situation that could pass or fail on its own. Use these fields for every case: `Small task:`,

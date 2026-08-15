@@ -15,8 +15,6 @@ Write tests that prove behavior and remain deterministic, focused, and maintaina
   pass or fail separately, give them separate case IDs.
 - A broad note such as "test validation," "test errors," or "cover edge cases" is not a complete test
   plan. List the exact values, action, and expected checks for every situation.
-- List every interaction step needed to reach the result while naming the one main behavior being
-  checked. Do not split one behavior merely because it needs several steps.
 - Link every case to one smallest task item and to the request, schema, validator, existing test, or
   other source that defines the expected behavior.
 - Use these fields for every case: `Small task:`, `Source:`, `Test place:`, `Starting state:`,
@@ -27,8 +25,7 @@ Write tests that prove behavior and remain deterministic, focused, and maintaina
   input, and expected result.
 - Test values together when one value changes another value's result, when check order matters, or
   when several errors must be returned together. Do not test every possible mix of unrelated values.
-- If the expected behavior is not defined, search the repository. If the answer remains unknown, ask
-  the user and block the affected work instead of guessing.
+- If the expected behavior is not defined, search the repository and ask the user instead of guessing.
 - If trusted sources disagree, check which source wins under repository guidance. If no rule answers
   that question, record the conflict, ask the user, and block the affected cases and implementation.
 - During planning, record the Planned command and Expected result before the code change. Record the
@@ -48,9 +45,6 @@ has run. Do not invent test results before running the command.
 
 If trusted sources disagree, check which source wins under repository guidance. If no rule answers
 that question, record the conflict, ask the user, and block the affected cases and implementation.
-
-If no trusted source defines the expected behavior, search the repository. If the answer is still
-unknown, record the open question, ask the user, and block the affected work until it is resolved.
 
 ## Test Scope
 

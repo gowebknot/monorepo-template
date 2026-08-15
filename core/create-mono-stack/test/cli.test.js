@@ -226,7 +226,8 @@ test("creates a project through isolated pinned Copier environments", async () =
         : { stderr: "", stdout: "" };
     },
     temporaryDirectory: "/tmp",
-    writeFile: async () => {}
+    writeFile: async () => {},
+    copyFile: async () => {}
   };
 
   await createProject(
@@ -377,7 +378,8 @@ test("runs native scaffolding for wizard-shaped app names", async () => {
         return [];
       },
       temporaryDirectory: "/tmp",
-      writeFile: async () => {}
+      writeFile: async () => {},
+      copyFile: async () => {}
     }
   );
   assert.deepEqual(scaffoldOptions.appNames, {
@@ -446,7 +448,8 @@ test("removes the temporary environment when Copier fails", async () => {
           return { stderr: "", stdout: "" };
         },
         temporaryDirectory: "/tmp",
-        writeFile: async () => {}
+        writeFile: async () => {},
+        copyFile: async () => {}
       }
     ),
     /Copier failed/
@@ -459,6 +462,7 @@ test("removes the temporary environment when Copier fails", async () => {
 
 test("TEST-CREATE-002 cleans up when final lockfile generation fails", async () => {
   const commands = [];
+  const copied = [];
   const removed = [];
 
   await assert.rejects(
@@ -492,7 +496,8 @@ test("TEST-CREATE-002 cleans up when final lockfile generation fails", async () 
           return { stderr: "", stdout: "" };
         },
         temporaryDirectory: "/tmp",
-        writeFile: async () => {}
+        writeFile: async () => {},
+        copyFile: async (...args) => copied.push(args)
       }
     ),
     /Registry unavailable/
@@ -503,6 +508,9 @@ test("TEST-CREATE-002 cleans up when final lockfile generation fails", async () 
       "/tmp/create-mono-stack-dependency-failure",
       { force: true, recursive: true }
     ]
+  ]);
+  assert.deepEqual(copied, [
+    ["/workspace/acme-platform/.env.example", "/workspace/acme-platform/.env"]
   ]);
   assert.equal(
     commands.some(
@@ -550,7 +558,8 @@ test("reports Git initialization failures after project setup", async () => {
           return { stderr: "", stdout: "" };
         },
         temporaryDirectory: "/tmp",
-        writeFile: async () => {}
+        writeFile: async () => {},
+        copyFile: async () => {}
       }
     ),
     /Git initialization failed: Git is unavailable/

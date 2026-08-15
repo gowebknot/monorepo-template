@@ -81,7 +81,8 @@ test("persists an SSH alias without changing Copier's recorded source", async ()
           : { stderr: "", stdout: "" };
       },
       temporaryDirectory: "/tmp",
-      writeFile: async () => {}
+      writeFile: async () => {},
+      copyFile: async () => {}
     }
   );
 

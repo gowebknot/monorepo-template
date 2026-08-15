@@ -10,6 +10,10 @@ import { parse } from "yaml";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const templateAdapters = new Map([
   [
+    ".env.example",
+    "# Local development environment. Copying this file to .env is handled by create-mono-stack.\nNODE_ENV=development\nWEB_PUBLIC_APP_URL=http://localhost:5173\nWEB_PUBLIC_API_BASE_URL=http://localhost:3001\nDATABASE_URL=./local.db\nPORT=3000\nREFERENCE_PORT=3001\nREFERENCE_ALLOWED_ORIGINS=http://localhost:5173\n"
+  ],
+  [
     ".copier-answers.yml.jinja",
     "# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY\n<%= _copier_answers | to_nice_yaml =%>\n"
   ],
@@ -46,7 +50,7 @@ const templateAdapters = new Map([
     "README.md.jinja",
     `<%!- filter replace("# Monorepo Template", "# " ~ project_name)
   | replace('- \`core/create-mono-stack\`: source-only npm launcher and Copier tests\\n', "")
-  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Template updates\\n\\nProject setup creates .venv with pinned Copier dependencies and keeps the latest Python declaration in mise.toml. Native CLI versions win for overlapping packages, template-only packages are added, and profile overlays support Vite React TypeScript and the NestJS reference. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml and its selected stack in .mono-stack.json. Run updates from a clean working tree.\\n\\nProject setup stores any --git-host-alias value in the local Git configuration automatically. Because .git/config is not committed, configure the alias once after cloning the project elsewhere or when repairing an older project:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nOmit that setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
+  | regex_replace('(?s)## Creating a project.*?(?=## Structure)', '## Native apps and reference profiles\\n\\nVite and NestJS are initialized through their native CLIs. Native CLI versions win for packages also declared by a reference profile, while template-only packages are added at the template-authored versions. Only Vite React TypeScript currently receives the web reference profile; other Vite choices remain fresh native apps without web reference mode. Every generated NestJS app receives the NestJS reference profile. Custom-path and unsupported native apps remain untouched during template updates, and Copier does not recreate their canonical placeholder directories.\\n\\n## Template updates\\n\\nProject setup creates .venv with pinned Copier dependencies and writes the final pnpm lockfile after combining native apps with reference profiles. mise.toml declares the latest Python runtime. No separate updater bootstrap is required. Setup initializes Git on main without creating a commit, so create the baseline commit before the first update.\\n\\nThis project records its Copier source and version in .copier-answers.yml and its selected stack in .mono-stack.json. Run updates from a clean working tree.\\n\\nProject setup stores any --git-host-alias value in the local Git configuration automatically. Because .git/config is not committed, configure the alias once after cloning the project elsewhere or when repairing a project:\\n\\n    git config --local mono-stack.template-host-alias github-webknot\\n\\nOmit the setting when generic GitHub SSH works. Run updates through the wrapper so Copier keeps the generic source URL while Git uses the local alias when needed:\\n\\n    pnpm template:update\\n\\nReview and resolve any reported conflicts, then run just check.\\n\\n') -!%>
 <%!- include "README.md" -!%>
 <%!- endfilter -!%>
 `
@@ -73,6 +77,10 @@ templateAdapters.set(
     .replace(
       "Omit that setting when generic GitHub SSH works.",
       "Omit the setting when generic GitHub SSH works."
+    )
+    .replace(
+      "Project setup creates .venv with pinned Copier dependencies and writes the final pnpm lockfile after combining native apps with reference profiles.",
+      "Project setup creates .venv with pinned Copier dependencies and writes the final pnpm lockfile after combining native apps with reference profiles. New projects include a committed .env.example with safe local defaults and create a matching ignored .env automatically. Edit .env for local values; template updates preserve it."
     )
 );
 
@@ -121,7 +129,23 @@ test("TEST-MANIFEST-036 keeps stack metadata launcher-owned", async () => {
   );
 });
 
+test("TEST-ENV-001 provides safe environment defaults", async () => {
+  const expected = `# Local development environment. Copying this file to .env is handled by create-mono-stack.
+NODE_ENV=development
+WEB_PUBLIC_APP_URL=http://localhost:5173
+WEB_PUBLIC_API_BASE_URL=http://localhost:3001
+DATABASE_URL=./local.db
+PORT=3000
+REFERENCE_PORT=3001
+REFERENCE_ALLOWED_ORIGINS=http://localhost:5173
+`;
+
+  assert.equal(await readFile(join(root, ".env.example"), "utf8"), expected);
+  assert.doesNotMatch(expected, /token|secret|password|api[_-]?key/i);
+});
+
 test("TEST-DOCS-001 documents hybrid reference profiles", async () => {
+  const sourceReadme = await readFile(join(root, "README.md"), "utf8");
   const launcherReadme = await readFile(
     join(root, "core/create-mono-stack/README.md"),
     "utf8"
@@ -131,15 +155,34 @@ test("TEST-DOCS-001 documents hybrid reference profiles", async () => {
     "utf8"
   );
 
-  for (const contents of [launcherReadme, generatedReadmeAdapter]) {
-    assert.match(contents, /native CLI versions win/i);
+  for (const contents of [
+    sourceReadme,
+    launcherReadme,
+    generatedReadmeAdapter
+  ]) {
+    assert.match(contents, /native\s+CLI versions win/i);
     assert.match(contents, /template-only packages/i);
-    assert.match(contents, /Vite React TypeScript/i);
+    assert.match(contents, /Vite React\s+TypeScript/i);
     assert.match(contents, /NestJS reference/i);
+    assert.match(
+      contents,
+      /custom-path and unsupported native apps remain untouched during template\s+updates/i
+    );
+    assert.match(contents, /\.env\.example/);
+    assert.match(contents, /ignored\s+`?\.env/);
     assert.doesNotMatch(
       contents,
       /refreshes npm dependencies to their latest releases/i
     );
+  }
+});
+
+test("TEST-ENV-005 documents generated environment files", async () => {
+  for (const path of ["README.md", "core/create-mono-stack/README.md"]) {
+    const contents = await readFile(join(root, path), "utf8");
+    assert.match(contents, /\.env\.example/);
+    assert.match(contents, /ignored\s+`?\.env/);
+    assert.doesNotMatch(contents, /DATABASE_URL=.*(password|secret|token)/i);
   }
 });
 
@@ -154,6 +197,14 @@ test("builds workspace dependencies before starting development", async () => {
   assert.equal(rootPackage.scripts["dev:reference"], "turbo dev:reference");
   assert.deepEqual(turbo.tasks.dev.dependsOn, ["^build"]);
   assert.deepEqual(turbo.tasks["dev:reference"].dependsOn, ["^build"]);
+  assert.deepEqual(turbo.tasks["dev:reference"].env, [
+    "DATABASE_URL",
+    "NODE_ENV",
+    "REFERENCE_ALLOWED_ORIGINS",
+    "REFERENCE_PORT",
+    "WEB_PUBLIC_API_BASE_URL",
+    "WEB_PUBLIC_APP_URL"
+  ]);
   assert.match(gitignore, /^\.npmrc$/m);
 });
 

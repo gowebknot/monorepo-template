@@ -1,13 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import {
-  access,
-  copyFile,
-  mkdtemp,
-  mkdir,
-  readFile,
-  writeFile
-} from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
@@ -172,75 +165,4 @@ test("staged check rejects a partially staged skill update", async (t) => {
 
   const result = run(root, "check", "--staged");
   assert.notEqual(result.status, 0);
-});
-
-test("TEST-SKILL-137 discovers every skill test file", async () => {
-  const packageJson = JSON.parse(
-    await readFile(join(repositoryRoot, "package.json"), "utf8")
-  );
-
-  assert.equal(
-    packageJson.scripts["skills:test"],
-    "node scripts/run-skills-tests.mjs"
-  );
-});
-
-test("TEST-SKILL-161 uses cross-version test discovery", async () => {
-  const packageJson = JSON.parse(
-    await readFile(join(repositoryRoot, "package.json"), "utf8")
-  );
-  const command = packageJson.scripts["skills:test"];
-  const runner = await readFile(
-    join(repositoryRoot, "scripts/run-skills-tests.mjs"),
-    "utf8"
-  );
-
-  assert.equal(command, "node scripts/run-skills-tests.mjs");
-  assert.doesNotMatch(command, /[*?[]/);
-  assert.match(runner, /readdirSync/);
-  assert.match(runner, /endsWith\("\.test\.mjs"\)/);
-  assert.match(
-    runner,
-    /spawnSync\(process\.execPath, \["--test", \.\.\.files\]/
-  );
-});
-
-test("TEST-SKILL-164 executes every discovered test file", async (t) => {
-  const root = await temporaryRepository(t);
-  const scripts = join(root, "scripts");
-  await mkdir(scripts);
-  await copyFile(
-    join(repositoryRoot, "scripts/run-skills-tests.mjs"),
-    join(scripts, "run-skills-tests.mjs")
-  );
-  await writeFile(
-    join(scripts, "first.test.mjs"),
-    'import { writeFile } from "node:fs/promises"; import test from "node:test"; test("first", () => writeFile(new URL("first-ran", import.meta.url), ""));\n'
-  );
-  await writeFile(
-    join(scripts, "second.test.mjs"),
-    'import { writeFile } from "node:fs/promises"; import test from "node:test"; test("second", () => writeFile(new URL("second-ran", import.meta.url), ""));\n'
-  );
-  await writeFile(
-    join(scripts, "ignored.mjs"),
-    'throw new Error("non-test file ran");\n'
-  );
-
-  const result = spawnSync(
-    process.execPath,
-    [join(scripts, "run-skills-tests.mjs")],
-    {
-      cwd: root,
-      encoding: "utf8",
-      env: Object.fromEntries(
-        Object.entries(process.env).filter(
-          ([name]) => name !== "NODE_TEST_CONTEXT"
-        )
-      )
-    }
-  );
-
-  expectSuccess(result);
-  await access(join(scripts, "first-ran"));
-  await access(join(scripts, "second-ran"));
 });

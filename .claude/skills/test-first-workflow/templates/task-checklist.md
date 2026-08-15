@@ -100,9 +100,6 @@ has run. Do not invent test results before running the command.
 If trusted sources disagree, check which source wins under repository guidance. If no rule answers
 that question, record the conflict, ask the user, and block the affected work.
 
-If no trusted source defines the expected behavior, search the repository. If the answer is still
-unknown, record the open question, ask the user, and block the affected work until it is resolved.
-
 ## Exact Test Cases To Complete
 
 - [ ] TEST-<AREA>-001: <one exact situation and result>

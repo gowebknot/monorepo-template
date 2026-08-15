@@ -67,9 +67,6 @@ has run. Do not invent test results before running the command.
 If trusted sources disagree, check which source wins under repository guidance. If no rule answers
 that question, record the conflict, ask the user, and block the affected tests and implementation.
 
-If no trusted source defines the expected behavior, search the repository. If the answer is still
-unknown, record the open question, ask the user, and block the affected work until it is resolved.
-
 Give every case a `TEST-<AREA>-<NUMBER>` ID and use these fields:
 
 - **Small task:** The smallest task item it proves.
@@ -102,10 +99,10 @@ Test values together when one value changes how another value should behave. Do 
 possible mix of unrelated values.
 
 If no source defines what should happen, search the repository first. If the answer is still unknown,
-record an open question, ask the user, and block the affected work until it is resolved instead of
-guessing, inventing a rule, or silently skipping the case. If trusted sources disagree, check which
-source wins under repository guidance. If no rule answers that question, record the conflict, ask the
-user, and block the affected tests and implementation until it is resolved.
+record an open question and ask the user instead of guessing, inventing a rule, or silently skipping
+the case. If trusted sources disagree, check which source wins under repository guidance. If no rule
+answers that question, record the conflict, ask the user, and block the affected tests and
+implementation until it is resolved.
 
 Do not invent test results before running the command. During planning, record only the Planned
 command and Expected result before the code change. Fill in the First observed run and Passing rerun
@@ -115,10 +112,6 @@ Before creating the checklist, map every smallest task item and every known rule
 each common test area, list the test IDs or explain why that area does not apply. Do not start tests or
 implementation while an item is still broad, a known rule has no case, a case is vague, or an expected
 result is still unknown.
-
-If the user explicitly requires a read-only review, explanation, or research task, perform the same
-planning, decomposition, and validation design in memory. Do not create or update a checklist, and do
-not edit repository files. Report findings and validation gaps directly.
 
 ## Create the Checklist From the Plan
 

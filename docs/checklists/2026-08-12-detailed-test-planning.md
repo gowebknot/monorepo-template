@@ -13,12 +13,8 @@
 - Affected paths: `skills/test-first-workflow`, `skills/testing-policy`,
   `skills/checklist-tracking`, `scripts/skills.test.mjs`,
   `scripts/test-planning-policy.test.mjs`, `scripts/test-case-coverage-policy.test.mjs`,
-  `scripts/test-policy-file-contracts.test.mjs`, `scripts/test-workflow-example-policy.test.mjs`,
-  `scripts/run-skills-tests.mjs`,
-  `docs/checklists/2026-08-12-detailed-test-planning-case-catalog.md`,
-  `docs/checklists/2026-08-12-detailed-test-planning-final-review-cases.md`,
-  `docs/checklists/2026-08-12-detailed-test-planning-validation-history.md`, `package.json`, all copied
-  skill folders, and `.skills-sync.json`
+  `scripts/test-policy-file-contracts.test.mjs`, `package.json`, all copied skill folders, and
+  `.skills-sync.json`
 - Status legend: `[ ]` incomplete, `[/]` partial, `[x]` complete
 
 ## What Is Wrong Today
@@ -69,11 +65,175 @@
   - [x] Do not start coding while a task item is still broad, a test description is still vague, a
         known rule has no test, or an expected result is unknown.
 
-## Exact Cases
+## Small Task and Test Map
 
-The original task map and `TEST-SKILL-019` through `098` records are in the linked
-[case catalog](./2026-08-12-detailed-test-planning-case-catalog.md). The 2026-08-13 corrections use the
-[final review case record](./2026-08-12-detailed-test-planning-final-review-cases.md).
+| Small task or rule                                   | Test IDs                              |
+| ---------------------------------------------------- | ------------------------------------- |
+| Reject broad headings and split broad work           | TEST-SKILL-019, TEST-SKILL-020        |
+| Preserve real user flows                             | TEST-SKILL-034                        |
+| Separate normal and rejected values                  | TEST-SKILL-022                        |
+| Map every small task and rule                        | TEST-SKILL-023                        |
+| Ask about missing rules                              | TEST-SKILL-024                        |
+| Limit combined-value cases and keep table rows clear | TEST-SKILL-025, TEST-SKILL-026        |
+| Keep all copied skill folders the same               | TEST-SKILL-027                        |
+| Require plain English                                | TEST-SKILL-032                        |
+| Review each easily missed situation separately       | TEST-SKILL-035 through TEST-SKILL-080 |
+| Keep every case field in every policy file           | TEST-SKILL-081 through TEST-SKILL-086 |
+| Keep planned and observed results separate per file  | TEST-SKILL-087 through TEST-SKILL-092 |
+| Block conflicting rules in every policy file         | TEST-SKILL-093 through TEST-SKILL-098 |
+
+## Exact Checks For This Change
+
+The following fields apply to every row in the first table:
+
+- Source: User request, repository rules, or a review correction named by the row.
+- Test place: `scripts/test-planning-policy.test.mjs`.
+- Starting state: The canonical workflow, guide, template, testing policy, checklist skill, and
+  checklist reference are readable.
+- Interaction steps: Read each named file and check the exact rule.
+- Must change: Nothing; these are read-only text checks.
+- Must not happen: No file writes, network calls, or product code runs.
+- Planned command: `node --test scripts/test-planning-policy.test.mjs`.
+- Expected result before the code change: The named case fails when its rule is absent.
+
+| ID             | Small task               | Exact input or fixture                     | Main behavior                      | Expected result                                         | First observed run                                | Passing rerun                        |
+| -------------- | ------------------------ | ------------------------------------------ | ---------------------------------- | ------------------------------------------------------- | ------------------------------------------------- | ------------------------------------ |
+| TEST-SKILL-019 | Reject broad notes       | "add focused tests"                        | Check whether the note is complete | It is a heading only; exact cases are required          | Passed when first run separately                  | Passed in the final policy suite     |
+| TEST-SKILL-020 | Split broad work         | A task with parts that can fail separately | Check when splitting stops         | Splitting continues at any depth                        | Failed because its first text check was too exact | Passed after the check was corrected |
+| TEST-SKILL-022 | Separate rejected values | Normal and separately rejected values      | Check invalid-case detail          | One broad invalid-input case is not enough              | Passed when first run separately                  | Passed in the final policy suite     |
+| TEST-SKILL-023 | Map work to tests        | Every small task and known rule            | Check the coverage map             | Every row maps to test IDs                              | Failed because its first text check was too exact | Passed after the check was corrected |
+| TEST-SKILL-024 | Ask about missing rules  | Expected behavior with no trusted rule     | Check unanswered behavior          | Ask the user and block affected work                    | Passed when first run separately                  | Passed in the final policy suite     |
+| TEST-SKILL-025 | Limit combined cases     | Related and unrelated values               | Check combination rules            | Related values combine; unrelated mixes are avoided     | Passed when first run separately                  | Passed in the final policy suite     |
+| TEST-SKILL-026 | Keep rows trackable      | Rows in a table-based test                 | Check each row                     | Every row keeps its ID, input, and result               | Failed when one reference used different wording  | Passed after the wording was aligned |
+| TEST-SKILL-032 | Require simple wording   | Task and test wording                      | Check writing rules                | Plain English is used and technical terms are explained | Failed before the rule was added                  | Passed after the rule was added      |
+| TEST-SKILL-034 | Preserve real user flows | A flow with several interaction steps      | Check one focused behavior         | List all steps but name one main behavior               | Failed before the fields were added               | Passed after the fields were added   |
+
+### Skill Copy Check
+
+- [x] TEST-SKILL-027: All four skill folders contain the same files.
+  - Small task: Keep copied skills synchronized.
+  - Source: Repository skill rules.
+  - Test place: `pnpm skills:check`.
+  - Starting state: Canonical edits are complete.
+  - Exact input or fixture: All 16 canonical skills and their three copied roots.
+  - Interaction steps: Run `pnpm skills:sync`, then `pnpm skills:check`.
+  - Main behavior: Validate identical skill copies.
+  - Expected result: All 16 skills validate with no different copies.
+  - Must change: Only intended copied skill files and saved hashes during synchronization.
+  - Must not happen: No unrelated file changes.
+  - Planned command: `pnpm skills:sync && pnpm skills:check`.
+  - Expected result before the code change: The check fails until changed skills are synchronized.
+  - First observed run: Both commands passed after the first synchronization.
+  - Passing rerun: Both commands passed after the final synchronization.
+
+### Missed-Case Rows
+
+The following shared fields are part of every row from `TEST-SKILL-035` through `080`:
+
+- Small task: Review the exact situation named in the row.
+- Source: User request and second review correction.
+- Test place: `scripts/test-case-coverage-policy.test.mjs`.
+- Starting state: The case-design guide and checklist template are readable.
+- Exact input or fixture: The exact situation named in the row.
+- Interaction steps: Read both files and look for that exact situation.
+- Main behavior: Require a separate checklist prompt for the named situation.
+- Expected result: Both files name the situation; the template requires test IDs or a reason.
+- Must change: Nothing; these are read-only text checks.
+- Must not happen: No file writes, network calls, or product code runs.
+- Planned command: `node --test scripts/test-case-coverage-policy.test.mjs`.
+- Expected result before the code change: A row fails if either file omits its situation.
+- Passing rerun: Every row passed in the final 46-case coverage run.
+
+| ID             | Exact situation                 | First observed run                                       |
+| -------------- | ------------------------------- | -------------------------------------------------------- |
+| TEST-SKILL-035 | Missing value                   | Passed                                                   |
+| TEST-SKILL-036 | Explicit `null` value           | Passed                                                   |
+| TEST-SKILL-037 | Empty value                     | Passed                                                   |
+| TEST-SKILL-038 | Spaces-only text                | Passed                                                   |
+| TEST-SKILL-039 | Wrong value type                | Passed                                                   |
+| TEST-SKILL-040 | Bad format                      | Passed                                                   |
+| TEST-SKILL-041 | Unsupported value               | Passed                                                   |
+| TEST-SKILL-042 | Duplicate value                 | Passed                                                   |
+| TEST-SKILL-043 | Conflicting values              | Passed                                                   |
+| TEST-SKILL-044 | Exact minimum                   | Passed                                                   |
+| TEST-SKILL-045 | Closest value below the minimum | Passed                                                   |
+| TEST-SKILL-046 | Exact maximum                   | Passed                                                   |
+| TEST-SKILL-047 | Closest value above the maximum | Passed                                                   |
+| TEST-SKILL-048 | Each choice                     | Passed                                                   |
+| TEST-SKILL-049 | Each branch                     | Passed                                                   |
+| TEST-SKILL-050 | Empty data                      | Failed because the template omitted this prompt          |
+| TEST-SKILL-051 | One item                        | Passed                                                   |
+| TEST-SKILL-052 | Many items                      | Failed because the template omitted this prompt          |
+| TEST-SKILL-053 | Allowed state change            | Failed because the template grouped both state changes   |
+| TEST-SKILL-054 | Blocked state change            | Passed                                                   |
+| TEST-SKILL-055 | Not found                       | Passed                                                   |
+| TEST-SKILL-056 | Dependency failure              | Passed                                                   |
+| TEST-SKILL-057 | Timeout                         | Passed                                                   |
+| TEST-SKILL-058 | Unexpected error                | Passed                                                   |
+| TEST-SKILL-059 | Signed-out access               | Passed                                                   |
+| TEST-SKILL-060 | Wrong-permission access         | Passed                                                   |
+| TEST-SKILL-061 | Wrong-owner access              | Passed                                                   |
+| TEST-SKILL-062 | Wrong-account access            | Passed                                                   |
+| TEST-SKILL-063 | Required data changes           | Failed because the template grouped all required effects |
+| TEST-SKILL-064 | Required outside calls          | Passed                                                   |
+| TEST-SKILL-065 | Required messages               | Passed                                                   |
+| TEST-SKILL-066 | Required events                 | Passed                                                   |
+| TEST-SKILL-067 | Required file changes           | Passed                                                   |
+| TEST-SKILL-068 | Required navigation             | Passed                                                   |
+| TEST-SKILL-069 | Forbidden work after rejection  | Passed                                                   |
+| TEST-SKILL-070 | Repeated request                | Passed                                                   |
+| TEST-SKILL-071 | Retry                           | Passed                                                   |
+| TEST-SKILL-072 | Duplicate delivery              | Passed                                                   |
+| TEST-SKILL-073 | Existing callers                | Passed                                                   |
+| TEST-SKILL-074 | Stored data                     | Passed                                                   |
+| TEST-SKILL-075 | Existing public behavior        | Passed                                                   |
+| TEST-SKILL-076 | Loading view                    | Passed                                                   |
+| TEST-SKILL-077 | Empty view                      | Passed                                                   |
+| TEST-SKILL-078 | Success view                    | Passed                                                   |
+| TEST-SKILL-079 | Error view                      | Passed                                                   |
+| TEST-SKILL-080 | Retry view                      | Passed                                                   |
+
+All rows above passed in the final rerun. The four rows with an earlier failure passed after the
+template gained separate prompts for their exact situations.
+
+### Per-File Contract Rows
+
+These shared fields apply to `TEST-SKILL-081` through `098`:
+
+- Small task: Protect one rule in one exact policy file.
+- Source: Final review correction.
+- Test place: `scripts/test-policy-file-contracts.test.mjs`.
+- Starting state: The named canonical policy file is readable.
+- Exact input or fixture: The exact field list, result-timing rule, or conflict rule named below.
+- Interaction steps: Read only the named file and check the named rule.
+- Main behavior: Prevent one policy file from relying on another for required instructions.
+- Expected result: The named file contains the complete rule.
+- Must change: Nothing; these are read-only text checks.
+- Must not happen: No file writes, network calls, or product code runs.
+- Planned command: `node --test scripts/test-policy-file-contracts.test.mjs`.
+- Expected result before the code change: A case fails when its named file omits the rule.
+- Passing rerun: All 18 cases passed after every policy file received the complete contract.
+
+| ID             | Exact policy file   | Exact rule                                      | First observed run                        | Passing rerun                      |
+| -------------- | ------------------- | ----------------------------------------------- | ----------------------------------------- | ---------------------------------- |
+| TEST-SKILL-081 | Workflow            | Every exact case field                          | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-082 | Guide               | Every exact case field                          | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-083 | Template            | Every exact case field                          | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-084 | Testing policy      | Every exact case field                          | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-085 | Checklist skill     | Every exact case field                          | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-086 | Checklist reference | Every exact case field                          | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-087 | Workflow            | Planned and observed results stay separate      | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-088 | Guide               | Planned and observed results stay separate      | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-089 | Template            | Planned and observed results stay separate      | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-090 | Testing policy      | Planned and observed results stay separate      | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-091 | Checklist skill     | Planned and observed results stay separate      | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-092 | Checklist reference | Planned and observed results stay separate      | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-093 | Workflow            | Conflicting sources ask the user and block work | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-094 | Guide               | Conflicting sources ask the user and block work | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-095 | Template            | Conflicting sources ask the user and block work | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-096 | Testing policy      | Conflicting sources ask the user and block work | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-097 | Checklist skill     | Conflicting sources ask the user and block work | Failed: exact contract section was absent | Passed after the section was added |
+| TEST-SKILL-098 | Checklist reference | Conflicting sources ask the user and block work | Failed: exact contract section was absent | Passed after the section was added |
 
 ## Work Steps
 
@@ -171,23 +331,6 @@ The original task map and `TEST-SKILL-019` through `098` records are in the link
 - [x] Remove retired test IDs from active validation notes.
 - [x] Record and fix the final checklist formatting failure.
 
-## 2026-08-13 Review Corrections
-
-Exact case definitions and results are tracked in the
-[final review case record](./2026-08-12-detailed-test-planning-final-review-cases.md).
-
-- [x] Report each independently failing policy-file rule under its own test ID.
-- [x] Require unknown expected behavior to block affected work in every exact-case policy section.
-- [x] Make `pnpm skills:test` discover every `scripts/*.test.mjs` file instead of maintaining a manual
-      filename list.
-- [x] Define a no-write path for tasks that explicitly request only review, explanation, or research.
-- [x] Replace the incomplete quantity example with a linked example that follows its own exact-case
-      contract and maps every smallest example task.
-- [x] Split this active record so every changed file remains under 300 lines.
-- [x] Use automatic skill-test discovery across supported Node versions.
-- [x] Require the testing policy to preserve every interaction step while naming one main behavior.
-- [x] Prove the discovery runner executes every matching test file, not only a subset.
-
 ## Final Checks
 
 - [x] Run the new focused automated check and record the first expected failure.
@@ -199,13 +342,98 @@ Exact case definitions and results are tracked in the
 - [x] Run `git diff --check`.
 - [/] Run `just check`. Lint and typecheck passed, but the repository-wide format check is blocked by
   an unrelated active checklist.
-- [x] Review all changes and confirm unrelated work was not changed.
-- [x] Review this checklist and do not mark a parent complete while one of its smaller items is open.
+- [/] Review all changes and confirm unrelated work was not changed. The first review found corrections
+  listed above.
+- [/] Review this checklist and do not mark a parent complete while one of its smaller items is open.
+  Review corrections remain open.
 
 ## Test Results
 
-The complete observed-result log is in the linked
-[validation history](./2026-08-12-detailed-test-planning-validation-history.md).
+Record every failed check here before fixing it. Record the later passing run before marking the
+related test complete.
+
+- 2026-08-12: The first broad skill test failed at its first assertion because the permanent skill did
+  not yet contain "Split the Work Until Each Part Is Small." Later assertions did not run, so no
+  starting result was claimed for them. Separate named tests were added afterward.
+- 2026-08-12: After adding the permanent instructions, the focused check found the new stop rule but
+  failed because Markdown wrapped "tests or implementation" onto two lines. The check will allow normal
+  spaces or line breaks without weakening the wording it requires.
+- 2026-08-12: The next focused run reached the detailed guide and failed only because the check used
+  lowercase letters for the heading "One Exact Test Situation." The check will match the real heading.
+- 2026-08-12: The then-current focused skill check passed after the wording and check corrections. It
+  was later replaced by separately named policy checks.
+- 2026-08-12: `pnpm skills:sync` copied the canonical changes to all supported skill folders and
+  reported 16 synchronized skills. `TEST-SKILL-027` remains partial until `pnpm skills:check` confirms
+  the copies are identical.
+- 2026-08-12: `pnpm skills:test` passed all 5 tests, including the new permanent guidance check.
+- 2026-08-12: `pnpm skills:check` validated all 16 skills and completed `TEST-SKILL-027`.
+- 2026-08-12: `git diff --check` passed with no whitespace errors.
+- 2026-08-12: The first targeted Prettier check failed for the detailed guide, checklist template, and
+  skill test file. This failure was recorded before formatting those files.
+- 2026-08-12: Prettier formatted the three reported files. The rerun passed for all changed canonical
+  skill files, the skill test, and both checklist files.
+- 2026-08-12: After formatting and resynchronizing, `pnpm skills:test` passed 5/5,
+  `pnpm skills:check` validated all 16 skills, and `git diff --check` passed again.
+- 2026-08-12: `just check` passed lint and typecheck, then stopped at `pnpm format:check` because the
+  unrelated active file `docs/checklists/2026-08-12-hybrid-native-reference-profiles.md` is not
+  formatted. This task did not create or change that file, so it was left untouched. The checks after
+  the format step will be run separately.
+- 2026-08-12: The separately run template tests passed 86/86: 1 core test and 85 launcher tests.
+- 2026-08-12: The next targeted Prettier check found formatting drift in this active checklist after
+  new result notes were added. The failure was recorded before formatting the checklist again.
+- 2026-08-12: A final policy review found that the one automated policy test was too broad, planning
+  and observed results were mixed together, plain English was not a direct rule, conflicting sources
+  did not clearly block work, the "one action" wording could split normal user flows incorrectly, and
+  this checklist's own cases did not yet use the full case format. These corrections were added above
+  before changing the implementation again.
+- 2026-08-12: The first review-specific run failed because the permanent files were missing rules for
+  planned versus real results, plain English, conflicting sources, and multi-step interactions.
+- 2026-08-12: After adding those rules, the plain-English check passed. The user-flow check found the
+  required "Main behavior" field but failed because its text check expected a lowercase `m`. The check
+  was changed to ignore capitalization while still requiring the field in every policy file.
+- 2026-08-12: The next `TEST-SKILL-034` run reached `testing-policy` and found that it said "every
+  Interaction step" rather than using the shared field name "Interaction steps." The policy wording
+  will be aligned before rerunning the case.
+- 2026-08-12: The then-current policy suite passed 11 cases. Four checks failed because they required
+  one exact sentence even though the required rules and fields were present with equivalent wording.
+  The checks were changed to verify meaning without requiring one fixed sentence.
+- 2026-08-12: After making those four checks meaning-based, all 15 named policy cases passed.
+- 2026-08-12: The policy checks were moved to a separate 238-line file; the portable-skill test file is
+  168 lines. The targeted Prettier check then found formatting changes needed in the new policy test
+  file and this checklist. This failure was recorded before formatting both files.
+- 2026-08-12: The first separate run of `TEST-SKILL-035` through `080` passed 42 cases and failed four:
+  `050` empty data, `052` many items, `053` an allowed state change, and `063` required data changes.
+  The checklist template grouped or omitted those exact prompts. The same review run found that
+  the field-contract check lacked `Test place` in checklist policy and the table-row check lacked the
+  shared "table-based test" wording in its reference. These failures were recorded before correction.
+- 2026-08-12: After adding separate checklist prompts and aligning the policy fields, all 46 detailed
+  coverage cases and the then-current main policy cases passed. Earlier broad coverage checks were
+  replaced by the separate `TEST-SKILL-035` through `080` cases.
+- 2026-08-12: The test files are 168, 220, 277, and 95 lines, so each remains below 300 lines. The next
+  targeted Prettier check found formatting changes needed in the two policy test files and this
+  checklist. The failure was recorded before formatting them.
+- 2026-08-12: The first per-file contract run found missing complete field wording and conflict-result
+  wording in the checklist policies. It also exposed a hidden control character accidentally added to
+  the new test helper. The helper will be replaced cleanly, then each reported policy file will be
+  corrected and rerun.
+- 2026-08-12: The first section-only coverage run passed 44/46 and failed the two state-change cases
+  because the bullet parser treated the word "and" as part of the bullet name. The test data will use
+  the actual shared bullet name while still keeping separate IDs and assertions for allowed and blocked
+  changes.
+- 2026-08-12: After adding the complete contract to each policy file, the per-file tests found only
+  Markdown matching problems: bold field labels and normal line wrapping hid exact text from the test.
+  The test will remove Markdown bold and extra whitespace before checking, while still requiring every
+  field and rule separately in every file.
+- 2026-08-12: All 18 per-file contract checks and all 46 section-only missed-case checks passed. Two
+  older policy checks then failed only on a Markdown line break and capitalization. Those older checks
+  will use formatting-safe matching without weakening the newer per-file or section-only checks.
+- 2026-08-12: The final synchronized skill suite passed 77/77. It includes four skill-tool tests, nine
+  main planning-policy tests, 46 separate missed-situation tests, and 18 per-file contract tests.
+  `pnpm skills:check` also validated all 16 portable skills.
+- 2026-08-12: The closure review found that per-file checks still searched whole files, the 18
+  per-file results were grouped, and active notes still named retired aggregate IDs. The targeted
+  Prettier check also found formatting drift in this checklist. These corrections were recorded above
+  before changing the tests and checklist again.
 
 ## Risks
 

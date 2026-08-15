@@ -979,3 +979,11 @@ Record failures before correcting them and passing reruns afterward.
 - 2026-08-12: After updating old fixtures, the legacy package list passed 86/86. After adding every new
   profile, overlay, selection, launcher, and schema file to the package test command, the complete
   launcher suite passed 152/152.
+
+## Updates
+
+- 2026-08-14: Post-commit review found that the production template updater skips schema version 3
+  loading unless a test-only reader is injected, while the generated-project integration still bypasses
+  native profile orchestration and expects obsolete schema version 1 metadata. This leaves update
+  selection and runnable reference mode unproved. Corrective implementation and validation are tracked
+  in [Complete Hybrid Native Reference Generation](./2026-08-14-complete-hybrid-native-reference-generation.md).

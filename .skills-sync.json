@@ -5,7 +5,7 @@
       "hash": "877d99efc816644bf0c3d3e99030712c98195b0ed52aaaaecd9829b20b101647"
     },
     "checklist-tracking": {
-      "hash": "05dccf7d03b20d4ec2a31ca9fa37de7b2a734f6317701a897fa94e538af1d923"
+      "hash": "3469c468382d708dcb9815abe6528c10d6c4c369b94ab90d5134ad4353811678"
     },
     "code-quality": {
       "hash": "58cac9f47fa631d1d6c080d2565c90c949ef8ae37ad64508fa98db8297ec027f"
@@ -44,10 +44,10 @@
       "hash": "ddcb3b8ae5ca933521d91beb64d3dfd81848235d4dc7fec5c173cee10470bc29"
     },
     "test-first-workflow": {
-      "hash": "72cf47449d23d30fd9ab68b60a69296ca214ba1710ed0f5396504c903e769cee"
+      "hash": "7f8bd403528c1c399d93ebd97206f9cb4903e3e92c2ef9b6bf331709319ba5ec"
     },
     "testing-policy": {
-      "hash": "07523ddd94140050e87aec5276ab4b6d038b537b218a9cf6fa88f608e46d527e"
+      "hash": "9bfa6cc56c49c4438e8e35bb80e0081598963cca8ca48199eed1d47d2209c61d"
     }
   }
 }

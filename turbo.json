@@ -13,6 +13,14 @@
     "dev:reference": {
       "dependsOn": ["^build"],
       "cache": false,
+      "env": [
+        "DATABASE_URL",
+        "NODE_ENV",
+        "REFERENCE_ALLOWED_ORIGINS",
+        "REFERENCE_PORT",
+        "WEB_PUBLIC_API_BASE_URL",
+        "WEB_PUBLIC_APP_URL"
+      ],
       "persistent": true
     },
     "lint": {

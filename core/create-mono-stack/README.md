@@ -69,16 +69,30 @@ Options:
 The destination must not contain files. Setup initializes Git on `main` without creating a commit.
 Install project dependencies and create the baseline commit after generation.
 
+## Native apps and reference profiles
+
+Vite and NestJS run through their native CLIs before the template reference code is applied. Native
+CLI versions win when both the native app and reference profile declare the same package;
+template-only packages are then added at the versions authored by the template.
+
+The web reference profile currently supports only Vite React TypeScript. Other Vite choices remain
+fresh native apps and setup reports that web reference mode was skipped. Every generated NestJS app
+receives the NestJS reference profile, including the workspace source, example API, tests, and build
+configuration.
+
+Custom-path and unsupported native apps remain untouched during template updates, and Copier does not
+recreate their canonical placeholder directories.
+
+Generated projects include `.env.example` with safe local defaults and an ignored `.env` copy. Edit
+`.env` for local values; template updates preserve it.
+
 ## Template Updates
 
 Generated projects include `pnpm template:update`, a `mise.toml` declaration for the latest Python,
-and a ready-to-use `.venv` with pinned Copier dependencies. It also refreshes generated npm
-dependencies to their latest releases and updates the pnpm lockfile. Setup stores any alias passed with
+and a ready-to-use `.venv` with pinned Copier dependencies. Setup writes the final pnpm lockfile after
+native apps and reference profiles are combined. It also stores any alias passed with
 `--git-host-alias` automatically. Because the local setting is not committed, configure it once after
-cloning the project elsewhere or when repairing an older project:
-
-Native CLI versions win for overlapping packages, template-only packages are added, and profile overlays
-support Vite React TypeScript and the NestJS reference.
+cloning the project elsewhere or when repairing a project:
 
 ```sh
 git config --local mono-stack.template-host-alias github-webknot

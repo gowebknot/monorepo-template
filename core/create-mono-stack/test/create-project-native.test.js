@@ -18,6 +18,9 @@ function projectDependencies({ apps = [], events = [], scaffold } = {}) {
     platform: "darwin",
     readdir: async () => missingPath(),
     rm: async () => {},
+    copyFile: async (source, target) => {
+      events.push({ source, target, type: "copyFile" });
+    },
     runCommand: async (command, args, options = {}) => {
       if (command === "git" && args[0] === "--version") {
         return { stderr: "", stdout: "git version 2.50.0\n" };
@@ -114,6 +117,57 @@ test("TEST-MANIFEST-001 writes the current stack manifest", async () => {
     features: ["web-vite", "api-nest"],
     apps
   });
+});
+
+test("TEST-ENV-002 copies the environment example to the local environment", async () => {
+  const events = [];
+
+  await createProject(
+    {
+      destination,
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    projectDependencies({ events })
+  );
+
+  const copy = events.find((event) => event.type === "copyFile");
+  const copierIndex = events.findIndex(
+    (event) =>
+      event.type === "command" &&
+      event.command === "python3" &&
+      event.args[0] === "-m" &&
+      event.args[1] === "copier"
+  );
+  assert.deepEqual(copy, {
+    source: `${destination}/.env.example`,
+    target: `${destination}/.env`,
+    type: "copyFile"
+  });
+  assert.ok(copierIndex < events.indexOf(copy));
+});
+
+test("TEST-ENV-006 explains when a template lacks the environment example", async () => {
+  const dependencies = projectDependencies();
+  dependencies.copyFile = async () => {
+    const error = new Error("missing");
+    error.code = "ENOENT";
+    throw error;
+  };
+
+  await assert.rejects(
+    createProject(
+      {
+        destination,
+        projectName: "Acme Platform",
+        python: "python3",
+        template: "/workspace/custom-template"
+      },
+      dependencies
+    ),
+    /custom template must provide \.env\.example.*\/workspace\/acme-platform/i
+  );
 });
 
 test("TEST-CREATE-001 generates one final lockfile after metadata", async () => {

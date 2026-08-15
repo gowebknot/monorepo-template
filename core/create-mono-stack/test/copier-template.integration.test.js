@@ -1,22 +1,25 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
-  cp,
+  copyFile,
   mkdir,
   mkdtemp,
-  readdir,
   readFile,
   rm,
   writeFile
 } from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
+import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
-  assertDevelopmentTaskGraph,
+  assertReferenceBuilds,
+  assertReferenceTaskGraph,
   assertGeneratedProject
 } from "./copier-template.integration.helpers.js";
+import { copyTemplateFixture } from "./copier-template.integration.fixture.js";
+import { applyNativeReferenceProfiles } from "./copier-template.integration.native.js";
+import { runReferenceDevelopment } from "./copier-template.integration.runtime.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const temporaryRoot = join(root, ".tmp");
@@ -100,35 +103,7 @@ test("creates and updates a customized project with Copier", async (t) => {
     stage("cleanup.completed");
   });
 
-  const excludedDirectories = new Set([
-    ".git",
-    ".npmrc",
-    ".npmrc.auth",
-    ".tmp",
-    ".turbo",
-    ".venv",
-    "dist",
-    "node_modules"
-  ]);
-  await mkdir(templateRoot);
-  for (const entry of await readdir(root, { withFileTypes: true })) {
-    if (excludedDirectories.has(entry.name)) continue;
-    await cp(join(root, entry.name), join(templateRoot, entry.name), {
-      recursive: true,
-      filter(source) {
-        const path = relative(root, source);
-        const parts = path.split(sep);
-        if (parts.some((part) => excludedDirectories.has(part))) return false;
-        if (path.endsWith("routeTree.gen.ts")) return false;
-        return !path.startsWith(join(".claude", "worktrees"));
-      }
-    });
-  }
-  await mkdir(join(templateRoot, ".github/workflows"), { recursive: true });
-  await writeFile(
-    join(templateRoot, ".github/workflows/template-check.yml"),
-    "name: Template check\n"
-  );
+  await copyTemplateFixture({ root, templateRoot });
 
   git(templateRoot, "init", "--initial-branch", "main");
   git(templateRoot, "config", "user.email", "template@example.test");
@@ -224,7 +199,26 @@ test("creates and updates a customized project with Copier", async (t) => {
   );
   stage("copy.completed");
 
-  await assertGeneratedProject({ projectRoot, templateRoot });
+  stage("native-profiles.started");
+  const stack = await applyNativeReferenceProfiles({
+    projectRoot,
+    temporaryRoot: join(fixtureRoot, "native-scaffolds")
+  });
+  await copyFile(join(projectRoot, ".env.example"), join(projectRoot, ".env"));
+  run("pnpm", ["install", "--lockfile-only"], {
+    cwd: projectRoot,
+    timeout: 180_000
+  });
+  await assertGeneratedProject({
+    projectRoot,
+    stackConfig: stack.config,
+    templateRoot
+  });
+  await writeFile(
+    join(projectRoot, ".env"),
+    `${await readFile(join(projectRoot, ".env"), "utf8")}CONSUMER_ENV_MARKER=preserve-me\n`
+  );
+  stage("native-profiles.completed");
 
   git(projectRoot, "init", "--initial-branch", "main");
   git(projectRoot, "config", "user.email", "consumer@example.test");
@@ -242,12 +236,21 @@ test("creates and updates a customized project with Copier", async (t) => {
 
   const templateConfigPath = join(templateRoot, "packages/config/src/index.ts");
   const templateConfig = await readFile(templateConfigPath, "utf8");
+  const templateEnvironmentExamplePath = join(templateRoot, ".env.example");
+  const templateEnvironmentExample = await readFile(
+    templateEnvironmentExamplePath,
+    "utf8"
+  );
   await writeFile(
     templateConfigPath,
     templateConfig.replace(
       '  name: "monorepo-template"',
       '  name: "monorepo-template",\n  templateVersion: 2'
     )
+  );
+  await writeFile(
+    templateEnvironmentExamplePath,
+    `${templateEnvironmentExample}TEMPLATE_ENV_MARKER=updated\n`
   );
   git(templateRoot, "add", ".");
   git(templateRoot, "commit", "--message", "template v2");
@@ -269,6 +272,19 @@ test("creates and updates a customized project with Copier", async (t) => {
   );
   stage("update.completed");
 
+  assert.equal(
+    await readFile(join(projectRoot, ".mono-stack.json"), "utf8"),
+    stack.contents
+  );
+  assert.match(
+    await readFile(join(projectRoot, ".env"), "utf8"),
+    /CONSUMER_ENV_MARKER=preserve-me/
+  );
+  assert.match(
+    await readFile(join(projectRoot, ".env.example"), "utf8"),
+    /TEMPLATE_ENV_MARKER=updated/
+  );
+
   const updatedConfig = await readFile(generatedConfigPath, "utf8");
   assert.match(updatedConfig, /name: "acme-platform"/);
   assert.match(updatedConfig, /templateVersion: 2/);
@@ -286,14 +302,17 @@ test("creates and updates a customized project with Copier", async (t) => {
   stage("install.started");
   run("pnpm", ["install", "--frozen-lockfile"], { cwd: projectRoot });
   stage("install.completed");
-  assertDevelopmentTaskGraph(
+  assertReferenceTaskGraph(
     JSON.parse(
-      run("pnpm", ["exec", "turbo", "run", "dev", "--dry=json"], {
+      run("pnpm", ["exec", "turbo", "run", "dev:reference", "--dry=json"], {
         cwd: projectRoot
       })
     )
   );
   stage("build.started");
-  run("pnpm", ["build"], { cwd: projectRoot, timeout: 180_000 });
+  await assertReferenceBuilds({ projectRoot, run });
   stage("build.completed");
+  stage("reference-development.started");
+  await runReferenceDevelopment(projectRoot);
+  stage("reference-development.completed");
 });

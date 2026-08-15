@@ -17,6 +17,10 @@ const stackFeatureIds = [
   "mobile-expo",
   "mobile-react-native"
 ];
+const canonicalAppPaths = new Map([
+  ["web-vite", "apps/web"],
+  ["api-nest", "apps/server"]
+]);
 const genericGitHubSshPrefix = "git@github.com:";
 const gitRoutingVariableNames = new Set(
   [
@@ -86,6 +90,15 @@ function stackFeatureData(config) {
   ];
 }
 
+function stackAppExcludes(config) {
+  return [...canonicalAppPaths].flatMap(([feature, canonicalPath]) => {
+    const app = config.apps.find((record) => record.feature === feature);
+    return app?.path === canonicalPath && app.referenceProfile !== null
+      ? []
+      : [canonicalPath];
+  });
+}
+
 function missingEnvironmentError(python, platform) {
   const localPython =
     platform === "win32" ? ".\\.venv\\Scripts\\python.exe" : ".venv/bin/python";
@@ -109,9 +122,7 @@ export function updateTemplate(args, dependencies = {}) {
   );
   const execute = dependencies.execute ?? spawnSync;
   const exists = dependencies.exists ?? existsSync;
-  const stackConfig = dependencies.readFile
-    ? readStackConfig(cwd, dependencies.readFile)
-    : undefined;
+  const stackConfig = readStackConfig(cwd, dependencies.readFile);
   const platform = dependencies.platform ?? process.platform;
   const python = join(
     cwd,
@@ -144,12 +155,13 @@ export function updateTemplate(args, dependencies = {}) {
   const env = alias
     ? { ...environment, ...gitHostAliasEnvironment(alias, environment) }
     : environment;
-  const featureArguments = stackConfig
-    ? stackFeatureData(stackConfig).flatMap((data) => ["--data", data])
-    : [];
+  const stackArguments = [
+    ...stackFeatureData(stackConfig).flatMap((data) => ["--data", data]),
+    ...stackAppExcludes(stackConfig).flatMap((path) => ["--exclude", path])
+  ];
   const result = execute(
     python,
-    ["-m", "copier", "update", ...featureArguments, ...args],
+    ["-m", "copier", "update", ...stackArguments, ...args],
     {
       cwd,
       env,

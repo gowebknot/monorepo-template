@@ -63,11 +63,18 @@ Copier selects the newest stable PEP 440-compatible Git tag by default. Publish 
 as `v1.0.0` and `v1.1.0` so generated projects can update predictably.
 
 Setup installs the pinned Copier toolchain into the generated project's `.venv`, while `mise.toml`
-declares the latest Python runtime. Native CLI versions win for overlapping packages, template-only
-packages are added, and profile scripts provide the Vite React TypeScript and NestJS reference overlays.
+declares the latest Python runtime. Native CLI versions win for packages also declared by a reference
+profile, while template-only packages are added at the template-authored versions. Only Vite React
+TypeScript currently receives the web reference profile, and every generated NestJS app receives the
+NestJS reference profile. Custom-path and unsupported native apps remain untouched during template
+updates, and Copier does not recreate their canonical placeholder directories.
+
 The project records its template source and version in `.copier-answers.yml`, and its selected stack in
 `.mono-stack.json`, so no separate updater bootstrap is required. Create the initial Git commit before
 applying a template update.
+
+New projects include a committed `.env.example` with safe local defaults and create a matching ignored
+`.env` automatically. Edit `.env` for local values; template updates preserve it.
 
 Setup stores an alias passed with `--git-host-alias` automatically. Because the setting remains in
 `.git/config` and is not committed, configure it once after cloning the project elsewhere or when

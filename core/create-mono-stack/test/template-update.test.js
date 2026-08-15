@@ -7,21 +7,13 @@ import {
   readStackConfig,
   updateTemplate
 } from "../../../scripts/update-template.mjs";
+import {
+  expectedStackArguments,
+  stackConfig,
+  validStackDependencies
+} from "./template-update.helpers.js";
 
 const projectRoot = "/workspace/project";
-const stackConfig = JSON.stringify({
-  schemaVersion: 3,
-  features: ["web-vite", "api-express", "mobile-expo"],
-  apps: [
-    {
-      feature: "web-vite",
-      generator: "vite",
-      name: "dashboard",
-      path: "apps/dashboard",
-      referenceProfile: "vite/react-ts"
-    }
-  ]
-});
 
 test("reads and validates the generated stack manifest", () => {
   assert.deepEqual(
@@ -57,20 +49,7 @@ test("passes generated stack features to Copier during updates", () => {
     "-m",
     "copier",
     "update",
-    "--data",
-    'features_json="[\\"web-vite\\",\\"api-express\\",\\"mobile-expo\\"]"',
-    "--data",
-    "feature_web_vite=true",
-    "--data",
-    "feature_web_next=false",
-    "--data",
-    "feature_api_nest=false",
-    "--data",
-    "feature_api_express=true",
-    "--data",
-    "feature_mobile_expo=true",
-    "--data",
-    "feature_mobile_react_native=false",
+    ...expectedStackArguments,
     "--defaults"
   ]);
 });
@@ -119,6 +98,7 @@ test("updates through the SSH alias stored in local Git config", () => {
 
   assert.equal(
     updateTemplate(["--defaults"], {
+      ...validStackDependencies,
       cwd: projectRoot,
       environment,
       execute,
@@ -144,7 +124,7 @@ test("updates through the SSH alias stored in local Git config", () => {
     },
     {
       command: `${projectRoot}/.venv/bin/python`,
-      args: ["-m", "copier", "update", "--defaults"],
+      args: ["-m", "copier", "update", ...expectedStackArguments, "--defaults"],
       options: {
         cwd: projectRoot,
         env: {
@@ -173,6 +153,7 @@ test("updates normally when the repository has no SSH alias", () => {
 
   assert.equal(
     updateTemplate([], {
+      ...validStackDependencies,
       cwd: projectRoot,
       environment,
       execute,
@@ -188,6 +169,7 @@ test("explains how to repair a missing update environment", () => {
   assert.throws(
     () =>
       updateTemplate([], {
+        ...validStackDependencies,
         cwd: projectRoot,
         environment: {},
         execute: () => assert.fail("No subprocess should run without .venv"),
@@ -209,6 +191,7 @@ test("prints a PowerShell-compatible Windows repair command", () => {
   assert.throws(
     () =>
       updateTemplate([], {
+        ...validStackDependencies,
         cwd: projectRoot,
         environment: {},
         execute: () => assert.fail("No subprocess should run without .venv"),
@@ -231,6 +214,7 @@ test("explains that Git must be initialized before an update", () => {
   assert.throws(
     () =>
       updateTemplate([], {
+        ...validStackDependencies,
         cwd: projectRoot,
         environment: {},
         execute: () => ({
@@ -251,6 +235,7 @@ test("explains when Git itself is unavailable", () => {
   assert.throws(
     () =>
       updateTemplate([], {
+        ...validStackDependencies,
         cwd: projectRoot,
         environment: {},
         execute: () => ({ error, status: null, stderr: "", stdout: "" }),
@@ -275,6 +260,7 @@ test("rejects an unsafe SSH host alias before invoking Copier", () => {
   assert.throws(
     () =>
       updateTemplate([], {
+        ...validStackDependencies,
         cwd: projectRoot,
         environment: {},
         execute,

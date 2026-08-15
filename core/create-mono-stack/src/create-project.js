@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, isAbsolute, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -112,6 +112,7 @@ const systemDependencies = {
   environment: process.env,
   isAdministrator: process.getuid?.() === 0,
   cp: undefined,
+  copyFile,
   readFile: undefined,
   mkdtemp,
   platform: process.platform,
@@ -307,6 +308,26 @@ export async function createProject(
         : environment,
       replaceEnvironment: true
     });
+
+    const environmentExample = join(options.destination, ".env.example");
+    const environmentFile = join(options.destination, ".env");
+    try {
+      await (dependencies.copyFile ?? copyFile)(
+        environmentExample,
+        environmentFile
+      );
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        throw new Error(
+          `The custom template must provide .env.example at ${environmentExample} before project setup can continue.`,
+          { cause: error }
+        );
+      }
+      throw new Error(
+        `Unable to create the local environment file at ${environmentFile}.`,
+        { cause: error }
+      );
+    }
 
     const scaffold = dependencies.scaffoldNativeApps ?? scaffoldNativeApps;
     const nativeApps = await scaffold(scaffoldOptions, {

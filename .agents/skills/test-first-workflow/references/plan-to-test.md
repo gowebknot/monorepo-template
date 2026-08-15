@@ -26,10 +26,6 @@ test cases before implementation starts.
     evidence, impact, corrective action, validation, and a backlink to the bottom of the original
     checklist. Do not edit its prior plan, items, or statuses.
 
-If the user explicitly requires a read-only review, explanation, or research task, perform the same
-planning, decomposition, and validation design in memory. Do not create or update a checklist, and do
-not edit repository files. Report findings and validation gaps directly.
-
 ## Split Large Work Into Small Parts
 
 Use as many checklist levels as the task needs. Do not stop at a feature, page, endpoint, service,
@@ -87,9 +83,6 @@ has run. Do not invent test results before running the command.
 
 If trusted sources disagree, check which source wins under repository guidance. If no rule answers
 that question, record the conflict, ask the user, and block the affected cases and implementation.
-
-If no trusted source defines the expected behavior, search the repository. If the answer is still
-unknown, record the open question, ask the user, and block the affected work until it is resolved.
 
 Use each field as follows:
 
@@ -187,8 +180,39 @@ Use the owning package or module for `AREA`, and keep numbering stable when case
 
 ## Simple Example
 
-See the [complete quantity-field example](../examples/quantity-field-plan.md). It demonstrates the
-method only; do not copy its made-up product rules into another task.
+This example shows the method only. Do not copy its made-up rules into another task.
+
+Request: Add a quantity field. The existing schema says it must be a whole number from 1 through 10.
+
+Small task breakdown:
+
+- Show the quantity field.
+- Accept a valid quantity.
+  - Save the lowest allowed value.
+  - Save a middle allowed value.
+  - Save the highest allowed value.
+- Reject an invalid quantity.
+  - Reject a missing value.
+  - Reject a value below the minimum.
+  - Reject a value above the maximum.
+  - Reject a decimal value.
+- Show the validation message without saving.
+
+Exact cases include:
+
+- `TEST-FORM-001`: Start with an empty form, enter `1`, submit once, and expect quantity `1` to be
+  saved.
+- `TEST-FORM-002`: Start with an empty form, enter `10`, submit once, and expect quantity `10` to be
+  saved.
+- `TEST-FORM-003`: Start with an empty form, enter `0`, submit once, expect the schema's minimum-value
+  error, and expect no save call.
+- `TEST-FORM-004`: Start with an empty form, enter `11`, submit once, expect the schema's maximum-value
+  error, and expect no save call.
+- `TEST-FORM-005`: Start with an empty form, enter `1.5`, submit once, expect the schema's whole-number
+  error, and expect no save call.
+
+"Test quantity validation" would be only a heading. It would not be a complete plan because it hides
+the exact situations above.
 
 ## Validation Sequence
 

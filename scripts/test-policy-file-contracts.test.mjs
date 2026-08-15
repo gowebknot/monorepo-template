@@ -64,7 +64,6 @@ for (const [index, [name]] of files.entries()) {
   const fieldId = String(81 + index).padStart(3, "0");
   const resultId = String(87 + index).padStart(3, "0");
   const conflictId = String(93 + index).padStart(3, "0");
-  const unknownId = String(116 + index).padStart(3, "0");
 
   test(`TEST-SKILL-${fieldId} keeps every case field in the ${name}`, () => {
     const text = exactCaseRules(contents.get(name));
@@ -92,14 +91,5 @@ for (const [index, [name]] of files.entries()) {
       text,
       /block the affected (tests and implementation|cases and implementation|work)/i
     );
-  });
-
-  test(`TEST-SKILL-${unknownId} blocks undefined behavior in the ${name}`, () => {
-    const text = exactCaseRules(contents.get(name));
-    assert.match(text, /no trusted source defines the expected behavior/i);
-    assert.match(text, /search the repository/i);
-    assert.match(text, /answer is still unknown/i);
-    assert.match(text, /ask the user/i);
-    assert.match(text, /block the affected work/i);
   });
 }

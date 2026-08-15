@@ -19,7 +19,7 @@
     "skills:create": "node scripts/skills.mjs create",
     "skills:remove": "node scripts/skills.mjs remove",
     "skills:sync": "node scripts/skills.mjs sync",
-    "skills:test": "node scripts/run-skills-tests.mjs",
+    "skills:test": "node --test scripts/skills.test.mjs scripts/test-case-coverage-policy.test.mjs scripts/test-planning-policy.test.mjs scripts/test-policy-file-contracts.test.mjs",
     "template:test": "pnpm core:test && pnpm --filter create-mono-stack test",
     "template:test:integration": "pnpm --filter create-mono-stack test:integration",
     "template:update": "node scripts/update-template.mjs",
