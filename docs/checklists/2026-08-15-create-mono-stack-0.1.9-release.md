@@ -23,9 +23,9 @@
 - [x] Package metadata reports version `0.1.9`.
 - [x] Required tests, lint, formatting, integration, and repository checks pass.
 - [x] The packed artifact contains the intended launcher files and excludes repository-only content.
-- [ ] All current worktree changes are included in one release commit without secrets.
-- [ ] The release commit is pushed to its tracked remote branch.
-- [ ] `create-mono-stack@0.1.9` is published through `publish:package`.
+- [x] All current worktree changes are included in one release commit without secrets.
+- [x] The release commit is pushed to its tracked remote branch.
+- [x] `create-mono-stack@0.1.9` is published through `publish:package`.
 
 ## Exact Test Cases
 
@@ -61,7 +61,7 @@
   - First observed run: `npm pack --dry-run` produced `create-mono-stack-0.1.9.tgz` with 15 intended files.
   - Passing rerun: Same dry-run passed with no repository-only tests, checklists, auth files, or environment files.
 
-- [ ] TEST-RELEASE-003: Commit, push, and publish complete through approved commands.
+- [x] TEST-RELEASE-003: Commit, push, and publish complete through approved commands.
   - Small task: Execute the explicitly authorized release operations.
   - Source: User authorization and `core/create-mono-stack/AGENTS.md`.
   - Test place: Git status/history, remote tracking, and npm registry metadata.
@@ -75,8 +75,8 @@
   - Must not happen: Force push, skipped hooks, direct `npm publish`, or credentials committed.
   - Planned command: `pnpm --filter create-mono-stack publish:package` after commit and push.
   - Expected result before the code change: No `0.1.9` release exists.
-  - First observed run: Pending.
-  - Passing rerun: Pending.
+  - First observed run: Commit `3b8c7d1` passed hooks, pushed to `origin/master`, and the publish wrapper reported `+ create-mono-stack@0.1.9`.
+  - Passing rerun: `pnpm view create-mono-stack version dist-tags --json` confirmed version `0.1.9` and `latest: 0.1.9`; the worktree remained clean.
 
 ## Verification
 
@@ -84,12 +84,12 @@
 - [x] Run `pnpm --filter create-mono-stack test:integration`.
 - [x] Run `npm pack --dry-run` from `core/create-mono-stack`.
 - [x] Inspect `git status`, `git diff`, and `git log --oneline -10` before staging.
-- [ ] Commit with repository-compliant Conventional Commit syntax.
-- [ ] Push the tracked branch without force.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Confirm registry version and final clean/pushed state.
+- [x] Commit with repository-compliant Conventional Commit syntax.
+- [x] Push the tracked branch without force.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Confirm registry version and final clean/pushed state.
 
 ## Risks and Follow-Up
 
-- [ ] Publishing requires valid ignored npm authentication; stop before publish if credentials are unavailable.
+- [x] Publishing used the ignored npm authentication file; no credentials were staged.
 - [ ] The worktree contains pre-existing related changes; all must be reviewed and included as explicitly requested.
