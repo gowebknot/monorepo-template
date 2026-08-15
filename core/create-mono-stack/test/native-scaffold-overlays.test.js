@@ -126,6 +126,13 @@ test("TEST-OVERLAY-007 copies exact NestJS profile configuration", async (t) => 
   assert.equal(apps[0].referenceProfile, "nestjs/default");
 });
 
+test("TEST-OVERLAY-008 copies NestJS agent memory files", async (t) => {
+  const { root } = await scaffoldNest(t);
+
+  assert.equal(await fixtureText(root, "AGENTS.md"), "server-agent-marker");
+  assert.equal(await fixtureText(root, "CLAUDE.md"), "server-claude-marker");
+});
+
 async function fixtureText(root, path) {
   const { readFile } = await import("node:fs/promises");
   return readFile(join(root, path), "utf8");

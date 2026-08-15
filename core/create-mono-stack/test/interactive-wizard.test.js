@@ -11,6 +11,7 @@ import {
   promptForProjectArguments
 } from "../src/interactive-wizard.js";
 import { parseArguments } from "../src/create-project.js";
+import { FEATURE_DEFINITIONS } from "../src/feature-config.js";
 
 const downArrow = "\u001B[B";
 const enter = "\r";
@@ -31,6 +32,23 @@ async function sendInput(app, input, expectedFrame) {
     await waitFor(() => expectedFrame.test(app.lastFrame() ?? ""));
   }
   await new Promise((resolve) => setTimeout(resolve, 10));
+}
+
+// Ink hard-wraps long lines to the terminal width and redraws the box
+// border on every wrapped line, so a description that spans a word-wrap
+// boundary is split across frame lines by both a newline and a border
+// character. Strip the border and collapse whitespace before matching so
+// these assertions don't depend on layout.
+function normalizeFrame(frame) {
+  return (frame ?? "").replace(/[│╭╮╰╯─]/g, "").replace(/\s+/g, " ");
+}
+
+function flattenFrame(app) {
+  return normalizeFrame(app.lastFrame());
+}
+
+function wrapped(regex) {
+  return { test: (frame) => regex.test(normalizeFrame(frame)) };
 }
 
 test("renders an Ink wizard and uses safe project defaults", async (t) => {
@@ -194,6 +212,160 @@ test("renders discovered Python choices in the advanced flow", async (t) => {
   await sendInput(app, enter, /Python executable/);
 
   assert.match(app.lastFrame(), /pyenv-python \(3\.12\.4\)/);
+});
+
+test("TEST-WIZARD-001 shows the Stack features question description and the default-highlighted feature's description", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+
+  const [webVite, apiNest] = FEATURE_DEFINITIONS;
+  assert.match(
+    flattenFrame(app),
+    /Select which apps and frameworks to scaffold into the project\./
+  );
+  assert.match(flattenFrame(app), new RegExp(webVite.description));
+  assert.doesNotMatch(flattenFrame(app), new RegExp(apiNest.description));
+});
+
+test("TEST-WIZARD-002 moves the shown feature description when the Stack features cursor moves", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+
+  const [webVite, apiNest] = FEATURE_DEFINITIONS;
+  await sendInput(app, downArrow, wrapped(new RegExp(apiNest.description)));
+  assert.doesNotMatch(flattenFrame(app), new RegExp(webVite.description));
+});
+
+test("TEST-WIZARD-003 shows the Advanced options question description and the default-highlighted choice's description", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Advanced options/);
+
+  assert.match(
+    flattenFrame(app),
+    /Optionally fine-tune how Git connects, which Python runs setup, and which template version is used/
+  );
+  assert.match(
+    flattenFrame(app),
+    /Use defaults — Skip SSH, Python, template, and revision configuration/
+  );
+  assert.doesNotMatch(
+    flattenFrame(app),
+    /Manually set the Git SSH host alias, Python executable, template source, and revision\./
+  );
+});
+
+test("TEST-WIZARD-004 moves the shown option description when the Advanced options cursor moves", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Advanced options/);
+
+  await sendInput(
+    app,
+    downArrow,
+    wrapped(/Configure advanced options — Manually set the Git SSH host alias/)
+  );
+  assert.doesNotMatch(
+    flattenFrame(app),
+    /Skip SSH, Python, template, and revision configuration/
+  );
+});
+
+test("TEST-WIZARD-005 shows the Ready to create question description and the default-highlighted choice's description", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+
+  assert.match(
+    flattenFrame(app),
+    /Review the choices above before the project files are generated\./
+  );
+  assert.match(
+    flattenFrame(app),
+    /Create project — Generate the project now using the answers above\./
+  );
+  assert.doesNotMatch(flattenFrame(app), /Exit without creating a project\./);
+});
+
+test("TEST-WIZARD-006 shows a question description on a TextQuestion screen", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, downArrow, /Custom destination/);
+  await sendInput(
+    app,
+    enter,
+    /Choose the directory where the new project will be created\./
+  );
+});
+
+test("TEST-WIZARD-007 shows the question description and default-highlighted option's description on an advanced sub-step", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, downArrow, /Configure advanced options/);
+  await sendInput(app, enter, /Git SSH host alias/);
+
+  assert.match(
+    flattenFrame(app),
+    /If you use a custom nickname \(alias\) for github\.com in your ~\/\.ssh\/config/
+  );
+  assert.match(
+    flattenFrame(app),
+    /No alias \(default: none\) — Connect to GitHub normally, without a custom alias\./
+  );
+});
+
+test("TEST-WIZARD-008 renders a discovered choice without an authored description as plain label text", async (t) => {
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: () => {},
+      options: {
+        python: [{ label: "pyenv-python (3.12.4)", value: "pyenv-python" }]
+      }
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, downArrow, /Configure advanced options/);
+  await sendInput(app, enter, /Git SSH host alias/);
+  await sendInput(app, enter, /Python executable/);
+  await sendInput(app, downArrow, /❯ pyenv-python \(3\.12\.4\)/);
+
+  assert.match(flattenFrame(app), /pyenv-python \(3\.12\.4\)/);
+  assert.doesNotMatch(flattenFrame(app), /pyenv-python \(3\.12\.4\) —/);
 });
 
 test("parses concrete SSH aliases from SSH config", () => {

@@ -40,6 +40,7 @@ export const REFERENCE_PROFILES = {
     overlayEntries: [
       ".prettierrc",
       "AGENTS.md",
+      "CLAUDE.md",
       "eslint.config.mjs",
       "nest-cli.json",
       "nest-cli.reference.json",

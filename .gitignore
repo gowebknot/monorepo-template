@@ -3,6 +3,7 @@ dist
 .turbo
 .venv
 .claude/worktrees/
+.claude/settings.local.json
 .tmp
 .env
 .npmrc

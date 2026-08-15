@@ -54,3 +54,14 @@ test("keeps feature definitions stable and uniquely identified", () => {
     FEATURE_DEFINITIONS.length
   );
 });
+
+test("TEST-FEATURE-001 documents every feature with a non-empty description", () => {
+  for (const { description, id } of FEATURE_DEFINITIONS) {
+    assert.equal(
+      typeof description,
+      "string",
+      `${id} is missing a description`
+    );
+    assert.ok(description.trim().length > 0, `${id} has an empty description`);
+  }
+});

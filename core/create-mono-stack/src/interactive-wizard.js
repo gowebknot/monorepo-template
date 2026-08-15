@@ -18,62 +18,154 @@ export { parseSshAliases } from "./wizard-discovery.js";
 const h = createElement;
 const defaultDestination = "my-project";
 const advancedChoices = [
-  { label: "Use defaults", value: false },
-  { label: "Configure advanced options", value: true }
+  {
+    description:
+      "Skip SSH, Python, template, and revision configuration and use recommended defaults.",
+    label: "Use defaults",
+    value: false
+  },
+  {
+    description:
+      "Manually set the Git SSH host alias, Python executable, template source, and revision.",
+    label: "Configure advanced options",
+    value: true
+  }
 ];
 const customChoice = "__custom__";
 const backChoice = "__back__";
+const backChoiceOption = {
+  description: "Return to the previous step.",
+  label: "Back",
+  value: backChoice
+};
 const destinationChoices = [
-  { label: "my-project (recommended)", value: "my-project" },
-  { label: "Custom destination", value: customChoice }
+  {
+    description: "Create the project in a new ./my-project directory.",
+    label: "my-project (recommended)",
+    value: "my-project"
+  },
+  {
+    description:
+      "Choose a different destination directory for the new project.",
+    label: "Custom destination",
+    value: customChoice
+  }
 ];
+const destinationDescription =
+  "Choose the directory where the new project will be created.";
+const projectNameDescription =
+  "Set the name used for the project and its package manifests.";
+const featuresDescription =
+  "Select which apps and frameworks to scaffold into the project.";
+const advancedDescription =
+  "Optionally fine-tune how Git connects, which Python runs setup, and which template version is used. Most people can skip this and use the defaults.";
+const confirmDescription =
+  "Review the choices above before the project files are generated.";
 const confirmationChoices = [
-  { label: "Create project", value: true },
-  { label: "Cancel", value: false },
-  { label: "Back", value: backChoice }
+  {
+    description: "Generate the project now using the answers above.",
+    label: "Create project",
+    value: true
+  },
+  {
+    description: "Exit without creating a project.",
+    label: "Cancel",
+    value: false
+  },
+  {
+    description: "Return to the advanced options step to make changes.",
+    label: "Back",
+    value: backChoice
+  }
 ];
 const advancedSteps = [
   {
+    description:
+      "If you use a custom nickname (alias) for github.com in your ~/.ssh/config, enter it here so Git can fetch private templates or submodules through it.",
     field: "gitHostAlias",
     label: "Git SSH host alias",
     next: "python",
     previous: "advanced",
     choices: [
-      { label: "No alias (default: none)", value: "" },
-      { label: "Custom alias", value: customChoice }
+      {
+        description: "Connect to GitHub normally, without a custom alias.",
+        label: "No alias (default: none)",
+        value: ""
+      },
+      {
+        description:
+          "Enter the SSH host alias you already set up in ~/.ssh/config.",
+        label: "Custom alias",
+        value: customChoice
+      }
     ],
     placeholder: "github host alias"
   },
   {
+    description:
+      "Some setup steps need Python 3.10 or newer on your computer. Choose which installed Python to use for them.",
     field: "python",
     label: "Python executable",
     next: "template",
     previous: "gitHostAlias",
     choices: [
-      { label: "Auto-detect (runtime discovery)", value: "" },
-      { label: "Custom executable", value: customChoice }
+      {
+        description:
+          "Let the CLI find a suitable Python 3.10+ installation on your computer automatically.",
+        label: "Auto-detect (runtime discovery)",
+        value: ""
+      },
+      {
+        description:
+          "Enter the file path to the specific Python program you want to use instead.",
+        label: "Custom executable",
+        value: customChoice
+      }
     ],
     placeholder: "path to Python 3.10+"
   },
   {
+    description:
+      "Your project is generated from a template (a ready-made project blueprint). Choose where that template comes from — most people can leave this as the default.",
     field: "template",
     label: "Template source",
     next: "vcsRef",
     previous: "python",
     choices: [
-      { label: "Latest stable template (canonical GitHub source)", value: "" },
-      { label: "Custom template source", value: customChoice }
+      {
+        description:
+          "Use the official, latest stable project template from GitHub.",
+        label: "Latest stable template (canonical GitHub source)",
+        value: ""
+      },
+      {
+        description:
+          "Enter a Git URL or local folder path to use a different template instead.",
+        label: "Custom template source",
+        value: customChoice
+      }
     ],
     placeholder: "Git URL or local path"
   },
   {
+    description:
+      "The template changes over time as it's updated. Choose which version of it to build your project from — the newest version is usually right.",
     field: "vcsRef",
     label: "Template revision",
     next: "confirm",
     previous: "template",
     choices: [
-      { label: "Latest stable version (template default)", value: "" },
-      { label: "Custom revision", value: customChoice }
+      {
+        description: "Use the newest released version of the template.",
+        label: "Latest stable version (template default)",
+        value: ""
+      },
+      {
+        description:
+          "Enter a specific tag, branch, or commit to lock the template to (useful for reproducing an exact past setup).",
+        label: "Custom revision",
+        value: customChoice
+      }
     ],
     placeholder: "tag, branch, or commit"
   }
@@ -137,7 +229,24 @@ function WizardFrame({ children }) {
   );
 }
 
-function TextQuestion({ label, onBack, onSubmit, placeholder }) {
+function QuestionHeader({ description, label }) {
+  return h(
+    Box,
+    { flexDirection: "column" },
+    h(Text, { bold: true }, label),
+    description ? h(Text, { dimColor: true }, description) : null
+  );
+}
+
+function DescribedItem({ description, isSelected = false, label }) {
+  return h(
+    Text,
+    { color: isSelected ? "blue" : undefined },
+    isSelected && description ? `${label} — ${description}` : label
+  );
+}
+
+function TextQuestion({ description, label, onBack, onSubmit, placeholder }) {
   const [value, setValue] = useState("");
   const [backFocused, setBackFocused] = useState(false);
 
@@ -152,7 +261,7 @@ function TextQuestion({ label, onBack, onSubmit, placeholder }) {
   return h(
     Box,
     { flexDirection: "column" },
-    h(Text, { bold: true }, label),
+    h(QuestionHeader, { description, label }),
     h(
       Box,
       { marginTop: 1 },
@@ -175,15 +284,27 @@ function TextQuestion({ label, onBack, onSubmit, placeholder }) {
   );
 }
 
-function ChoiceQuestion({ items, label, onSelect, showBack = false }) {
-  const choices = showBack
-    ? [...items, { label: "Back", value: backChoice }]
-    : items;
+function ChoiceQuestion({
+  description,
+  items,
+  label,
+  onSelect,
+  showBack = false
+}) {
+  const choices = showBack ? [...items, backChoiceOption] : items;
   return h(
     Box,
     { flexDirection: "column" },
-    h(Text, { bold: true }, label),
-    h(Box, { marginTop: 1 }, h(SelectInput, { items: choices, onSelect }))
+    h(QuestionHeader, { description, label }),
+    h(
+      Box,
+      { marginTop: 1 },
+      h(SelectInput, {
+        items: choices,
+        itemComponent: DescribedItem,
+        onSelect
+      })
+    )
   );
 }
 
@@ -228,17 +349,23 @@ function FeatureQuestion({ onBack, onSubmit, selected }) {
   return h(
     Box,
     { flexDirection: "column" },
-    h(Text, { bold: true }, "Stack features"),
+    h(QuestionHeader, {
+      description: featuresDescription,
+      label: "Stack features"
+    }),
     h(
       Box,
       { flexDirection: "column", marginTop: 1 },
-      ...FEATURE_DEFINITIONS.map(({ id, label }, index) =>
-        h(
+      ...FEATURE_DEFINITIONS.map(({ description, id, label }, index) => {
+        const isHighlighted = index === cursor;
+        const text =
+          isHighlighted && description ? `${label} — ${description}` : label;
+        return h(
           Text,
-          { key: id, color: index === cursor ? "cyan" : undefined },
-          `${index === cursor ? "❯" : " "} [${current.has(id) ? "x" : " "}] ${label}`
-        )
-      )
+          { key: id, color: isHighlighted ? "cyan" : undefined },
+          `${isHighlighted ? "❯" : " "} [${current.has(id) ? "x" : " "}] ${text}`
+        );
+      })
     ),
     h(Text, { dimColor: true }, "Space toggle | Enter continue | Left go back")
   );
@@ -255,10 +382,15 @@ function featureNameStep(featureId) {
 function projectNameChoices(destination) {
   return [
     {
+      description: "Use this name, derived from the destination directory.",
       label: `${basename(resolve(destination))} (derived from destination)`,
       value: basename(resolve(destination))
     },
-    { label: "Custom project name", value: customChoice }
+    {
+      description: "Enter a different name for the project.",
+      label: "Custom project name",
+      value: customChoice
+    }
   ];
 }
 
@@ -284,7 +416,10 @@ function Confirmation({ answers, onSelect }) {
   return h(
     Box,
     { flexDirection: "column" },
-    h(Text, { bold: true }, "Ready to create"),
+    h(QuestionHeader, {
+      description: confirmDescription,
+      label: "Ready to create"
+    }),
     h(
       Box,
       { flexDirection: "column", marginY: 1 },
@@ -292,7 +427,11 @@ function Confirmation({ answers, onSelect }) {
         h(SummaryLine, { key: label, label, value })
       )
     ),
-    h(SelectInput, { items: confirmationChoices, onSelect })
+    h(SelectInput, {
+      items: confirmationChoices,
+      itemComponent: DescribedItem,
+      onSelect
+    })
   );
 }
 
@@ -352,6 +491,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
   if (step === "destination") {
     content = h(ChoiceQuestion, {
       key: step,
+      description: destinationDescription,
       items: options.destinations
         ? [
             destinationChoices[0],
@@ -372,6 +512,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
   } else if (step === "projectName") {
     content = h(ChoiceQuestion, {
       key: step,
+      description: projectNameDescription,
       items: projectNameChoices(answers.destination),
       label: "Project name",
       showBack: true,
@@ -403,6 +544,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
     });
   } else if (step === "advanced") {
     content = h(ChoiceQuestion, {
+      description: advancedDescription,
       items: advancedChoices,
       label: "Advanced options",
       showBack: true,
@@ -434,6 +576,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
       const nextFeature = answers.features[featureIndex + 1];
       content = h(TextQuestion, {
         key: step,
+        description: `Enter a name for the ${feature.label} app's folder and package.`,
         label: `${feature.label} name`,
         onBack() {
           setStep(
@@ -460,6 +603,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
       if (currentStep) {
         content = h(ChoiceQuestion, {
           key: step,
+          description: currentStep.description,
           items: currentStep.choices,
           label: currentStep.label,
           showBack: true,
@@ -484,12 +628,14 @@ export function ProjectWizard({ onComplete, options = {} }) {
         const customStepDefinition =
           customField === "destination"
             ? {
+                description: destinationDescription,
                 label: "Destination directory",
                 next: "projectName",
                 placeholder: defaultDestination
               }
             : customField === "projectName"
               ? {
+                  description: projectNameDescription,
                   label: "Project name",
                   next: "features",
                   placeholder: basename(resolve(answers.destination))
@@ -497,6 +643,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
               : steps.find(({ field }) => field === customField);
         content = h(TextQuestion, {
           key: step,
+          description: customStepDefinition.description,
           label: customStepDefinition.label,
           onSubmit(value) {
             const fallback =

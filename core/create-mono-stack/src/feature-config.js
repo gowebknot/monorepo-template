@@ -2,20 +2,44 @@ export const FEATURE_DEFINITIONS = [
   {
     default: true,
     defaultName: "web",
+    description:
+      "A React single-page app bundled with Vite for fast local dev and builds.",
     id: "web-vite",
     label: "Vite web app"
   },
   {
     default: true,
     defaultName: "server",
+    description:
+      "A structured Node.js API framework with built-in dependency injection and modules.",
     id: "api-nest",
     label: "NestJS API"
   },
-  { defaultName: "next", id: "web-next", label: "Next.js web app" },
-  { defaultName: "express", id: "api-express", label: "Express API" },
-  { defaultName: "expo", id: "mobile-expo", label: "Expo React Native app" },
+  {
+    defaultName: "next",
+    description:
+      "A React app with server-side rendering, routing, and API routes built in.",
+    id: "web-next",
+    label: "Next.js web app"
+  },
+  {
+    defaultName: "express",
+    description:
+      "A minimal, unopinionated Node.js API framework for lightweight backends.",
+    id: "api-express",
+    label: "Express API"
+  },
+  {
+    defaultName: "expo",
+    description:
+      "A React Native app managed by Expo, with simplified builds and native APIs.",
+    id: "mobile-expo",
+    label: "Expo React Native app"
+  },
   {
     defaultName: "mobile",
+    description:
+      "A React Native app without Expo, for full control over native code.",
     id: "mobile-react-native",
     label: "Bare React Native app"
   }

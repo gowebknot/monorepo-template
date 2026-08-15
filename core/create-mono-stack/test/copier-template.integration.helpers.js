@@ -118,6 +118,25 @@ export async function assertGeneratedProject({
   );
   assert.doesNotMatch(generatedAgents, /core\/create-mono-stack/);
   assert.doesNotMatch(generatedAgents, /pnpm --filter create-mono-stack test/);
+  assert.equal(
+    (await readFile(join(projectRoot, "CLAUDE.md"), "utf8")).trim(),
+    "@AGENTS.md"
+  );
+  assert.equal(
+    (await readFile(join(projectRoot, "apps/server/CLAUDE.md"), "utf8")).trim(),
+    "@AGENTS.md"
+  );
+
+  // TEST-GATE-021: generated projects ship the skill-invocation gate.
+  await access(join(projectRoot, "scripts/skill-gate.mjs"));
+  const generatedTriggers = JSON.parse(
+    await readFile(join(projectRoot, ".claude/skill-triggers.json"), "utf8")
+  );
+  assert.ok(generatedTriggers.always.includes("test-first-workflow"));
+  assert.match(
+    await readFile(join(projectRoot, ".claude/settings.json"), "utf8"),
+    /skill-gate\.mjs/
+  );
   assert.match(
     await readFile(join(projectRoot, "scripts/update-template.mjs"), "utf8"),
     /mono-stack\.template-host-alias/

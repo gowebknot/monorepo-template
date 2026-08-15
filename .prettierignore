@@ -3,6 +3,9 @@ dist
 .turbo
 packages/*/dist
 packages/*/drizzle
+skills/shadcn
 .agents/skills/shadcn
+.claude/skills/shadcn
+.opencode/skills/shadcn
 apps/web/src/routeTree.gen.ts
 .copier-answers.yml

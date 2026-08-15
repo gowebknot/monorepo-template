@@ -271,6 +271,37 @@ test("keeps project identity adapters synchronized with live source files", asyn
   }
 });
 
+test("pairs every AGENTS.md with a CLAUDE.md import", async () => {
+  const trackedFiles = spawnSync("git", ["ls-files", "-z"], {
+    cwd: root,
+    encoding: "utf8"
+  });
+  assert.equal(trackedFiles.status, 0, trackedFiles.stderr);
+  const tracked = new Set(trackedFiles.stdout.split("\0").filter(Boolean));
+
+  const agentFiles = [...tracked].filter(
+    (path) =>
+      (path === "AGENTS.md" || path.endsWith("/AGENTS.md")) &&
+      !path.startsWith("core/") &&
+      !path.startsWith(".claude/worktrees/")
+  );
+  assert.ok(agentFiles.length > 0, "expected tracked AGENTS.md files");
+
+  for (const agentPath of agentFiles) {
+    const claudePath = agentPath.replace(/AGENTS\.md$/, "CLAUDE.md");
+    assert.ok(
+      tracked.has(claudePath),
+      `${agentPath} is missing a sibling ${claudePath}`
+    );
+    const contents = await readFile(join(root, claudePath), "utf8");
+    assert.equal(
+      contents.trim(),
+      "@AGENTS.md",
+      `${claudePath} must import its sibling AGENTS.md with "@AGENTS.md"`
+    );
+  }
+});
+
 test("uses a stable internal workspace package scope", async () => {
   const packagePaths = [
     "packages/api-client/package.json",

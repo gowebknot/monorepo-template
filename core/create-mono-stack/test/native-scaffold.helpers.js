@@ -127,6 +127,7 @@ const renderedWebTree = {
 const renderedServerTree = {
   ".prettierrc": '{"marker":"prettier"}',
   "AGENTS.md": "server-agent-marker",
+  "CLAUDE.md": "server-claude-marker",
   "eslint.config.mjs": "server-eslint-marker",
   "nest-cli.json": '{"marker":"nest-main"}',
   "nest-cli.reference.json": '{"marker":"nest-reference"}',

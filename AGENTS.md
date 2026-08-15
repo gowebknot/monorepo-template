@@ -181,6 +181,16 @@ changes code, tests, documentation, configuration, packages, or skills. Define a
 and executable tests or equivalent validation checks before editing, then run the checks after the
 change.
 
+Invoke each applicable skill through the agent's skill mechanism at the moment you enter an
+implementation phase. Entering implementation after a planning phase, after exiting plan mode, after
+answering questions, or after any research phase requires invoking the applicable skills at that
+point. Prior context, an approved plan, an earlier phase in the same session, or familiarity with the
+steps is never an exemption. Do not approximate a skill's rules from memory; invoke the skill so its
+current rules load, then follow them. In Claude Code this is enforced at edit time by the
+`scripts/skill-gate.mjs` pre-tool hook (configured in `.claude/settings.json` from
+`.claude/skill-triggers.json`); the same rule still binds every other agent, where it is not
+mechanically enforced.
+
 Load the additional skills when their task boundaries apply:
 
 - `checklist-tracking` when changing Markdown checklists, plans, status tables, or tracked test cases.

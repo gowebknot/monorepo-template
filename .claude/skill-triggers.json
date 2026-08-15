@@ -1,0 +1,24 @@
+{
+  "$comment": "Path-detectable skill triggers enforced by scripts/skill-gate.mjs (a PreToolUse hook). 'always' skills are required for every non-exempt edit; each rule adds skills when an edited path matches any 'when' glob. Edit this table to tighten or extend coverage. Intent-only skills that a hook cannot detect (code-review, release-flow, end-to-end-api-flow, observability, security-testing-policy, jsx-component-extraction) stay governed by AGENTS.md. Opt out with SKILL_GATE_DISABLE=1.",
+  "always": ["test-first-workflow"],
+  "rules": [
+    {
+      "when": ["**/*.test.*", "**/*.spec.*", "**/test/**", "**/tests/**"],
+      "require": ["testing-policy"]
+    },
+    {
+      "when": ["packages/entities/**", "**/*.dto.*", "**/*.schema.*"],
+      "require": ["contract-validation"]
+    },
+    { "when": ["apps/server/**"], "require": ["backend-standards"] },
+    { "when": ["apps/web/**"], "require": ["frontend-standards"] },
+    { "when": ["**/*.tsx", "**/*.jsx"], "require": ["react-19"] }
+  ],
+  "exempt": [
+    "docs/checklists/**",
+    ".claude/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.turbo/**"
+  ]
+}
