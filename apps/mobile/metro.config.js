@@ -64,8 +64,28 @@ const resolveRuntimeHelper = (context, moduleName, platform, fallback) => {
 };
 
 const nativewindConfig = withNativewind(config);
+nativewindConfig.resolver.extraNodeModules.react = path.resolve(
+  projectRoot,
+  "node_modules",
+  "react"
+);
+nativewindConfig.resolver.extraNodeModules["@tanstack/react-query"] =
+  path.resolve(projectRoot, "node_modules", "@tanstack", "react-query");
 const nativewindResolveRequest = nativewindConfig.resolver.resolveRequest;
-nativewindConfig.resolver.resolveRequest = (context, moduleName, platform) =>
-  resolveRuntimeHelper(context, moduleName, platform, nativewindResolveRequest);
+nativewindConfig.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === "react" || moduleName === "@tanstack/react-query") {
+    return nativewindResolveRequest(
+      context,
+      path.resolve(projectRoot, "node_modules", moduleName),
+      platform
+    );
+  }
+  return resolveRuntimeHelper(
+    context,
+    moduleName,
+    platform,
+    nativewindResolveRequest
+  );
+};
 
 module.exports = nativewindConfig;
