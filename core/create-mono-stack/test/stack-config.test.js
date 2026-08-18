@@ -11,7 +11,12 @@ const validApps = [
     generator: "vite",
     name: "dashboard",
     path: "apps/dashboard",
-    referenceProfile: "vite/react-ts"
+    referenceProfile: "vite/react-ts",
+    selection: {
+      framework: "React",
+      linter: "ESLint",
+      variant: "TypeScript"
+    }
   },
   {
     feature: "api-nest",
@@ -46,6 +51,72 @@ function assertInvalid(id, value, pattern) {
 test("TEST-MANIFEST-002 accepts schema version 3", () => {
   assert.deepEqual(read(manifest()), manifest());
 });
+
+test("TEST-MANIFEST-102 accepts native app metadata", () => {
+  const nativeApps = [
+    {
+      feature: "web-next",
+      generator: "next",
+      name: "next",
+      path: "apps/next",
+      referenceProfile: "next/default"
+    },
+    {
+      feature: "mobile-expo",
+      generator: "expo",
+      name: "expo",
+      path: "apps/expo",
+      referenceProfile: "expo/default"
+    },
+    {
+      feature: "mobile-react-native",
+      generator: "react-native",
+      name: "mobile",
+      path: "apps/mobile",
+      referenceProfile: "react-native/default"
+    }
+  ];
+  const value = manifest({
+    features: nativeApps.map((app) => app.feature),
+    apps: nativeApps
+  });
+
+  assert.deepEqual(read(value), value);
+});
+
+test("TEST-VITE-MANIFEST-001 accepts observed Vite selection metadata", () => {
+  assert.deepEqual(read(manifest()).apps[0].selection, validApps[0].selection);
+});
+
+test("TEST-VITE-MANIFEST-002 accepts legacy Vite metadata without selection", () => {
+  const legacyVite = { ...validApps[0] };
+  delete legacyVite.selection;
+  const value = manifest({ apps: [legacyVite, validApps[1]] });
+
+  assert.deepEqual(read(value), value);
+});
+
+test("TEST-MANIFEST-101 accepts delegated Vite reference profiles", () => {
+  for (const referenceProfile of [
+    "vite/react-router-v7",
+    "vite/tanstack-router",
+    "vite/redwood-sdk",
+    "vite/vike"
+  ]) {
+    const value = manifest({
+      apps: [{ ...validApps[0], referenceProfile }, validApps[1]]
+    });
+    assert.deepEqual(read(value), value, referenceProfile);
+  }
+});
+
+assertInvalid(
+  "TEST-VITE-MANIFEST-003",
+  manifest({
+    apps: [{ ...validApps[0], selection: { framework: "React" } }, validApps[1]]
+  }),
+  /selection.*framework.*variant/i
+);
 
 assertInvalid("TEST-MANIFEST-003", "not-json", /not valid JSON/);
 assertInvalid(
@@ -149,7 +220,7 @@ assertInvalid(
 assertInvalid(
   "TEST-MANIFEST-021",
   manifest({ apps: [{ ...validApps[0], feature: 1 }, validApps[1]] }),
-  /app feature must be web-vite or api-nest/
+  /app feature must be a known app feature/
 );
 assertInvalid(
   "TEST-MANIFEST-022",
@@ -169,7 +240,7 @@ assertInvalid(
 assertInvalid(
   "TEST-MANIFEST-024",
   manifest({ apps: [{ ...validApps[0], generator: null }, validApps[1]] }),
-  /generator must be vite or nestjs/
+  /generator must be vite for web-vite/
 );
 assertInvalid(
   "TEST-MANIFEST-025",
@@ -210,7 +281,7 @@ assertInvalid(
 assertInvalid(
   "TEST-MANIFEST-030",
   manifest({ apps: [{ ...validApps[0], feature: undefined }, validApps[1]] }),
-  /app feature must be web-vite or api-nest/
+  /app feature must be a known app feature/
 );
 assertInvalid(
   "TEST-MANIFEST-031",
@@ -220,7 +291,7 @@ assertInvalid(
 assertInvalid(
   "TEST-MANIFEST-032",
   manifest({ apps: [{ ...validApps[0], generator: undefined }, validApps[1]] }),
-  /generator must be vite or nestjs/
+  /generator must be vite for web-vite/
 );
 assertInvalid(
   "TEST-MANIFEST-033",

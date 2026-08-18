@@ -13,6 +13,18 @@
       "types": "./dist/src/web-env.d.ts",
       "default": "./dist/web-env.js"
     },
+    "./next": {
+      "types": "./dist/src/next-env.d.ts",
+      "default": "./dist/next-env.js"
+    },
+    "./expo": {
+      "types": "./dist/src/expo-env.d.ts",
+      "default": "./dist/expo-env.js"
+    },
+    "./react-native": {
+      "types": "./dist/src/react-native-env.d.ts",
+      "default": "./dist/react-native-env.js"
+    },
     "./server": {
       "types": "./dist/src/server-env.d.ts",
       "default": "./dist/server-env.js"

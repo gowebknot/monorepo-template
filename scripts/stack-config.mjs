@@ -14,9 +14,22 @@ const stackFeatureIds = [
 const stackFeatureIdSet = new Set(stackFeatureIds);
 const appDefinitions = {
   "api-nest": { generator: "nestjs", profiles: ["nestjs/default"] },
+  "mobile-expo": { generator: "expo", profiles: ["expo/default"] },
+  "mobile-react-native": {
+    generator: "react-native",
+    profiles: ["react-native/default"]
+  },
+  "web-next": { generator: "next", profiles: ["next/default"] },
   "web-vite": {
     generator: "vite",
-    profiles: [null, "vite/react-ts"]
+    profiles: [
+      null,
+      "vite/react-ts",
+      "vite/react-router-v7",
+      "vite/tanstack-router",
+      "vite/redwood-sdk",
+      "vite/vike"
+    ]
   }
 };
 const knownProfiles = new Set(
@@ -51,24 +64,44 @@ function validateAppName(name) {
   }
 }
 
+function validateViteSelection(selection) {
+  if (selection === undefined) return;
+  if (!selection || typeof selection !== "object" || Array.isArray(selection)) {
+    invalid("Vite selection must be an object");
+  }
+  if (
+    typeof selection.framework !== "string" ||
+    !selection.framework.trim() ||
+    typeof selection.variant !== "string" ||
+    !selection.variant.trim()
+  ) {
+    invalid("Vite selection must contain framework and variant strings");
+  }
+  if (
+    selection.linter !== undefined &&
+    (typeof selection.linter !== "string" || !selection.linter.trim())
+  ) {
+    invalid("Vite selection linter must be a non-empty string");
+  }
+}
+
 function validateApp(app, selectedFeatures) {
   if (!app || typeof app !== "object" || Array.isArray(app)) {
     invalid("app records must be objects");
   }
   if (typeof app.feature !== "string" || !appDefinitions[app.feature]) {
-    invalid("app feature must be web-vite or api-nest");
+    invalid("app feature must be a known app feature");
   }
   if (!selectedFeatures.has(app.feature)) {
     invalid(`app feature is not selected: ${app.feature}`);
   }
   validateAppName(app.name);
-  if (app.generator !== "vite" && app.generator !== "nestjs") {
-    invalid("generator must be vite or nestjs");
+  if (app.generator !== appDefinitions[app.feature].generator) {
+    invalid(
+      `generator must be ${appDefinitions[app.feature].generator} for ${app.feature}`
+    );
   }
   const definition = appDefinitions[app.feature];
-  if (app.generator !== definition.generator) {
-    invalid(`generator must be ${definition.generator} for ${app.feature}`);
-  }
   if (app.path !== `apps/${app.name}`) {
     invalid(`path must equal apps/${app.name}`);
   }
@@ -87,6 +120,7 @@ function validateApp(app, selectedFeatures) {
   if (!definition.profiles.includes(app.referenceProfile)) {
     invalid(`referenceProfile is incompatible with ${app.feature}`);
   }
+  if (app.generator === "vite") validateViteSelection(app.selection);
 }
 
 export function readStackConfig(cwd, readFile = readFileSync) {

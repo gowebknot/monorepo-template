@@ -1,13 +1,6 @@
-import {
-  FieldWrapper,
-  useFieldMeta
-} from "@/components/forms/field-elements/field-wrapper";
-import {
-  FieldContent,
-  FieldDescription,
-  FieldLabel
-} from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
+import { FieldWrapper, useFieldMeta } from "./field-wrapper";
+import { FieldContent, FieldDescription, FieldLabel } from "../../ui/field";
+import { Switch } from "../../ui/switch";
 
 interface FormSwitchProps extends React.ComponentProps<typeof Switch> {
   labelProps?: React.ComponentProps<typeof FieldLabel>;

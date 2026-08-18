@@ -12,6 +12,7 @@ import {
 } from "./git-setup.js";
 import { cleanupFailedProject } from "./project-cleanup.js";
 import { promptForProjectArguments } from "./interactive-wizard.js";
+import { runInteractiveCommand } from "./interactive-command.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
 import {
   DEFAULT_FEATURE_NAMES,
@@ -46,6 +47,11 @@ Options:
        --template <source> Copier template Git URL or local path
        --vcs-ref <ref>     Copier template Git revision
        --features <ids>    Comma-separated stack feature IDs
+                           (web-vite, api-nest, web-next, api-express,
+                            mobile-expo, mobile-react-native)
+       --app-name <feature>:<name>
+                           Name a selected feature's app; repeatable
+                           (e.g. --app-name web-next:next)
        --web-app-name <name>
                            Vite app name (default: web)
        --server-app-name <name>
@@ -120,6 +126,7 @@ const systemDependencies = {
   rm,
   writeFile,
   runCommand,
+  runInteractiveCommand,
   temporaryDirectory: tmpdir()
 };
 
@@ -338,6 +345,7 @@ export async function createProject(
         writeFile: dependencies.writeFile
       }),
       runCommand: dependencies.runCommand,
+      runInteractiveCommand: dependencies.runInteractiveCommand,
       temporaryRoot
     });
 
@@ -437,6 +445,7 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
 
 What's next:
   cd ${options.destination}
+  pnpm install
   git add .
   git commit -m "chore: initialize project"
   pnpm dev

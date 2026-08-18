@@ -8,6 +8,13 @@ export const stackConfig = JSON.stringify({
       name: "dashboard",
       path: "apps/dashboard",
       referenceProfile: "vite/react-ts"
+    },
+    {
+      feature: "mobile-expo",
+      generator: "expo",
+      name: "expo",
+      path: "apps/expo",
+      referenceProfile: "expo/default"
     }
   ]
 });
@@ -30,7 +37,11 @@ export const expectedStackArguments = [
   "--exclude",
   "apps/web",
   "--exclude",
-  "apps/server"
+  "apps/next",
+  "--exclude",
+  "apps/server",
+  "--exclude",
+  "apps/mobile"
 ];
 
 export const validStackDependencies = { readFile: () => stackConfig };

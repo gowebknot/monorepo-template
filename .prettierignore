@@ -1,5 +1,6 @@
 node_modules
 dist
+.next
 .turbo
 packages/*/dist
 packages/*/drizzle

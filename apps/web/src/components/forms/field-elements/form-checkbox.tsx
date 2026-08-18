@@ -1,9 +1,6 @@
-import {
-  FieldWrapper,
-  useFieldMeta
-} from "@/components/forms/field-elements/field-wrapper";
-import { Checkbox } from "@/components/ui/checkbox";
-import { FieldLabel } from "@/components/ui/field";
+import { FieldWrapper, useFieldMeta } from "./field-wrapper";
+import { Checkbox } from "../../ui/checkbox";
+import { FieldLabel } from "../../ui/field";
 
 interface FormCheckboxProps extends React.ComponentProps<typeof Checkbox> {
   labelProps?: React.ComponentProps<typeof FieldLabel>;

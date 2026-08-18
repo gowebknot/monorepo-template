@@ -19,7 +19,10 @@ const stackFeatureIds = [
 ];
 const canonicalAppPaths = new Map([
   ["web-vite", "apps/web"],
-  ["api-nest", "apps/server"]
+  ["web-next", "apps/next"],
+  ["api-nest", "apps/server"],
+  ["mobile-expo", "apps/expo"],
+  ["mobile-react-native", "apps/mobile"]
 ]);
 const genericGitHubSshPrefix = "git@github.com:";
 const gitRoutingVariableNames = new Set(

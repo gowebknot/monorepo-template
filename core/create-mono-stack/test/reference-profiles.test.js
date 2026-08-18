@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  REFERENCE_PROFILES,
   detectViteReferenceProfile,
-  mergeProfilePackageJson
+  mergeProfilePackageJson,
+  selectionSupportsViteProfile
 } from "../src/reference-profiles.js";
 
 const appRoot = "/tmp/native/vite-dashboard";
@@ -113,7 +115,7 @@ test("TEST-PROFILE-004 rejects Vue TypeScript", async () => {
   assert.equal(profile, null);
 });
 
-test("TEST-PROFILE-005 rejects React Compiler TypeScript", async () => {
+test("TEST-REFERENCE-012 detects React Compiler TypeScript", async () => {
   const packageJson = reactTypeScriptPackage();
   packageJson.devDependencies["@rolldown/plugin-babel"] = "^0.2.3";
   packageJson.devDependencies["babel-plugin-react-compiler"] = "^1.0.0";
@@ -127,7 +129,7 @@ test("TEST-PROFILE-005 rejects React Compiler TypeScript", async () => {
     }
   );
 
-  assert.equal(profile, null);
+  assert.equal(profile, "vite/react-ts");
 });
 
 test("TEST-PROFILE-006 rejects a missing React TypeScript entry file", async () => {
@@ -178,6 +180,133 @@ test("TEST-PROFILE-008 detects a profile supplied through the registry", async (
   assert.equal(profile, "vite/vue-ts");
 });
 
+for (const { dependency, profile, testId, variant } of [
+  {
+    dependency: "react-router",
+    profile: "vite/react-router-v7",
+    testId: "TEST-PROFILE-101",
+    variant: "React Router v7"
+  },
+  {
+    dependency: "@tanstack/react-router",
+    profile: "vite/tanstack-router",
+    testId: "TEST-PROFILE-102",
+    variant: "TanStack Router"
+  },
+  {
+    dependency: "rwsdk",
+    profile: "vite/redwood-sdk",
+    testId: "TEST-PROFILE-103",
+    variant: "RedwoodSDK"
+  },
+  {
+    dependency: "vike",
+    profile: "vite/vike",
+    testId: "TEST-PROFILE-104",
+    variant: "Vike"
+  }
+]) {
+  test(`${testId} detects ${variant}`, async () => {
+    const packageJson = reactTypeScriptPackage({
+      dependencies: {
+        react: "^19.2.8",
+        "react-dom": "^19.2.8",
+        [dependency]: "^1.0.0"
+      }
+    });
+
+    const detected = await detectViteReferenceProfile(
+      {
+        appRoot,
+        packageJson,
+        selection: { framework: "React", variant }
+      },
+      { readFile: fixtureReader(new Map()) }
+    );
+
+    assert.equal(detected, profile);
+  });
+}
+
+test("TEST-PROFILE-105 rejects delegated labels without generated evidence", async () => {
+  for (const variant of [
+    "React Router v7",
+    "TanStack Router",
+    "RedwoodSDK",
+    "Vike"
+  ]) {
+    const detected = await detectViteReferenceProfile(
+      {
+        appRoot,
+        packageJson: reactTypeScriptPackage(),
+        selection: { framework: "React", variant }
+      },
+      { readFile: fixtureReader(new Map()) }
+    );
+
+    assert.equal(detected, null, variant);
+  }
+});
+
+for (const { profileId, generator, canonicalName } of [
+  { profileId: "expo/default", generator: "expo", canonicalName: "expo" },
+  {
+    profileId: "react-native/default",
+    generator: "react-native",
+    canonicalName: "mobile"
+  }
+]) {
+  test(`TEST-PROFILE-110 ${profileId} is an overlay profile for ${generator}`, () => {
+    const profile = REFERENCE_PROFILES[profileId];
+
+    assert.ok(profile, `${profileId} is registered`);
+    assert.equal(profile.generator, generator);
+    assert.equal(profile.canonicalName, canonicalName);
+    assert.ok(Array.isArray(profile.overlayEntries));
+    assert.ok(profile.overlayEntries.includes("AGENTS.md"));
+    assert.ok(profile.overlayEntries.includes("README.md"));
+    assert.ok(profile.overlayEntries.includes("babel.config.js"));
+    assert.ok(profile.overlayEntries.includes("metro.config.js"));
+    assert.ok(profile.overlayEntries.includes("nativewind-env.d.ts"));
+    assert.deepEqual(profile.mergeScriptNames, ["dev"]);
+  });
+}
+
+test("TEST-PROFILE-112 next/default is a reference-folder profile", () => {
+  const profile = REFERENCE_PROFILES["next/default"];
+
+  assert.ok(profile, "next/default is registered");
+  assert.equal(profile.generator, "next");
+  assert.equal(profile.canonicalName, "next");
+  assert.equal(profile.overlayEntries, undefined);
+  assert.ok(Array.isArray(profile.referenceEntries));
+  assert.ok(
+    profile.referenceEntries.some(
+      (entry) => entry.destination === "reference/src" && entry.source === "src"
+    ),
+    "copies the demo src into reference/"
+  );
+  assert.ok(
+    profile.referenceEntries.some((entry) => entry.destination === "AGENTS.md"),
+    "keeps AGENTS.md at the app root"
+  );
+});
+
+test("TEST-PROFILE-111 Vite detection ignores non-Vite generators", async () => {
+  const detected = await detectViteReferenceProfile(
+    {
+      appRoot,
+      packageJson: {
+        dependencies: { next: "^15.0.0", react: "^19.0.0" },
+        devDependencies: { typescript: "^5.6.0" }
+      }
+    },
+    { readFile: fixtureReader(new Map()) }
+  );
+
+  assert.equal(detected, null);
+});
+
 function nativePackage() {
   return {
     name: "vite-dashboard",
@@ -186,7 +315,9 @@ function nativePackage() {
     scripts: {
       build: "tsc -b && vite build",
       dev: "vite",
-      "inspect-native": "vite --debug"
+      "inspect-native": "vite --debug",
+      lint: "eslint .",
+      preview: "vite preview"
     },
     dependencies: {
       react: "^20.0.0"
@@ -206,8 +337,14 @@ function templatePackage() {
     version: "0.0.0",
     scripts: {
       build: "pnpm routes:generate && tsc -b && vite build",
-      "dev:reference": "vite",
-      "routes:generate": "tsr generate"
+      "build:reference":
+        "pnpm routes:generate:reference && vite build reference --config vite.config.ts",
+      "dev:reference":
+        "pnpm routes:generate:reference && vite reference --config vite.config.ts",
+      "preview:reference": "vite preview reference --config vite.config.ts",
+      "routes:generate": "tsr generate",
+      "routes:generate:reference":
+        "node --eval \"process.chdir('reference'); process.argv = ['node', 'tsr', 'generate']; import('@tanstack/router-cli');\""
     },
     dependencies: {
       "@repo/env": "workspace:^",
@@ -255,18 +392,28 @@ test("TEST-MERGE-003 retains native-only dependencies", () => {
   assert.equal(merged.devDependencies.oxlint, "^1.75.0");
 });
 
-test("TEST-MERGE-004 lets profile scripts replace native scripts", () => {
+test("TEST-REFERENCE-011 preserves native scripts and adds reference scripts", () => {
   const merged = mergeProfilePackageJson(
     nativePackage(),
     templatePackage(),
     "dashboard"
   );
 
+  assert.equal(merged.scripts.build, "tsc -b && vite build");
+  assert.equal(merged.scripts.dev, "vite");
+  assert.equal(merged.scripts.lint, "eslint .");
+  assert.equal(merged.scripts.preview, "vite preview");
   assert.equal(
-    merged.scripts.build,
-    "pnpm routes:generate && tsc -b && vite build"
+    merged.scripts["routes:generate:reference"],
+    "node --eval \"process.chdir('reference'); process.argv = ['node', 'tsr', 'generate']; import('@tanstack/router-cli');\""
   );
-  assert.equal(merged.scripts["dev:reference"], "vite");
+  assert.match(
+    merged.scripts["dev:reference"],
+    /^pnpm routes:generate:reference/
+  );
+  assert.match(merged.scripts["build:reference"], /vite build reference/);
+  assert.match(merged.scripts["preview:reference"], /vite preview reference/);
+  assert.equal(merged.scripts["routes:generate"], undefined);
 });
 
 test("TEST-MERGE-005 retains native-only scripts", () => {
@@ -289,7 +436,7 @@ test("TEST-MERGE-006 replaces the temporary package name", () => {
   assert.equal(merged.name, "dashboard");
 });
 
-test("TEST-MERGE-007 retains native top-level version metadata", () => {
+test("TEST-REFERENCE-010 retains only native top-level metadata", () => {
   const merged = mergeProfilePackageJson(
     nativePackage(),
     templatePackage(),
@@ -297,7 +444,38 @@ test("TEST-MERGE-007 retains native top-level version metadata", () => {
   );
 
   assert.equal(merged.version, "1.0.0");
-  assert.deepEqual(merged.jest, { testEnvironment: "jsdom" });
+  assert.equal(merged.jest, undefined);
+});
+
+test("TEST-REFERENCE-013 accepts every observed React TypeScript variant", () => {
+  for (const variant of [
+    "TypeScript",
+    "TypeScript + SWC",
+    "TypeScript + React Compiler",
+    "TypeScript + SWC + React Compiler"
+  ]) {
+    assert.equal(
+      selectionSupportsViteProfile(
+        { framework: "React", linter: "Oxlint", variant },
+        "vite/react-ts"
+      ),
+      true,
+      variant
+    );
+  }
+});
+
+test("TEST-REFERENCE-014 rejects incompatible observed selections", () => {
+  for (const selection of [
+    undefined,
+    { framework: "React", variant: "JavaScript" },
+    { framework: "Vue", variant: "TypeScript" }
+  ]) {
+    assert.equal(
+      selectionSupportsViteProfile(selection, "vite/react-ts"),
+      false
+    );
+  }
 });
 
 test("TEST-MERGE-008 keeps native dependency placement", () => {

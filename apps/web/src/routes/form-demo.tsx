@@ -7,10 +7,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle
-} from "@/components/ui/card";
-import { SelectItem } from "@/components/ui/select";
-import { useAppForm } from "@/components/forms/form-core";
-import { bugReportFormOption } from "@/routes/-form-demo-option";
+} from "../components/ui/card";
+import { SelectItem } from "../components/ui/select";
+import { useAppForm } from "../components/forms/form-core";
+import { bugReportFormOption } from "./-form-demo-option";
 
 export const Route = createFileRoute("/form-demo")({
   component: FormDemo

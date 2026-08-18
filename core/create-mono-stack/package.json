@@ -1,6 +1,6 @@
 {
   "name": "create-mono-stack",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "license": "MIT",
   "description": "Create a project from the Go Webknot monorepo template",
   "type": "module",
@@ -10,6 +10,7 @@
   "files": [
     "bin",
     "src",
+    "reference-templates",
     "requirements",
     "LICENSE",
     "README.md"
@@ -17,7 +18,7 @@
   "scripts": {
     "lint": "eslint .",
     "publish:package": "node scripts/publish.mjs",
-    "test": "node --test test/cli.test.js test/copier-template.test.js test/create-project-native.test.js test/feature-config.test.js test/git-host-alias.test.js test/git-setup.test.js test/interactive-wizard.test.js test/native-scaffold-overlays.test.js test/native-scaffold-selection.test.js test/native-scaffold.test.js test/project-cleanup.test.js test/publish.test.js test/python-runtime.test.js test/reference-profiles.test.js test/runtime-installers.test.js test/stack-config.test.js test/template-update-stack.test.js test/template-update.test.js",
+    "test": "node --test test/cli.test.js test/copier-template.test.js test/create-project-native.test.js test/feature-config.test.js test/git-host-alias.test.js test/git-setup.test.js test/interactive-command.test.js test/interactive-wizard.test.js test/native-scaffold-overlays.test.js test/native-scaffold-selection.test.js test/native-scaffold.test.js test/project-cleanup.test.js test/publish.test.js test/python-runtime.test.js test/reference-profiles.test.js test/runtime-installers.test.js test/stack-config.test.js test/template-update-stack.test.js test/template-update.test.js test/vite-wizard-observer.test.js",
     "test:integration": "node --test test/copier-template.integration.test.js"
   },
   "engines": {
@@ -36,6 +37,7 @@
     "ink": "^6.8.0",
     "ink-select-input": "^6.2.0",
     "ink-text-input": "^6.0.0",
+    "node-pty": "^1.1.0",
     "react": "^19.2.0"
   },
   "devDependencies": {

@@ -1,8 +1,8 @@
 import React from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Checkbox } from "../../components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -10,8 +10,8 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "@/components/ui/table";
-import { useAppForm } from "@/components/forms/form-core";
+} from "../../components/ui/table";
+import { useAppForm } from "../../components/forms/form-core";
 import {
   useTodoDetail,
   useUpdateTodoOptimistic,
@@ -21,7 +21,7 @@ import {
   useRemoveTodoItemOptimistic
 } from "@repo/query-client/example";
 import type { CreateTodoItemInput } from "@repo/entities/example";
-import { clientEnv } from "@/lib/env";
+import { clientEnv } from "../../lib/env";
 
 export const Route = createFileRoute("/reference/todos/$todoId")({
   component: TodoDetailPage

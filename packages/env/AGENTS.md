@@ -10,7 +10,7 @@
 - App-specific envs must derive their schema with `globalEnv.pick(...).shape`; do not define app env schemas directly in apps.
 - This package is the only place that may read `process.env`; all other packages must import parsed envs, validators, or factory functions from `@repo/env`.
 - Use current Zod imports, methods, and functions only; do not add deprecated pre-Zod-4 patterns or compatibility implementations.
-- Export app-specific parsed constants from subpaths (`@repo/env/web`, `@repo/env/server`) so importing one app env does not validate another app's required variables.
+- Export app-specific parsed constants from subpaths (`@repo/env/web`, `@repo/env/next`, `@repo/env/server`) so importing one app env does not validate another app's required variables. Client-rendered web apps read `import.meta.env` (Vite) or `process.env` (Next `NEXT_PUBLIC_`, Expo `EXPO_PUBLIC_`) via the matching `createXEnv(runtimeEnv)` factory.
 - Root package exports `globalEnv`, app-specific validator objects (`webEnvSchema`, `webServerEnvSchema`, `webClientEnvSchema`, `serverEnvSchema`), and factory functions (`createWebEnv`, `createServerEnv`); it must not export parsed `webEnv` or `serverEnv` constants.
 
 ## Entry Points

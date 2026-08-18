@@ -1,7 +1,7 @@
 import { useId } from "react";
-import { useFieldContext } from "@/components/forms/form-core";
-import { Field, FieldError } from "@/components/ui/field";
-import { cn } from "@/lib/utils";
+import { useFieldContext } from "../form-core";
+import { Field, FieldError } from "../../ui/field";
+import { cn } from "../../../lib/utils";
 
 export function useFieldMeta<TValue>() {
   const field = useFieldContext<TValue>();

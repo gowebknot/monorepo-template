@@ -94,13 +94,23 @@ export async function applyNativeReferenceProfiles({
   const runCommand = async (_command, args) => {
     if (args[0] === "create" && args[1] === "vite") {
       await writeTree(join(temporaryRoot, args[2]), {
+        "index.html":
+          '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n',
         "package.json": `${JSON.stringify(
           viteNativePackage(webPackage, args[2]),
           null,
           2
         )}\n`,
         "src/App.tsx": "export default function App() { return null; }\n",
-        "src/main.tsx": "// controlled React TypeScript native entry\n"
+        "src/main.tsx": "// controlled React TypeScript native entry\n",
+        "tsconfig.app.json":
+          '{"compilerOptions":{"jsx":"react-jsx","module":"esnext","moduleResolution":"bundler","noEmit":true,"skipLibCheck":true},"include":["src"]}\n',
+        "tsconfig.json":
+          '{"files":[],"references":[{"path":"./tsconfig.app.json"},{"path":"./tsconfig.node.json"}]}\n',
+        "tsconfig.node.json":
+          '{"compilerOptions":{"composite":true,"module":"esnext","moduleResolution":"bundler","noEmit":true,"skipLibCheck":true},"include":["vite.config.ts"]}\n',
+        "vite.config.ts":
+          'import { defineConfig } from "vite";\nimport react from "@vitejs/plugin-react";\nexport default defineConfig({ plugins: [react()] });\n'
       });
       return;
     }
@@ -126,6 +136,16 @@ export async function applyNativeReferenceProfiles({
     {
       ...nativeScaffoldDependencies({}),
       runCommand,
+      runInteractiveCommand: async (...args) => {
+        await runCommand(...args);
+        return {
+          observation: {
+            framework: "React",
+            linter: "ESLint",
+            variant: "TypeScript"
+          }
+        };
+      },
       temporaryRoot
     }
   );

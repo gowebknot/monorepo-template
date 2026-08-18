@@ -14,6 +14,11 @@
   documentation
 - Status legend: `[ ]` incomplete, `[/]` partial, `[x]` complete
 
+> The Vite overlay criteria in this historical checklist were superseded by
+> [Isolate the Vite reference app](./2026-08-16-isolate-vite-reference-app.md): native Vite source,
+> configuration, scripts, and dependency placement are now preserved, while reference application
+> code is copied under `reference/`. NestJS criteria remain unchanged.
+
 ## Planning Record
 
 - [x] Confirm the regression began when native CLI output replaced complete Copier-rendered app

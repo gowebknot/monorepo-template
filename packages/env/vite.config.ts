@@ -11,6 +11,9 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, "env.ts"),
         "web-env": path.resolve(__dirname, "src/web-env.ts"),
+        "next-env": path.resolve(__dirname, "src/next-env.ts"),
+        "expo-env": path.resolve(__dirname, "src/expo-env.ts"),
+        "react-native-env": path.resolve(__dirname, "src/react-native-env.ts"),
         "server-env": path.resolve(__dirname, "src/server-env.ts"),
         "reference-server-env": path.resolve(
           __dirname,

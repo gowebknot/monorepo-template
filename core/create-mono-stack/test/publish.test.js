@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -9,6 +10,14 @@ import {
 
 const packageRoot = "/workspace/core/create-mono-stack";
 const authConfig = "/workspace/.npmrc.auth";
+
+test("TEST-PACKAGE-101 publishes framework reference templates", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8")
+  );
+
+  assert.ok(manifest.files.includes("reference-templates"));
+});
 
 test("strips the package-script argument separator", () => {
   assert.deepEqual(normalizePublishArguments(["--", "--tag", "next"]), [

@@ -72,13 +72,24 @@ Install project dependencies and create the baseline commit after generation.
 ## Native apps and reference profiles
 
 Vite and NestJS run through their native CLIs before the template reference code is applied. Native
-CLI versions win when both the native app and reference profile declare the same package;
-template-only packages are then added at the versions authored by the template.
+Vite source, configuration, scripts, dependency placement, and dependency versions remain
+authoritative. Missing packages used by the isolated reference app are added at template-authored
+versions.
 
-The web reference profile currently supports only Vite React TypeScript. Other Vite choices remain
-fresh native apps and setup reports that web reference mode was skipped. Every generated NestJS app
+The web reference profile supports every React variant whose Vite selection contains TypeScript,
+including SWC and React Compiler variants with either supported linter. It copies application code to
+`reference/` and adds separate route-generation, development, build, and preview scripts without
+replacing native Vite files or scripts. Other Vite choices remain fresh native apps and setup reports
+that web reference mode was skipped. React Router v7, TanStack Router, RedwoodSDK, and Vike instead
+receive separate code-only references under `reference/`. Setup does not add or replace configuration,
+dependencies, or scripts for these examples, and they are not independently runnable. Every generated NestJS app
 receives the NestJS reference profile, including the workspace source, example API, tests, and build
 configuration.
+
+Vite's own interactive wizard chooses the framework, variant, and linter. The launcher observes
+Vite's confirmed answers without changing the command or input and records recognized choices in
+`.mono-stack.json`. Unrecognized answers, or answers that disagree with the generated files, remain a
+native app without the web reference profile.
 
 Custom-path and unsupported native apps remain untouched during template updates, and Copier does not
 recreate their canonical placeholder directories.

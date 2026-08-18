@@ -89,13 +89,23 @@ test("TEST-UPDATE-002 excludes a custom supported web path", () => {
     defaultApps[1]
   ];
 
-  assert.deepEqual(exclusions(runUpdate(manifest({ apps }))), ["apps/web"]);
+  assert.deepEqual(exclusions(runUpdate(manifest({ apps }))), [
+    "apps/web",
+    "apps/next",
+    "apps/expo",
+    "apps/mobile"
+  ]);
 });
 
 test("TEST-UPDATE-003 excludes an unsupported native Vite app", () => {
   const apps = [{ ...defaultApps[0], referenceProfile: null }, defaultApps[1]];
 
-  assert.deepEqual(exclusions(runUpdate(manifest({ apps }))), ["apps/web"]);
+  assert.deepEqual(exclusions(runUpdate(manifest({ apps }))), [
+    "apps/web",
+    "apps/next",
+    "apps/expo",
+    "apps/mobile"
+  ]);
 });
 
 test("TEST-UPDATE-004 excludes server without a NestJS app record", () => {
@@ -104,7 +114,12 @@ test("TEST-UPDATE-004 excludes server without a NestJS app record", () => {
     apps: [defaultApps[0]]
   });
 
-  assert.deepEqual(exclusions(runUpdate(config)), ["apps/server"]);
+  assert.deepEqual(exclusions(runUpdate(config)), [
+    "apps/next",
+    "apps/server",
+    "apps/expo",
+    "apps/mobile"
+  ]);
 });
 
 test("TEST-UPDATE-005 excludes web without a Vite app record", () => {
@@ -113,7 +128,12 @@ test("TEST-UPDATE-005 excludes web without a Vite app record", () => {
     apps: [defaultApps[1]]
   });
 
-  assert.deepEqual(exclusions(runUpdate(config)), ["apps/web"]);
+  assert.deepEqual(exclusions(runUpdate(config)), [
+    "apps/web",
+    "apps/next",
+    "apps/expo",
+    "apps/mobile"
+  ]);
 });
 
 test("TEST-UPDATE-006 excludes a custom supported NestJS path", () => {
@@ -126,9 +146,50 @@ test("TEST-UPDATE-006 excludes a custom supported NestJS path", () => {
     }
   ];
 
-  assert.deepEqual(exclusions(runUpdate(manifest({ apps }))), ["apps/server"]);
+  assert.deepEqual(exclusions(runUpdate(manifest({ apps }))), [
+    "apps/next",
+    "apps/server",
+    "apps/expo",
+    "apps/mobile"
+  ]);
 });
 
 test("TEST-UPDATE-007 updates both default supported app paths", () => {
-  assert.deepEqual(exclusions(runUpdate(manifest())), []);
+  assert.deepEqual(exclusions(runUpdate(manifest())), [
+    "apps/next",
+    "apps/expo",
+    "apps/mobile"
+  ]);
+});
+
+test("TEST-UPDATE-008 keeps selected native canonical app paths", () => {
+  const nativeApps = [
+    {
+      feature: "web-next",
+      generator: "next",
+      name: "next",
+      path: "apps/next",
+      referenceProfile: "next/default"
+    },
+    {
+      feature: "mobile-expo",
+      generator: "expo",
+      name: "expo",
+      path: "apps/expo",
+      referenceProfile: "expo/default"
+    },
+    {
+      feature: "mobile-react-native",
+      generator: "react-native",
+      name: "mobile",
+      path: "apps/mobile",
+      referenceProfile: "react-native/default"
+    }
+  ];
+  const config = manifest({
+    features: nativeApps.map((app) => app.feature),
+    apps: nativeApps
+  });
+
+  assert.deepEqual(exclusions(runUpdate(config)), ["apps/web", "apps/server"]);
 });

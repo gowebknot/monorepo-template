@@ -53,7 +53,15 @@ export async function assertGeneratedProject({
     await readFile(join(projectRoot, "apps/server/package.json"), "utf8")
   );
   assert.equal(webPackage.version, "1.0.0");
-  assert.equal(webPackage.scripts["dev:reference"], "vite");
+  assert.equal(
+    webPackage.scripts["dev:reference"],
+    "pnpm routes:generate:reference && vite reference --config vite.config.ts"
+  );
+  assert.equal(
+    webPackage.scripts["build:reference"],
+    "pnpm routes:generate:reference && vite build reference --config vite.config.ts"
+  );
+  assert.equal(webPackage.scripts.build, "tsc -b && vite build");
   assert.equal(webPackage.dependencies["@repo/api-client"], "workspace:^");
   assert.equal(serverPackage.version, "1.0.0");
   assert.equal(
@@ -98,7 +106,11 @@ export async function assertGeneratedProject({
     "utf8"
   );
   assert.match(generatedReadme, /## Template updates/);
-  assert.match(generatedReadme, /Native CLI versions win/);
+  assert.match(
+    generatedReadme,
+    /Native Vite source, configuration, scripts, dependency placement, and dependency versions remain authoritative/
+  );
+  assert.match(generatedReadme, /isolated application under reference\//);
   assert.match(
     generatedReadme,
     /custom-path and unsupported native apps remain untouched/i
@@ -172,10 +184,15 @@ export async function assertReferenceBuilds({ projectRoot, run }) {
     cwd: projectRoot,
     timeout: 180_000
   });
+  run("pnpm", ["--filter", "web", "build:reference"], {
+    cwd: projectRoot,
+    timeout: 180_000
+  });
   run("pnpm", ["--filter", "server", "build:reference"], {
     cwd: projectRoot,
     timeout: 180_000
   });
   await access(join(projectRoot, "apps/web/dist/index.html"));
+  await access(join(projectRoot, "apps/web/reference/dist/index.html"));
   await access(join(projectRoot, "apps/server/dist/reference/main.js"));
 }

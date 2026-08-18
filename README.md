@@ -63,11 +63,21 @@ Copier selects the newest stable PEP 440-compatible Git tag by default. Publish 
 as `v1.0.0` and `v1.1.0` so generated projects can update predictably.
 
 Setup installs the pinned Copier toolchain into the generated project's `.venv`, while `mise.toml`
-declares the latest Python runtime. Native CLI versions win for packages also declared by a reference
-profile, while template-only packages are added at the template-authored versions. Only Vite React
-TypeScript currently receives the web reference profile, and every generated NestJS app receives the
-NestJS reference profile. Custom-path and unsupported native apps remain untouched during template
+declares the latest Python runtime. Native Vite source, configuration, scripts, dependency placement,
+and dependency versions remain authoritative. React TypeScript variants receive an isolated web app
+under `reference/`; only missing reference dependencies and `*:reference` scripts are added. Every
+generated NestJS app receives the NestJS reference profile. Custom-path and unsupported native apps remain untouched during template
 updates, and Copier does not recreate their canonical placeholder directories.
+
+React Router v7, TanStack Router, RedwoodSDK, and Vike selections receive separate code-only
+references under `reference/`. These references are integration examples: setup does not add or
+replace configuration, dependencies, or scripts for them, and they are not independently runnable.
+
+Vite's own interactive wizard still chooses the framework, variant, and linter. Setup observes Vite's
+confirmed answers without changing them and records recognized choices in `.mono-stack.json`. If the
+answers are unrecognized or disagree with the generated files, setup keeps the result as a native app
+without applying the web reference profile. React Compiler, SWC, ESLint, and Oxlint choices are
+preserved because the web reference never replaces the selected Vite configuration.
 
 The project records its template source and version in `.copier-answers.yml`, and its selected stack in
 `.mono-stack.json`, so no separate updater bootstrap is required. Create the initial Git commit before

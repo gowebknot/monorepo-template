@@ -91,9 +91,9 @@ export async function runReferenceDevelopment(projectRoot) {
   assert.notEqual(webPort, referencePort);
   const webPackagePath = join(projectRoot, "apps/web/package.json");
   const webPackage = JSON.parse(await readFile(webPackagePath, "utf8"));
-  assert.equal(webPackage.scripts["dev:reference"], "vite");
+  assert.match(webPackage.scripts["dev:reference"], /vite reference/);
   webPackage.scripts["dev:reference"] =
-    `vite --host 127.0.0.1 --port ${webPort} --strictPort`;
+    `pnpm routes:generate:reference && vite reference --config vite.config.ts --host 127.0.0.1 --port ${webPort} --strictPort`;
   await writeFile(webPackagePath, `${JSON.stringify(webPackage, null, 2)}\n`);
 
   const child = spawn("pnpm", ["dev:reference"], {
@@ -162,4 +162,64 @@ export async function runReferenceDevelopment(projectRoot) {
   assert.equal(result.webStatus, 200);
   assert.ok(Array.isArray(result.users));
   return { ...result, forcedKill };
+}
+
+export async function runReferencePreview(projectRoot) {
+  const webPort = await reservePort();
+  const child = spawn(
+    "pnpm",
+    [
+      "--filter",
+      "web",
+      "preview:reference",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      String(webPort),
+      "--strictPort"
+    ],
+    {
+      cwd: projectRoot,
+      detached: process.platform !== "win32",
+      env: { ...process.env, FORCE_COLOR: "0", NO_COLOR: "1" },
+      stdio: ["ignore", "pipe", "pipe"]
+    }
+  );
+  const state = {
+    closed: false,
+    deadline: Date.now() + readinessTimeoutMs,
+    output: "",
+    spawnError: undefined
+  };
+  const capture = (chunk) => {
+    state.output = `${state.output}${chunk}`.slice(-20_000);
+  };
+  child.stdout.on("data", capture);
+  child.stderr.on("data", capture);
+  child.once("error", (error) => {
+    state.spawnError = error;
+  });
+  const closedPromise = new Promise((resolve) => {
+    child.once("close", (code, signal) => {
+      state.closed = true;
+      resolve({ code, signal });
+    });
+  });
+
+  let status;
+  let readinessError;
+  try {
+    status = await fetchWithin(
+      `http://127.0.0.1:${webPort}/`,
+      state,
+      (response) => Promise.resolve(response.status)
+    );
+  } catch (error) {
+    readinessError = error;
+  }
+
+  const forcedKill = await closeProcess(child, closedPromise);
+  if (readinessError) throw readinessError;
+  assert.equal(forcedKill, false);
+  assert.equal(status, 200);
 }

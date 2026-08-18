@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:reference": "vite",
+    "build:reference": "pnpm routes:generate:reference && vite build reference --config vite.config.ts",
+    "dev:reference": "pnpm routes:generate:reference && vite reference --config vite.config.ts",
+    "preview:reference": "vite preview reference --config vite.config.ts",
+    "routes:generate:reference": "node --eval \"process.chdir('reference'); process.argv = ['node', 'tsr', 'generate']; import('@tanstack/router-cli');\"",
     "routes:generate": "tsr generate",
     "build": "pnpm routes:generate && tsc -b && vite build",
     "lint": "eslint .",

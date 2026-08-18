@@ -1,5 +1,5 @@
-import { useFormContext } from "@/components/forms/form-core";
-import { Button } from "@/components/ui/button";
+import { useFormContext } from "../form-core";
+import { Button } from "../../ui/button";
 
 type SubmitButtonProps = React.ComponentProps<typeof Button>;
 

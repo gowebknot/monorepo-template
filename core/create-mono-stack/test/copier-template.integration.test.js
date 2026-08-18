@@ -19,7 +19,10 @@ import {
 } from "./copier-template.integration.helpers.js";
 import { copyTemplateFixture } from "./copier-template.integration.fixture.js";
 import { applyNativeReferenceProfiles } from "./copier-template.integration.native.js";
-import { runReferenceDevelopment } from "./copier-template.integration.runtime.js";
+import {
+  runReferenceDevelopment,
+  runReferencePreview
+} from "./copier-template.integration.runtime.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const temporaryRoot = join(root, ".tmp");
@@ -39,7 +42,7 @@ function run(command, args, options = {}) {
   assert.equal(
     result.status,
     0,
-    result.error?.message || result.stderr || result.stdout
+    result.error?.message || `${result.stderr}\n${result.stdout}`.trim()
   );
   return result.stdout.trim();
 }
@@ -312,6 +315,9 @@ test("creates and updates a customized project with Copier", async (t) => {
   stage("build.started");
   await assertReferenceBuilds({ projectRoot, run });
   stage("build.completed");
+  stage("reference-preview.started");
+  await runReferencePreview(projectRoot);
+  stage("reference-preview.completed");
   stage("reference-development.started");
   await runReferenceDevelopment(projectRoot);
   stage("reference-development.completed");

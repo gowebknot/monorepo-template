@@ -1,7 +1,7 @@
 import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,15 +9,15 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "@/components/ui/table";
-import { useAppForm } from "@/components/forms/form-core";
+} from "../../components/ui/table";
+import { useAppForm } from "../../components/forms/form-core";
 import {
   useTodoListByUser,
   useCreateTodoOptimistic,
   useRemoveTodoOptimistic
 } from "@repo/query-client/example";
 import type { CreateTodoInput } from "@repo/entities/example";
-import { clientEnv } from "@/lib/env";
+import { clientEnv } from "../../lib/env";
 
 export const Route = createFileRoute("/reference/todos")({
   component: TodosPage

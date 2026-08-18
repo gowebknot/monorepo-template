@@ -15,6 +15,7 @@ function dependencies(fixture, overrides = {}) {
   return {
     ...nativeScaffoldDependencies({}),
     runCommand: fixture.runCommand,
+    runInteractiveCommand: fixture.runInteractiveCommand,
     temporaryRoot: fixture.temporaryRoot,
     ...overrides
   };
@@ -38,7 +39,12 @@ test("TEST-SELECTION-002 uses custom final app names only", async (t) => {
       generator: "vite",
       name: "dashboard",
       path: "apps/dashboard",
-      referenceProfile: "vite/react-ts"
+      referenceProfile: "vite/react-ts",
+      selection: {
+        framework: "React",
+        linter: "ESLint",
+        variant: "TypeScript"
+      }
     },
     {
       feature: "api-nest",
@@ -140,6 +146,47 @@ test("TEST-SELECTION-005 Nest-only removes the web placeholder", async (t) => {
   assert.equal(await pathExists(join(fixture.destination, "apps/web")), false);
   assert.equal(fixture.calls.length, 1);
   assert.equal(fixture.calls[0].args[1], "@nestjs/cli");
+});
+
+test("TEST-SELECTION-010 stages mixed targets and removes unselected canonicals", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+
+  const apps = await scaffoldNativeApps(
+    {
+      appNames: {
+        "web-vite": "web",
+        "web-next": "next",
+        "mobile-expo": "expo"
+      },
+      destination: fixture.destination,
+      features: ["web-vite", "web-next", "mobile-expo"]
+    },
+    dependencies(fixture)
+  );
+
+  assert.deepEqual(
+    apps.map(({ generator, name, referenceProfile }) => ({
+      generator,
+      name,
+      referenceProfile
+    })),
+    [
+      { generator: "vite", name: "web", referenceProfile: "vite/react-ts" },
+      { generator: "next", name: "next", referenceProfile: "next/default" },
+      { generator: "expo", name: "expo", referenceProfile: "expo/default" }
+    ]
+  );
+  assert.equal(await pathExists(join(fixture.destination, "apps/web")), true);
+  assert.equal(await pathExists(join(fixture.destination, "apps/next")), true);
+  assert.equal(await pathExists(join(fixture.destination, "apps/expo")), true);
+  assert.equal(
+    await pathExists(join(fixture.destination, "apps/server")),
+    false
+  );
+  assert.equal(
+    await pathExists(join(fixture.destination, "apps/mobile")),
+    false
+  );
 });
 
 test("TEST-SELECTION-006 removes both placeholders without native features", async (t) => {

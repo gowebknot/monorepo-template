@@ -1,10 +1,11 @@
-import { cp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import {
   REFERENCE_PROFILES,
   detectViteReferenceProfile,
-  mergeProfilePackageJson
+  mergeProfilePackageJson,
+  selectionSupportsViteProfile
 } from "./reference-profiles.js";
 
 const appDefinitions = [
@@ -12,13 +13,41 @@ const appDefinitions = [
     canonicalName: "web",
     feature: "web-vite",
     generator: "vite",
-    nameKey: "webAppName"
+    nameKey: "webAppName",
+    interactive: true,
+    detectProfile: detectViteReferenceProfile
   },
   {
     canonicalName: "server",
     feature: "api-nest",
     generator: "nestjs",
-    nameKey: "serverAppName"
+    nameKey: "serverAppName",
+    interactive: false,
+    defaultProfile: "nestjs/default"
+  },
+  {
+    canonicalName: "next",
+    feature: "web-next",
+    generator: "next",
+    nameKey: null,
+    interactive: false,
+    defaultProfile: "next/default"
+  },
+  {
+    canonicalName: "expo",
+    feature: "mobile-expo",
+    generator: "expo",
+    nameKey: null,
+    interactive: false,
+    defaultProfile: "expo/default"
+  },
+  {
+    canonicalName: "mobile",
+    feature: "mobile-react-native",
+    generator: "react-native",
+    nameKey: null,
+    interactive: false,
+    defaultProfile: "react-native/default"
   }
 ];
 
@@ -40,10 +69,20 @@ function temporaryAppName(generator, name) {
   return `${generator}-${name}`;
 }
 
-function commandFor(generator, target) {
-  return generator === "vite"
-    ? ["pnpm", ["create", "vite", target, "--no-immediate"]]
-    : [
+function pascalCaseName(name) {
+  return name
+    .split(/[^a-z0-9]+/i)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+}
+
+function commandFor(definition, target) {
+  switch (definition.generator) {
+    case "vite":
+      return ["pnpm", ["create", "vite", target, "--no-immediate"]];
+    case "nestjs":
+      return [
         "pnpm",
         [
           "dlx",
@@ -56,6 +95,57 @@ function commandFor(generator, target) {
           "--skip-install"
         ]
       ];
+    case "next":
+      return [
+        "pnpm",
+        [
+          "dlx",
+          "create-next-app@latest",
+          target,
+          "--ts",
+          "--app",
+          "--src-dir",
+          "--eslint",
+          "--tailwind",
+          "--import-alias",
+          "@/*",
+          "--use-pnpm",
+          "--skip-install",
+          "--yes"
+        ]
+      ];
+    case "expo":
+      return [
+        "pnpm",
+        [
+          "dlx",
+          "create-expo-app@latest",
+          target,
+          "--template",
+          "blank-typescript",
+          "--no-install"
+        ]
+      ];
+    case "react-native":
+      // `--pm` is intentionally omitted: with `--skip-install` no package
+      // manager runs, and passing `--pm pnpm` makes the CLI fail a pnpm
+      // detection check inside `pnpm dlx`.
+      return [
+        "pnpm",
+        [
+          "dlx",
+          "@react-native-community/cli@latest",
+          "init",
+          pascalCaseName(definition.name),
+          "--directory",
+          target,
+          "--skip-install",
+          "--skip-git-init"
+        ]
+      ];
+    default:
+      throw new Error(`Unsupported generator: ${definition.generator}`);
+  }
 }
 
 export function validateAppName(name) {
@@ -113,20 +203,41 @@ async function applyReferenceProfile(
   }
 
   const profile = REFERENCE_PROFILES[profileId];
-  const templatePackage = JSON.parse(
-    await dependencies.readFile(join(templateTarget, "package.json"), "utf8")
-  );
-  for (const entry of profile.overlayEntries) {
-    const destination = join(nativeTarget, entry);
-    await dependencies.rm(destination, { force: true, recursive: true });
-    await dependencies.cp(join(templateTarget, entry), destination, {
-      recursive: true
-    });
+  const profileTemplateTarget = profile.templateRoot ?? templateTarget;
+  const templatePackage = profile.codeOnly
+    ? {}
+    : JSON.parse(
+        await dependencies.readFile(
+          join(templateTarget, "package.json"),
+          "utf8"
+        )
+      );
+  if (profile.referenceEntries) {
+    for (const entry of profile.referenceEntries) {
+      const destination = join(nativeTarget, entry.destination);
+      await dependencies.mkdir(join(nativeTarget, "reference"), {
+        recursive: true
+      });
+      await dependencies.cp(
+        join(profileTemplateTarget, entry.source),
+        destination,
+        { recursive: true }
+      );
+    }
+  } else {
+    for (const entry of profile.overlayEntries) {
+      const destination = join(nativeTarget, entry);
+      await dependencies.rm(destination, { force: true, recursive: true });
+      await dependencies.cp(join(templateTarget, entry), destination, {
+        recursive: true
+      });
+    }
   }
   const packageJson = mergeProfilePackageJson(
     nativePackage,
     templatePackage,
-    name
+    name,
+    profile.mergeScriptNames
   );
   await dependencies.writeFile(
     join(nativeTarget, "package.json"),
@@ -144,22 +255,33 @@ export async function scaffoldNativeApps(options, dependencies) {
       definition.name
     );
     const nativeTarget = join(dependencies.temporaryRoot, temporaryName);
-    const [command, args] = commandFor(definition.generator, temporaryName);
-    await dependencies.runCommand(command, args, {
+    const [command, args] = commandFor(definition, temporaryName);
+    const runGenerator =
+      definition.interactive && dependencies.runInteractiveCommand
+        ? dependencies.runInteractiveCommand
+        : dependencies.runCommand;
+    const commandResult = await runGenerator(command, args, {
       cwd: dependencies.temporaryRoot,
       stdio: "inherit"
     });
+    const selection = definition.interactive
+      ? commandResult?.observation
+      : undefined;
     await removeTemporaryArtifacts(nativeTarget, dependencies);
     const nativePackage = JSON.parse(
       await dependencies.readFile(join(nativeTarget, "package.json"), "utf8")
     );
+    const detectedProfile = definition.detectProfile
+      ? await definition.detectProfile(
+          { appRoot: nativeTarget, packageJson: nativePackage, selection },
+          dependencies
+        )
+      : definition.defaultProfile;
     const referenceProfile =
-      definition.generator === "vite"
-        ? await detectViteReferenceProfile(
-            { appRoot: nativeTarget, packageJson: nativePackage },
-            dependencies
-          )
-        : "nestjs/default";
+      definition.interactive &&
+      !selectionSupportsViteProfile(selection, detectedProfile)
+        ? null
+        : detectedProfile;
     await applyReferenceProfile(
       {
         name: definition.name,
@@ -177,7 +299,8 @@ export async function scaffoldNativeApps(options, dependencies) {
         generator: definition.generator,
         name: definition.name,
         path: `apps/${definition.name}`,
-        referenceProfile
+        referenceProfile,
+        ...(selection ? { selection } : {})
       }
     });
   }
@@ -199,12 +322,14 @@ export async function scaffoldNativeApps(options, dependencies) {
 
 export function nativeScaffoldDependencies({
   cp: copy,
+  mkdir: makeDirectory,
   readFile: read,
   rm: remove,
   writeFile: write
 }) {
   return {
     cp: copy ?? cp,
+    mkdir: makeDirectory ?? mkdir,
     readFile: read ?? readFile,
     rm: remove ?? rm,
     writeFile: write ?? writeFile

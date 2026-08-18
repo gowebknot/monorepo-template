@@ -118,6 +118,7 @@ test("opens the project wizard when no arguments are passed in a TTY", async () 
 
 What's next:
   cd /workspace/acme-platform
+  pnpm install
   git add .
   git commit -m "chore: initialize project"
   pnpm dev
