@@ -237,7 +237,8 @@ async function applyReferenceProfile(
     nativePackage,
     templatePackage,
     name,
-    profile.mergeScriptNames
+    profile.mergeScriptNames,
+    profile.nativeOwnedDependencies
   );
   await dependencies.writeFile(
     join(nativeTarget, "package.json"),

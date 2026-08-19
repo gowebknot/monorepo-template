@@ -171,7 +171,8 @@ export const renderedExpoPackage = {
     "@tanstack/react-query": "^5.0.0",
     expo: "^51.0.0",
     "expo-router": "^3.0.0",
-    react: "^18.0.0"
+    react: "^18.0.0",
+    "react-native-safe-area-context": "5.9.1"
   },
   devDependencies: { typescript: "^7.0.0" }
 };
@@ -194,7 +195,8 @@ export const renderedMobilePackage = {
     "@repo/query-client": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     react: "^18.0.0",
-    "react-native": "^0.75.0"
+    "react-native": "^0.75.0",
+    "react-native-safe-area-context": "5.9.1"
   },
   devDependencies: { typescript: "^7.0.0" }
 };
@@ -230,7 +232,8 @@ export const expoNativeTree = {
     dependencies: {
       expo: "^52.0.0",
       react: "^19.0.0",
-      "react-native": "^0.76.0"
+      "react-native": "^0.76.0",
+      "react-native-safe-area-context": "^5.5.2"
     },
     devDependencies: { typescript: "^5.6.0" }
   }),
@@ -246,7 +249,11 @@ export const reactNativeNativeTree = {
     private: true,
     version: "0.0.1",
     scripts: { start: "react-native start" },
-    dependencies: { react: "^19.0.0", "react-native": "^0.76.0" },
+    dependencies: {
+      react: "^19.0.0",
+      "react-native": "^0.76.0",
+      "react-native-safe-area-context": "^5.5.2"
+    },
     devDependencies: { typescript: "^5.6.0" }
   }),
   "tsconfig.json": '{"native":"rn"}'

@@ -353,6 +353,10 @@ test("TEST-OVERLAY-010 overlays the Expo canonical app and merges dependencies",
     '{"expo":{"name":"expo-template"}}'
   );
   assert.equal(packageJson.dependencies.expo, "^52.0.0");
+  assert.equal(
+    packageJson.dependencies["react-native-safe-area-context"],
+    "5.9.1"
+  );
   assert.equal(packageJson.dependencies["@repo/env"], "workspace:^");
   assert.equal(packageJson.dependencies["expo-router"], "^3.0.0");
   assert.equal(packageJson.scripts.dev, "expo start");
@@ -392,6 +396,10 @@ test("TEST-OVERLAY-011 overlays the bare React Native canonical app and merges d
   );
   assert.equal(await fixtureText(root, "index.js"), "mobile-entry");
   assert.equal(packageJson.dependencies["react-native"], "^0.76.0");
+  assert.equal(
+    packageJson.dependencies["react-native-safe-area-context"],
+    "5.9.1"
+  );
   assert.equal(packageJson.dependencies["@react-navigation/native"], "^7.0.0");
   assert.equal(packageJson.dependencies["@repo/env"], "workspace:^");
   assert.equal(packageJson.scripts.dev, "react-native start");

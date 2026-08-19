@@ -392,6 +392,60 @@ test("TEST-MERGE-003 retains native-only dependencies", () => {
   assert.equal(merged.devDependencies.oxlint, "^1.75.0");
 });
 
+test("TEST-MERGE-009 prefers the template version for a non-owned overlapping dependency", () => {
+  const native = {
+    name: "MobileApp",
+    dependencies: {
+      "react-native": "^0.76.0",
+      "react-native-safe-area-context": "^5.5.2"
+    }
+  };
+  const template = {
+    name: "mobile",
+    dependencies: {
+      "react-native": "0.87.0",
+      "react-native-safe-area-context": "5.9.1"
+    }
+  };
+
+  const merged = mergeProfilePackageJson(
+    native,
+    template,
+    "mobile",
+    [],
+    ["react-native"]
+  );
+
+  assert.equal(merged.dependencies["react-native-safe-area-context"], "5.9.1");
+});
+
+test("TEST-MERGE-010 keeps the native version for a dependency listed as native-owned", () => {
+  const native = {
+    name: "MobileApp",
+    dependencies: {
+      "react-native": "^0.76.0",
+      "react-native-safe-area-context": "^5.5.2"
+    }
+  };
+  const template = {
+    name: "mobile",
+    dependencies: {
+      "react-native": "0.87.0",
+      "react-native-safe-area-context": "5.9.1"
+    }
+  };
+
+  const merged = mergeProfilePackageJson(
+    native,
+    template,
+    "mobile",
+    [],
+    ["react-native"]
+  );
+
+  assert.equal(merged.dependencies["react-native"], "^0.76.0");
+});
+
 test("TEST-REFERENCE-011 preserves native scripts and adds reference scripts", () => {
   const merged = mergeProfilePackageJson(
     nativePackage(),
