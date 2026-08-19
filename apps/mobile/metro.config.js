@@ -109,7 +109,17 @@ nativewindConfig.resolver.extraNodeModules["@tanstack/react-query"] =
 const SINGLETON_NATIVE_MODULES = [
   "react-native",
   "react-native-safe-area-context",
-  "react-native-screens"
+  "react-native-screens",
+  // The workspace resolves two peer-differentiated copies of react-native-css
+  // (this app on react-native 0.87, the Expo app on 0.86). Its Babel
+  // import-plugin and its className-interop component shims must come from the
+  // SAME copy, otherwise the plugin's own "is this my file?" guard fails to
+  // recognize the other copy's shims and rewrites their `import … from
+  // "react-native"` into a self-import, leaving the wrapped base component
+  // undefined (a crash in copyComponentProperties). Canonicalize every
+  // react-native-css resolution onto this app's single copy, same as the
+  // native singletons above.
+  "react-native-css"
 ];
 
 // Deep subpath imports of these packages (for example
