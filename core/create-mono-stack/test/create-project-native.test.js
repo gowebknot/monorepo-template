@@ -115,7 +115,10 @@ test("TEST-MANIFEST-001 writes the current stack manifest", async () => {
   assert.deepEqual(JSON.parse(manifestWrite.contents), {
     schemaVersion: 3,
     features: ["web-vite", "api-nest"],
-    apps
+    apps: [
+      { ...apps[0], ports: { dev: 5173, reference: 5173 } },
+      { ...apps[1], ports: { dev: 3000, reference: 3001 } }
+    ]
   });
 });
 

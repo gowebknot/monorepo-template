@@ -8,8 +8,8 @@
   "scripts": {
     "build": "turbo build",
     "core:test": "node --test core/test/core-packages.test.js",
-    "dev": "turbo dev --ui tui",
-    "dev:reference": "turbo dev:reference --ui tui",
+    "dev": "node scripts/dev-ports.mjs && turbo dev --ui tui",
+    "dev:reference": "node scripts/dev-ports.mjs && turbo dev:reference --ui tui",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo lint && eslint \"scripts/*.mjs\"",

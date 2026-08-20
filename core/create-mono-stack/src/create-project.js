@@ -1,5 +1,12 @@
 import { spawn } from "node:child_process";
-import { copyFile, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, isAbsolute, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -30,6 +37,7 @@ import {
   scaffoldNativeApps,
   validateAppName
 } from "./native-scaffold.js";
+import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
@@ -362,11 +370,16 @@ export async function createProject(
       runInteractiveCommand: dependencies.runInteractiveCommand,
       temporaryRoot
     });
+    const allocatedApps = await allocateAppPorts(nativeApps);
+    await configureAppScripts(options.destination, allocatedApps, {
+      read: dependencies.readFile ?? readFile,
+      write: dependencies.writeFile
+    });
 
     await dependencies.writeFile(
       join(options.destination, ".mono-stack.json"),
       `${JSON.stringify(
-        { schemaVersion: 3, features, apps: nativeApps },
+        { schemaVersion: 3, features, apps: allocatedApps },
         null,
         2
       )}\n`
@@ -401,7 +414,7 @@ export async function createProject(
       dependencies,
       options.gitHostAlias
     );
-    scaffoldOptions.generatedStack = { apps: nativeApps, features };
+    scaffoldOptions.generatedStack = { apps: allocatedApps, features };
   } catch (setupError) {
     await cleanupFailedProject(
       {

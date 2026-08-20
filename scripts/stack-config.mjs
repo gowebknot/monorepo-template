@@ -121,6 +121,24 @@ function validateApp(app, selectedFeatures) {
     invalid(`referenceProfile is incompatible with ${app.feature}`);
   }
   if (app.generator === "vite") validateViteSelection(app.selection);
+  if (app.ports !== undefined) {
+    if (
+      !app.ports ||
+      typeof app.ports !== "object" ||
+      Array.isArray(app.ports)
+    ) {
+      invalid("ports must be an object");
+    }
+    for (const mode of ["dev", "reference"]) {
+      if (
+        !Number.isInteger(app.ports[mode]) ||
+        app.ports[mode] <= 0 ||
+        app.ports[mode] > 65535
+      ) {
+        invalid(`ports.${mode} must be a valid port number`);
+      }
+    }
+  }
 }
 
 export function readStackConfig(cwd, readFile = readFileSync) {

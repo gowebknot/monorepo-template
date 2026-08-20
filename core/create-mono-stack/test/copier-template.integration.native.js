@@ -5,6 +5,10 @@ import {
   nativeScaffoldDependencies,
   scaffoldNativeApps
 } from "../src/native-scaffold.js";
+import {
+  allocateAppPorts,
+  configureAppScripts
+} from "../src/port-allocation.js";
 
 function pickPackages(record, names) {
   return Object.fromEntries(
@@ -149,10 +153,14 @@ export async function applyNativeReferenceProfiles({
       temporaryRoot
     }
   );
+  const allocatedApps = await allocateAppPorts(apps, {
+    checkPort: async () => true
+  });
+  await configureAppScripts(projectRoot, allocatedApps);
   const config = {
     schemaVersion: 3,
     features: ["web-vite", "api-nest"],
-    apps
+    apps: allocatedApps
   };
   const contents = `${JSON.stringify(config, null, 2)}\n`;
   await writeFile(join(projectRoot, ".mono-stack.json"), contents);

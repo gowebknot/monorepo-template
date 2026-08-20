@@ -23,7 +23,7 @@ export async function assertGeneratedProject({
   );
   assert.equal(
     generatedPackage.scripts["dev:reference"],
-    "turbo dev:reference --ui tui"
+    "node scripts/dev-ports.mjs && turbo dev:reference --ui tui"
   );
   assert.equal(
     JSON.parse(
@@ -55,7 +55,7 @@ export async function assertGeneratedProject({
   assert.equal(webPackage.version, "1.0.0");
   assert.equal(
     webPackage.scripts["dev:reference"],
-    "pnpm routes:generate:reference && vite reference --config vite.config.ts"
+    "node ../../scripts/run-app.mjs reference"
   );
   assert.equal(
     webPackage.scripts["build:reference"],

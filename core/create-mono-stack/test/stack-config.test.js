@@ -272,6 +272,27 @@ test("TEST-MANIFEST-028 accepts a Vite app without a profile", () => {
   assert.deepEqual(read(value), value);
 });
 
+test("TEST-MANIFEST-036 accepts per-mode app ports", () => {
+  const value = manifest({
+    apps: [
+      { ...validApps[0], ports: { dev: 5173, reference: 5174 } },
+      validApps[1]
+    ]
+  });
+  assert.deepEqual(read(value), value);
+});
+
+assertInvalid(
+  "TEST-MANIFEST-037",
+  manifest({
+    apps: [
+      { ...validApps[0], ports: { dev: 0, reference: 5174 } },
+      validApps[1]
+    ]
+  }),
+  /ports\.dev must be a valid port number/
+);
+
 assertInvalid(
   "TEST-MANIFEST-029",
   { apps: [], features: ["api-express"] },

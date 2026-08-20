@@ -89,12 +89,16 @@ export async function runReferenceDevelopment(projectRoot) {
     reservePort()
   ]);
   assert.notEqual(webPort, referencePort);
-  const webPackagePath = join(projectRoot, "apps/web/package.json");
-  const webPackage = JSON.parse(await readFile(webPackagePath, "utf8"));
-  assert.match(webPackage.scripts["dev:reference"], /vite reference/);
-  webPackage.scripts["dev:reference"] =
-    `pnpm routes:generate:reference && vite reference --config vite.config.ts --host 127.0.0.1 --port ${webPort} --strictPort`;
-  await writeFile(webPackagePath, `${JSON.stringify(webPackage, null, 2)}\n`);
+  const manifestPath = join(projectRoot, ".mono-stack.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.apps = manifest.apps.map((app) =>
+    app.name === "web"
+      ? { ...app, ports: { ...app.ports, reference: webPort } }
+      : app.name === "server"
+        ? { ...app, ports: { ...app.ports, reference: referencePort } }
+        : app
+  );
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
   const child = spawn("pnpm", ["dev:reference"], {
     cwd: projectRoot,

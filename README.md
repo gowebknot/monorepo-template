@@ -143,6 +143,11 @@ CLI's `r`/`m`) to a specific app while every other dev server keeps running. Run
 itself in its own terminal (`pnpm --filter mobile dev`, `pnpm --filter expo dev`, etc.) still
 works too.
 
+Generated projects assign separate `dev` and `reference` ports to every app instance in
+`.mono-stack.json`. Ports are checked during allocation, occupied ports are skipped, and the
+assignment is reused when the project starts again. This prevents multiple Vite, Next, Nest, Expo,
+or React Native instances from attempting to bind the same port.
+
 Or with Just:
 
 ```sh

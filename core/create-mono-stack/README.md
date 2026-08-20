@@ -126,6 +126,11 @@ packages. Existing apps are preserved when adding another app. Template-owned pa
 `entities`, `env`, `db`, and `api-client` are never offered for removal. App and package removal
 requires explicit confirmation and runs `pnpm install` afterward.
 
+Generated app instances receive stable `dev` and `reference` ports in `.mono-stack.json`. The
+generated root preflight checks and allocates free ports, while each app delegates its `dev` and
+`dev:reference` scripts to the shared launcher. This applies to Vite, Next.js, NestJS, Expo, and
+React Native instances.
+
 ## Local Development
 
 From the repository root:

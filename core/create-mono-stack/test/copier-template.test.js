@@ -249,10 +249,13 @@ test("builds workspace dependencies before starting development", async () => {
   const turbo = JSON.parse(await readFile(join(root, "turbo.json"), "utf8"));
   const gitignore = await readFile(join(root, ".gitignore"), "utf8");
 
-  assert.equal(rootPackage.scripts.dev, "turbo dev --ui tui");
+  assert.equal(
+    rootPackage.scripts.dev,
+    "node scripts/dev-ports.mjs && turbo dev --ui tui"
+  );
   assert.equal(
     rootPackage.scripts["dev:reference"],
-    "turbo dev:reference --ui tui"
+    "node scripts/dev-ports.mjs && turbo dev:reference --ui tui"
   );
   assert.deepEqual(turbo.tasks.dev.dependsOn, ["^build"]);
   assert.deepEqual(turbo.tasks["dev:reference"].dependsOn, ["^build"]);

@@ -13,6 +13,7 @@ import {
   runProjectCommand,
   validateName
 } from "./project-management-runtime.js";
+import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
 
 export const MANAGEABLE_APP_DEFINITIONS = [
   {
@@ -136,7 +137,12 @@ function findAppDefinition(feature) {
 export async function addApp(
   cwd,
   { feature, name },
-  { runCommand = runProjectCommand, write = writeFile, read = readFile } = {}
+  {
+    runCommand = runProjectCommand,
+    write = writeFile,
+    read = readFile,
+    checkPort
+  } = {}
 ) {
   const definition = findAppDefinition(feature);
   validateName(name, "app name");
@@ -153,17 +159,15 @@ export async function addApp(
     path: `apps/${name}`,
     referenceProfile: definition.referenceProfile
   };
-  await writeManifest(
-    cwd,
-    {
-      ...manifest,
-      features: manifest.features.includes(feature)
-        ? manifest.features
-        : [...manifest.features, feature],
-      apps: [...manifest.apps, app]
-    },
-    write
-  );
+  const nextManifest = {
+    ...manifest,
+    features: manifest.features.includes(feature)
+      ? manifest.features
+      : [...manifest.features, feature],
+    apps: await allocateAppPorts([...manifest.apps, app], { checkPort })
+  };
+  await configureAppScripts(cwd, [app], { read, write });
+  await writeManifest(cwd, nextManifest, write);
   await runCommand("pnpm", ["install"], { cwd });
   return app;
 }
