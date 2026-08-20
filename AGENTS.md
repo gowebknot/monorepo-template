@@ -28,6 +28,7 @@ ephemeral runner that does not persist a global installation.
 ```sh
 pnpm build          # turbo build (topological, cached)
 pnpm dev            # build upstream packages, then start persistent development tasks
+pnpm dev:reference  # same, but for the reference apps under reference/
 pnpm lint           # turbo package lint + root scripts (requires upstream build first)
 pnpm package:create <name>  # scaffold packages/<name> as @repo/<name>
 pnpm typecheck      # turbo typecheck (requires upstream build first)
@@ -37,6 +38,14 @@ pnpm format:check   # CI-safe format check
 just check          # lint + typecheck + format-check + skills-check + skills-test + template-test
 just package-create <name>  # Just wrapper for pnpm package:create
 ```
+
+`pnpm dev` and `pnpm dev:reference` run through Turborepo's interactive terminal UI (`--ui tui`):
+each app's dev server gets its own pane. Use the arrow keys (or a pane's shown number) to focus a
+pane, then type directly into it — this is how to send interactive keypresses (e.g. React Native
+Metro's `r`/`d`, the Expo CLI's `r`/`m`) to `apps/mobile` or `apps/expo` while every other dev
+server keeps running. Running a single app's dev script by itself
+(`pnpm --filter mobile dev:reference`, `pnpm --filter expo dev:reference`, etc.) in its own
+terminal remains available too.
 
 Run a single package:
 

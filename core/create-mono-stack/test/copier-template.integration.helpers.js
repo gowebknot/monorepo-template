@@ -23,7 +23,7 @@ export async function assertGeneratedProject({
   );
   assert.equal(
     generatedPackage.scripts["dev:reference"],
-    "turbo dev:reference"
+    "turbo dev:reference --ui tui"
   );
   assert.equal(
     JSON.parse(

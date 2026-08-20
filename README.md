@@ -128,6 +128,13 @@ pnpm typecheck
 pnpm package:create billing
 ```
 
+`pnpm dev` (and `pnpm dev:reference`) open Turborepo's interactive terminal UI: each app's dev
+server runs in its own pane. Focus a pane with the arrow keys or its shown number, then type into
+it directly — this is how to send interactive keypresses (React Native Metro's `r`/`d`, the Expo
+CLI's `r`/`m`) to a specific app while every other dev server keeps running. Running one app by
+itself in its own terminal (`pnpm --filter mobile dev`, `pnpm --filter expo dev`, etc.) still
+works too.
+
 Or with Just:
 
 ```sh
