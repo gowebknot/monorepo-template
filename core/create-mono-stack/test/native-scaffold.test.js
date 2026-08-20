@@ -109,6 +109,7 @@ test("TEST-COMMAND-005 invokes create-next-app with non-interactive flags", asyn
         "@/*",
         "--use-pnpm",
         "--skip-install",
+        "--disable-git",
         "--yes"
       ],
       options: { cwd: fixture.temporaryRoot, stdio: "inherit" }

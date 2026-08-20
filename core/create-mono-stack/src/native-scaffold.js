@@ -111,6 +111,7 @@ function commandFor(definition, target) {
           "@/*",
           "--use-pnpm",
           "--skip-install",
+          "--disable-git",
           "--yes"
         ]
       ];
