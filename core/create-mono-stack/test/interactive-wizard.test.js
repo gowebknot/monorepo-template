@@ -65,7 +65,9 @@ test("renders an Ink wizard and uses safe project defaults", async (t) => {
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   assert.match(app.lastFrame(), /Advanced options/);
@@ -78,8 +80,8 @@ test("renders an Ink wizard and uses safe project defaults", async (t) => {
     [
       "--name=my-project",
       "--features=web-vite,api-nest",
-      "--app-name=web-vite:web",
-      "--app-name=api-nest:server",
+      "--app-name=web-vite:web-app-1",
+      "--app-name=api-nest:server-app-1",
       "--",
       "my-project"
     ]
@@ -100,8 +102,11 @@ test("selects additional stack features through the multiselect screen", async (
   await sendInput(app, downArrow);
   await sendInput(app, downArrow);
   await sendInput(app, " ");
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Next.js web app count/);
   await sendInput(app, enter, /Next.js web app name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -112,9 +117,9 @@ test("selects additional stack features through the multiselect screen", async (
     [
       "--name=my-project",
       "--features=web-vite,api-nest,web-next",
-      "--app-name=web-vite:web",
-      "--app-name=api-nest:server",
-      "--app-name=web-next:next",
+      "--app-name=web-vite:web-app-1",
+      "--app-name=api-nest:server-app-1",
+      "--app-name=web-next:next-app-1",
       "--",
       "my-project"
     ]
@@ -134,6 +139,7 @@ test("asks only for names of selected apps", async (t) => {
   await sendInput(app, enter, /Stack features/);
   await sendInput(app, downArrow);
   await sendInput(app, " ");
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
 
   assert.doesNotMatch(app.lastFrame(), /NestJS API name/);
@@ -145,7 +151,9 @@ test("navigates backward through selected app-name screens", async (t) => {
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, tab, /❯ Back/);
   await sendInput(app, enter, /Vite web app name/);
@@ -158,6 +166,7 @@ test("documents Tab focus for app-name Back navigation", async (t) => {
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
 
   assert.match(app.lastFrame(), /Tab focus Back/);
@@ -180,7 +189,9 @@ test("navigates backward through selectable wizard screens", async (t) => {
   await sendInput(app, enter, /Destination directory/);
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -204,7 +215,9 @@ test("renders discovered Python choices in the advanced flow", async (t) => {
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
@@ -248,7 +261,9 @@ test("TEST-WIZARD-003 shows the Advanced options question description and the de
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
 
@@ -272,7 +287,9 @@ test("TEST-WIZARD-004 moves the shown option description when the Advanced optio
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
 
@@ -293,7 +310,9 @@ test("TEST-WIZARD-005 shows the Ready to create question description and the def
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -327,7 +346,9 @@ test("TEST-WIZARD-007 shows the question description and default-highlighted opt
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
@@ -356,7 +377,9 @@ test("TEST-WIZARD-008 renders a discovered choice without an authored descriptio
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
@@ -366,6 +389,49 @@ test("TEST-WIZARD-008 renders a discovered choice without an authored descriptio
 
   assert.match(flattenFrame(app), /pyenv-python \(3\.12\.4\)/);
   assert.doesNotMatch(flattenFrame(app), /pyenv-python \(3\.12\.4\) —/);
+});
+
+test("TEST-MULTI-007 asks how many, then names each instance, chaining across features", async (t) => {
+  const completed = [];
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: (args) => completed.push(args)
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, " ");
+  await sendInput(app, enter, /Vite web app count/);
+  await sendInput(app, "2", /2/);
+  await sendInput(app, enter, /Vite web app name \(1 of 2\)/);
+  await sendInput(app, "dashboard", /dashboard/);
+  await sendInput(app, enter, /Vite web app name \(2 of 2\)/);
+  await sendInput(app, "admin-dashboard", /admin-dashboard/);
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Next.js web app count/);
+  await sendInput(app, enter, /Next.js web app name/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+  await sendInput(app, enter);
+  await waitFor(() => completed.length === 1);
+
+  assert.deepEqual(completed, [
+    [
+      "--name=my-project",
+      "--features=web-vite,api-nest,web-next",
+      "--app-name=web-vite:dashboard",
+      "--app-name=web-vite:admin-dashboard",
+      "--app-name=api-nest:server-app-1",
+      "--app-name=web-next:next-app-1",
+      "--",
+      "my-project"
+    ]
+  ]);
 });
 
 test("parses concrete SSH aliases from SSH config", () => {
@@ -394,8 +460,10 @@ test("collects advanced options through keyboard-driven Ink controls", async (t)
   await sendInput(app, enter, /Project name/);
   await sendInput(app, "Acme Platform", /Acme Platform/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, "dashboard", /dashboard/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, "api", /api/);
   await sendInput(app, enter, /Advanced options/);
@@ -479,7 +547,9 @@ test("cancels from the confirmation menu", async (t) => {
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -507,7 +577,9 @@ test("remains interactive in Ink screen-reader mode", async (t) => {
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -518,8 +590,8 @@ test("remains interactive in Ink screen-reader mode", async (t) => {
     [
       "--name=my-project",
       "--features=web-vite,api-nest",
-      "--app-name=web-vite:web",
-      "--app-name=api-nest:server",
+      "--app-name=web-vite:web-app-1",
+      "--app-name=api-nest:server-app-1",
       "--",
       "my-project"
     ]
@@ -532,7 +604,7 @@ test("preserves leading hyphens in wizard values", () => {
     gitHostAlias: "github-work",
     projectName: "-Acme Platform",
     features: ["web-vite", "api-nest"],
-    appNames: { "web-vite": "web", "api-nest": "server" },
+    featureNames: { "web-vite": ["web"], "api-nest": ["server"] },
     python: "--python3",
     template: "--template",
     vcsRef: "--revision"
@@ -543,7 +615,7 @@ test("preserves leading hyphens in wizard values", () => {
     gitHostAlias: "github-work",
     projectName: "-Acme Platform",
     features: ["web-vite", "api-nest"],
-    appNames: { "web-vite": "web", "api-nest": "server" },
+    appNames: { "web-vite": ["web"], "api-nest": ["server"] },
     python: "--python3",
     template: "/workspace/--template",
     vcsRef: "--revision"

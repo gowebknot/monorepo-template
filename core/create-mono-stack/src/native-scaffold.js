@@ -162,12 +162,18 @@ function selectedDefinitions(options) {
   const selected = new Set(options.features ?? []);
   const definitions = appDefinitions
     .filter(({ feature }) => selected.has(feature))
-    .map((definition) => ({
-      ...definition,
-      name: validateAppName(
-        options.appNames?.[definition.feature] ?? options[definition.nameKey]
-      )
-    }));
+    .flatMap((definition) => {
+      const names =
+        options.appNames?.[definition.feature] ??
+        (options[definition.nameKey] !== undefined
+          ? [options[definition.nameKey]]
+          : []);
+      const instanceNames = names.length > 0 ? names : [undefined];
+      return instanceNames.map((name) => ({
+        ...definition,
+        name: validateAppName(name)
+      }));
+    });
   const duplicate = definitions.find(
     ({ name }, index) =>
       definitions.findIndex((definition) => definition.name === name) !== index

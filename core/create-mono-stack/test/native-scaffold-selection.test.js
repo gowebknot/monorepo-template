@@ -26,7 +26,7 @@ test("TEST-SELECTION-002 uses custom final app names only", async (t) => {
 
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "api-nest": "api", "web-vite": "dashboard" },
+      appNames: { "api-nest": ["api"], "web-vite": ["dashboard"] },
       destination: fixture.destination,
       features: ["web-vite", "api-nest"]
     },
@@ -82,7 +82,7 @@ test("TEST-SELECTION-003 rejects equal app names before side effects", async (t)
   await assert.rejects(
     scaffoldNativeApps(
       {
-        appNames: { "api-nest": "app", "web-vite": "app" },
+        appNames: { "api-nest": ["app"], "web-vite": ["app"] },
         destination: fixture.destination,
         features: ["web-vite", "api-nest"]
       },
@@ -111,7 +111,7 @@ test("TEST-SELECTION-004 Vite-only removes the server placeholder", async (t) =>
 
   await scaffoldNativeApps(
     {
-      appNames: { "web-vite": "web" },
+      appNames: { "web-vite": ["web"] },
       destination: fixture.destination,
       features: ["web-vite"]
     },
@@ -132,7 +132,7 @@ test("TEST-SELECTION-005 Nest-only removes the web placeholder", async (t) => {
 
   await scaffoldNativeApps(
     {
-      appNames: { "api-nest": "server" },
+      appNames: { "api-nest": ["server"] },
       destination: fixture.destination,
       features: ["api-nest"]
     },
@@ -154,9 +154,9 @@ test("TEST-SELECTION-010 stages mixed targets and removes unselected canonicals"
   const apps = await scaffoldNativeApps(
     {
       appNames: {
-        "web-vite": "web",
-        "web-next": "next",
-        "mobile-expo": "expo"
+        "web-vite": ["web"],
+        "web-next": ["next"],
+        "mobile-expo": ["expo"]
       },
       destination: fixture.destination,
       features: ["web-vite", "web-next", "mobile-expo"]
@@ -208,4 +208,99 @@ test("TEST-SELECTION-006 removes both placeholders without native features", asy
     false
   );
   assert.deepEqual(fixture.calls, []);
+});
+
+test("TEST-MULTI-002 scaffolds two named instances of one feature", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+
+  const apps = await scaffoldNativeApps(
+    {
+      appNames: { "web-next": ["next", "admin-next"] },
+      destination: fixture.destination,
+      features: ["web-next"]
+    },
+    dependencies(fixture)
+  );
+
+  assert.deepEqual(
+    apps.map(({ feature, name, referenceProfile }) => ({
+      feature,
+      name,
+      referenceProfile
+    })),
+    [
+      { feature: "web-next", name: "next", referenceProfile: "next/default" },
+      {
+        feature: "web-next",
+        name: "admin-next",
+        referenceProfile: "next/default"
+      }
+    ]
+  );
+  assert.equal(await pathExists(join(fixture.destination, "apps/next")), true);
+  assert.equal(
+    await pathExists(join(fixture.destination, "apps/admin-next")),
+    true
+  );
+});
+
+test("TEST-MULTI-003 rejects duplicate names within the same feature", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+  const sideEffects = [];
+
+  await assert.rejects(
+    scaffoldNativeApps(
+      {
+        appNames: { "web-next": ["next", "next"] },
+        destination: fixture.destination,
+        features: ["web-next"]
+      },
+      {
+        cp: async () => sideEffects.push("copy"),
+        readFile: async () => sideEffects.push("read"),
+        rm: async () => sideEffects.push("remove"),
+        runCommand: async () => sideEffects.push("command"),
+        temporaryRoot: fixture.temporaryRoot,
+        writeFile: async () => sideEffects.push("write")
+      }
+    ),
+    /App names must be unique: next/
+  );
+
+  assert.deepEqual(sideEffects, []);
+});
+
+test("TEST-MULTI-004 removes the canonical placeholder exactly once for two instances", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+  const rmPaths = [];
+  const realDependencies = dependencies(fixture);
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "web-next": ["admin-next", "second-next"] },
+      destination: fixture.destination,
+      features: ["web-next"]
+    },
+    {
+      ...realDependencies,
+      rm: async (path, options) => {
+        rmPaths.push(path);
+        return realDependencies.rm(path, options);
+      }
+    }
+  );
+
+  const canonicalRemovals = rmPaths.filter((path) =>
+    path.endsWith(join("apps", "next"))
+  );
+  assert.equal(canonicalRemovals.length, 1);
+  assert.equal(await pathExists(join(fixture.destination, "apps/next")), false);
+  assert.equal(
+    await pathExists(join(fixture.destination, "apps/admin-next")),
+    true
+  );
+  assert.equal(
+    await pathExists(join(fixture.destination, "apps/second-next")),
+    true
+  );
 });

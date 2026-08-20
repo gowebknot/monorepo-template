@@ -193,3 +193,30 @@ test("TEST-UPDATE-008 keeps selected native canonical app paths", () => {
 
   assert.deepEqual(exclusions(runUpdate(config)), ["apps/web", "apps/server"]);
 });
+
+test("TEST-UPDATE-009 finds the canonical-path instance regardless of array order", () => {
+  const apps = [
+    {
+      feature: "web-next",
+      generator: "next",
+      name: "admin-next",
+      path: "apps/admin-next",
+      referenceProfile: "next/default"
+    },
+    {
+      feature: "web-next",
+      generator: "next",
+      name: "next",
+      path: "apps/next",
+      referenceProfile: "next/default"
+    },
+    defaultApps[0],
+    defaultApps[1]
+  ];
+  const config = manifest({
+    features: ["web-vite", "api-nest", "web-next"],
+    apps
+  });
+
+  assert.deepEqual(exclusions(runUpdate(config)), ["apps/expo", "apps/mobile"]);
+});

@@ -158,10 +158,6 @@ export function readStackConfig(cwd, readFile = readFileSync) {
   for (const app of value.apps) validateApp(app, selectedFeatures);
 
   const appFeatures = value.apps.map(({ feature }) => feature);
-  const duplicateFeature = appFeatures.find(
-    (feature, index) => appFeatures.indexOf(feature) !== index
-  );
-  if (duplicateFeature) invalid(`duplicate app feature: ${duplicateFeature}`);
   const appNames = value.apps.map(({ name }) => name);
   const duplicateName = appNames.find(
     (name, index) => appNames.indexOf(name) !== index

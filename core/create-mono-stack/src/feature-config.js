@@ -60,6 +60,10 @@ export const DEFAULT_FEATURE_NAMES = Object.fromEntries(
   FEATURE_DEFINITIONS.map(({ defaultName, id }) => [id, defaultName])
 );
 
+export function defaultInstanceName(featureId, index) {
+  return `${DEFAULT_FEATURE_NAMES[featureId]}-app-${index + 1}`;
+}
+
 function invalidFeatures(value, reason) {
   throw new Error(`Invalid feature selection${reason ? `: ${reason}` : ""}.`);
 }

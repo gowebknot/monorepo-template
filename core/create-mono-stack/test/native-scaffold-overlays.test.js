@@ -30,7 +30,7 @@ async function scaffoldWeb(t, nativeVite, viteSelection) {
   });
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "web-vite": "dashboard" },
+      appNames: { "web-vite": ["dashboard"] },
       destination: fixture.destination,
       features: ["web-vite"]
     },
@@ -43,7 +43,7 @@ async function scaffoldNest(t) {
   const fixture = await createNativeScaffoldFixture(t);
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "api-nest": "api" },
+      appNames: { "api-nest": ["api"] },
       destination: fixture.destination,
       features: ["api-nest"]
     },
@@ -270,7 +270,7 @@ async function scaffoldSingle(t, { appNames, feature, name }) {
 
 test("TEST-OVERLAY-009 keeps the generated Next app and copies the demo into reference/", async (t) => {
   const { apps, root } = await scaffoldSingle(t, {
-    appNames: { "web-next": "next" },
+    appNames: { "web-next": ["next"] },
     feature: "web-next",
     name: "next"
   });
@@ -321,7 +321,7 @@ test("TEST-OVERLAY-009 keeps the generated Next app and copies the demo into ref
 
 test("TEST-OVERLAY-010 overlays the Expo canonical app and merges dependencies", async (t) => {
   const { apps, root } = await scaffoldSingle(t, {
-    appNames: { "mobile-expo": "expo" },
+    appNames: { "mobile-expo": ["expo"] },
     feature: "mobile-expo",
     name: "expo"
   });
@@ -367,7 +367,7 @@ test("TEST-OVERLAY-010 overlays the Expo canonical app and merges dependencies",
 
 test("TEST-OVERLAY-011 overlays the bare React Native canonical app and merges dependencies", async (t) => {
   const { apps, root } = await scaffoldSingle(t, {
-    appNames: { "mobile-react-native": "mobile" },
+    appNames: { "mobile-react-native": ["mobile"] },
     feature: "mobile-react-native",
     name: "mobile"
   });
@@ -407,6 +407,40 @@ test("TEST-OVERLAY-011 overlays the bare React Native canonical app and merges d
   assert.equal(packageJson.name, "mobile");
   assert.equal(apps[0].referenceProfile, "react-native/default");
   assert.equal(apps[0].selection, undefined);
+});
+
+test("TEST-MULTI-008 detects reference profiles independently for two Vite instances", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+  const selections = [
+    { framework: "React", linter: "ESLint", variant: "TypeScript" },
+    { framework: "Vue", variant: "TypeScript" }
+  ];
+  let callCount = 0;
+  const runInteractiveCommand = async (...args) => {
+    await fixture.runCommand(...args);
+    const selection = selections[callCount];
+    callCount += 1;
+    return { observation: selection };
+  };
+
+  const apps = await scaffoldNativeApps(
+    {
+      appNames: { "web-vite": ["dashboard-one", "dashboard-two"] },
+      destination: fixture.destination,
+      features: ["web-vite"]
+    },
+    {
+      ...nativeScaffoldDependencies({}),
+      runCommand: fixture.runCommand,
+      runInteractiveCommand,
+      temporaryRoot: fixture.temporaryRoot
+    }
+  );
+
+  assert.equal(apps[0].referenceProfile, "vite/react-ts");
+  assert.deepEqual(apps[0].selection, selections[0]);
+  assert.equal(apps[1].referenceProfile, null);
+  assert.deepEqual(apps[1].selection, selections[1]);
 });
 
 async function fixtureText(root, path) {

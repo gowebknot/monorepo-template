@@ -15,7 +15,7 @@ import { promptForProjectArguments } from "./interactive-wizard.js";
 import { runInteractiveCommand } from "./interactive-command.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
 import {
-  DEFAULT_FEATURE_NAMES,
+  defaultInstanceName,
   normalizeFeatures,
   serializeFeatureData
 } from "./feature-config.js";
@@ -50,8 +50,10 @@ Options:
                            (web-vite, api-nest, web-next, api-express,
                             mobile-expo, mobile-react-native)
        --app-name <feature>:<name>
-                           Name a selected feature's app; repeatable
-                           (e.g. --app-name web-next:next)
+                           Name a selected feature's app; repeatable per
+                           feature to request multiple instances
+                           (e.g. --app-name web-next:next
+                                 --app-name web-next:admin-next)
        --web-app-name <name>
                            Vite app name (default: web)
        --server-app-name <name>
@@ -213,7 +215,8 @@ export function parseArguments(args, cwd = process.cwd()) {
     const separator = value.indexOf(":");
     if (separator <= 0) throw new Error(`Invalid app name mapping: ${value}`);
     const featureId = value.slice(0, separator);
-    result[featureId] = validateAppName(value.slice(separator + 1));
+    const name = validateAppName(value.slice(separator + 1));
+    result[featureId] = [...(result[featureId] ?? []), name];
     return result;
   }, {});
 
@@ -250,9 +253,12 @@ export async function createProject(
     features.map((feature) => [
       feature,
       options.appNames?.[feature] ??
-        (feature === "web-vite" ? options.webAppName : undefined) ??
-        (feature === "api-nest" ? options.serverAppName : undefined) ??
-        DEFAULT_FEATURE_NAMES[feature]
+        (feature === "web-vite" && options.webAppName
+          ? [options.webAppName]
+          : undefined) ??
+        (feature === "api-nest" && options.serverAppName
+          ? [options.serverAppName]
+          : undefined) ?? [defaultInstanceName(feature, 0)]
     ])
   );
   const scaffoldOptions = { ...options, appNames, features };

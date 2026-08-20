@@ -8,8 +8,8 @@ import { createElement, useRef, useState } from "react";
 import {
   DEFAULT_APP_NAMES,
   DEFAULT_FEATURES,
-  DEFAULT_FEATURE_NAMES,
-  FEATURE_DEFINITIONS
+  FEATURE_DEFINITIONS,
+  defaultInstanceName
 } from "./feature-config.js";
 import { discoverWizardOptions } from "./wizard-discovery.js";
 
@@ -284,6 +284,52 @@ function TextQuestion({ description, label, onBack, onSubmit, placeholder }) {
   );
 }
 
+function CountQuestion({ description, label, onBack, onSubmit }) {
+  const [value, setValue] = useState("");
+  const [backFocused, setBackFocused] = useState(false);
+
+  useInput((input, key) => {
+    if (key.tab) {
+      setBackFocused((current) => !current);
+      return;
+    }
+    if (backFocused && key.return) onBack?.();
+  });
+
+  function handleChange(next) {
+    if (next === "" || /^[0-9]+$/.test(next)) setValue(next);
+  }
+
+  function handleSubmit(next) {
+    onSubmit(Math.max(1, parseInt(next, 10) || 1));
+  }
+
+  return h(
+    Box,
+    { flexDirection: "column" },
+    h(QuestionHeader, { description, label }),
+    h(
+      Box,
+      { marginTop: 1 },
+      h(Text, { color: "cyan" }, "> "),
+      backFocused
+        ? h(Text, { dimColor: true }, value || "1")
+        : h(TextInput, {
+            onChange: handleChange,
+            onSubmit: handleSubmit,
+            placeholder: "1",
+            value
+          })
+    ),
+    h(
+      Text,
+      { color: backFocused ? "cyan" : undefined },
+      `${backFocused ? "❯" : " "} Back`
+    ),
+    h(Text, { dimColor: true }, "Tab focus Back | Enter submit/select")
+  );
+}
+
 function ChoiceQuestion({
   description,
   items,
@@ -375,8 +421,12 @@ function customStep(field) {
   return `custom:${field}`;
 }
 
-function featureNameStep(featureId) {
-  return `feature-name:${featureId}`;
+function featureCountStep(featureId) {
+  return `feature-count:${featureId}`;
+}
+
+function featureNameStep(featureId, instanceIndex) {
+  return `feature-name:${featureId}:${instanceIndex}`;
 }
 
 function projectNameChoices(destination) {
@@ -403,10 +453,16 @@ function Confirmation({ answers, onSelect }) {
     ["Destination", answers.destination],
     ["Project name", answers.projectName],
     ["Features", answers.features.join(", ")],
-    ...answers.features.map((featureId) => [
-      `${FEATURE_DEFINITIONS.find(({ id }) => id === featureId)?.label ?? featureId} name`,
-      answers.featureNames[featureId]
-    ]),
+    ...answers.features.flatMap((featureId) => {
+      const label =
+        FEATURE_DEFINITIONS.find(({ id }) => id === featureId)?.label ??
+        featureId;
+      const names = answers.featureNames[featureId] ?? [];
+      return names.map((name, index) => [
+        names.length > 1 ? `${label} #${index + 1} name` : `${label} name`,
+        name
+      ]);
+    }),
     ["SSH alias", answers.gitHostAlias || "none"],
     ["Python", answers.python || "auto-detect"],
     ["Template", answers.template || "latest stable"],
@@ -437,12 +493,14 @@ function Confirmation({ answers, onSelect }) {
 
 export function buildProjectArguments(answers) {
   const features = answers.features ?? DEFAULT_FEATURES;
-  const featureNames = answers.featureNames ?? DEFAULT_FEATURE_NAMES;
+  const featureNames = answers.featureNames ?? {};
   const args = [
     `--name=${answers.projectName}`,
     `--features=${features.join(",")}`,
-    ...features.map(
-      (featureId) => `--app-name=${featureId}:${featureNames[featureId]}`
+    ...features.flatMap((featureId) =>
+      (featureNames[featureId] ?? [defaultInstanceName(featureId, 0)]).map(
+        (name) => `--app-name=${featureId}:${name}`
+      )
     )
   ];
   const options = [
@@ -465,7 +523,10 @@ export function ProjectWizard({ onComplete, options = {} }) {
   const [answers, setAnswers] = useState({
     destination: "",
     features: DEFAULT_FEATURES,
-    featureNames: { ...DEFAULT_FEATURE_NAMES },
+    featureCounts: Object.fromEntries(DEFAULT_FEATURES.map((id) => [id, 1])),
+    featureNames: Object.fromEntries(
+      DEFAULT_FEATURES.map((id) => [id, [defaultInstanceName(id, 0)]])
+    ),
     serverAppName: DEFAULT_APP_NAMES.serverAppName,
     webAppName: DEFAULT_APP_NAMES.webAppName,
     gitHostAlias: "",
@@ -537,7 +598,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
       onSubmit(features) {
         setAnswers((current) => ({ ...current, features }));
         setStep(
-          features.length > 0 ? featureNameStep(features[0]) : "advanced"
+          features.length > 0 ? featureCountStep(features[0]) : "advanced"
         );
       },
       selected: answers.features
@@ -568,35 +629,88 @@ export function ProjectWizard({ onComplete, options = {} }) {
       }
     });
   } else {
+    const countStep = step.startsWith("feature-count:");
     const appNameStep = step.startsWith("feature-name:");
-    if (appNameStep) {
-      const featureId = step.slice("feature-name:".length);
+
+    function previousFeatureTarget(featureId) {
+      const featureIndex = answers.features.indexOf(featureId);
+      if (featureIndex === 0) return "features";
+      const previousFeature = answers.features[featureIndex - 1];
+      const previousCount = answers.featureCounts[previousFeature] ?? 1;
+      return featureNameStep(previousFeature, previousCount - 1);
+    }
+
+    if (countStep) {
+      const featureId = step.slice("feature-count:".length);
+      const feature = FEATURE_DEFINITIONS.find(({ id }) => id === featureId);
+      content = h(CountQuestion, {
+        key: step,
+        description: `How many ${feature.label} apps do you want to create?${
+          featureId === "web-vite"
+            ? " You'll be prompted by create-vite's own setup wizard once per app."
+            : ""
+        }`,
+        label: `${feature.label} count`,
+        onBack() {
+          setStep(previousFeatureTarget(featureId));
+        },
+        onSubmit(count) {
+          setAnswers((current) => {
+            const existingNames = current.featureNames[featureId] ?? [];
+            const names = Array.from(
+              { length: count },
+              (_, index) =>
+                existingNames[index] ?? defaultInstanceName(featureId, index)
+            );
+            return {
+              ...current,
+              featureCounts: { ...current.featureCounts, [featureId]: count },
+              featureNames: { ...current.featureNames, [featureId]: names }
+            };
+          });
+          setStep(featureNameStep(featureId, 0));
+        }
+      });
+    } else if (appNameStep) {
+      const [, featureId, instanceIndexText] = step.split(":");
+      const instanceIndex = Number(instanceIndexText);
       const feature = FEATURE_DEFINITIONS.find(({ id }) => id === featureId);
       const featureIndex = answers.features.indexOf(featureId);
       const nextFeature = answers.features[featureIndex + 1];
+      const count = answers.featureCounts[featureId] ?? 1;
       content = h(TextQuestion, {
         key: step,
         description: `Enter a name for the ${feature.label} app's folder and package.`,
-        label: `${feature.label} name`,
+        label:
+          count > 1
+            ? `${feature.label} name (${instanceIndex + 1} of ${count})`
+            : `${feature.label} name`,
         onBack() {
           setStep(
-            featureIndex === 0
-              ? "features"
-              : featureNameStep(answers.features[featureIndex - 1])
+            instanceIndex === 0
+              ? previousFeatureTarget(featureId)
+              : featureNameStep(featureId, instanceIndex - 1)
           );
         },
         onSubmit(value) {
-          const fallback = DEFAULT_FEATURE_NAMES[featureId];
-          setAnswers((current) => ({
-            ...current,
-            featureNames: {
-              ...current.featureNames,
-              [featureId]: value.trim() || fallback
-            }
-          }));
-          setStep(nextFeature ? featureNameStep(nextFeature) : "advanced");
+          const fallback = defaultInstanceName(featureId, instanceIndex);
+          setAnswers((current) => {
+            const names = [...(current.featureNames[featureId] ?? [])];
+            names[instanceIndex] = value.trim() || fallback;
+            return {
+              ...current,
+              featureNames: { ...current.featureNames, [featureId]: names }
+            };
+          });
+          setStep(
+            instanceIndex + 1 < count
+              ? featureNameStep(featureId, instanceIndex + 1)
+              : nextFeature
+                ? featureCountStep(nextFeature)
+                : "advanced"
+          );
         },
-        placeholder: DEFAULT_FEATURE_NAMES[featureId]
+        placeholder: defaultInstanceName(featureId, instanceIndex)
       });
     } else {
       const currentStep = steps.find(({ field }) => field === step);

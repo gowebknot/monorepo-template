@@ -129,7 +129,7 @@ export async function applyNativeReferenceProfiles({
   };
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "api-nest": "server", "web-vite": "web" },
+      appNames: { "api-nest": ["server"], "web-vite": ["web"] },
       destination: projectRoot,
       features: ["web-vite", "api-nest"]
     },

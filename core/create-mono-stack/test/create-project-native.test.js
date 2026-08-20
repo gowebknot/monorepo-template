@@ -72,8 +72,8 @@ test("TEST-SELECTION-001 scaffolds default Vite and NestJS apps", async () => {
 
   assert.deepEqual(scaffoldOptions.features, ["web-vite", "api-nest"]);
   assert.deepEqual(scaffoldOptions.appNames, {
-    "api-nest": "server",
-    "web-vite": "web"
+    "api-nest": ["server-app-1"],
+    "web-vite": ["web-app-1"]
   });
 });
 
@@ -98,7 +98,7 @@ test("TEST-MANIFEST-001 writes the current stack manifest", async () => {
 
   await createProject(
     {
-      appNames: { "api-nest": "api", "web-vite": "dashboard" },
+      appNames: { "api-nest": ["api"], "web-vite": ["dashboard"] },
       destination,
       features: ["web-vite", "api-nest"],
       projectName: "Acme Platform",

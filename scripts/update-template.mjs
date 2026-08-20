@@ -95,8 +95,10 @@ function stackFeatureData(config) {
 
 function stackAppExcludes(config) {
   return [...canonicalAppPaths].flatMap(([feature, canonicalPath]) => {
-    const app = config.apps.find((record) => record.feature === feature);
-    return app?.path === canonicalPath && app.referenceProfile !== null
+    const app = config.apps.find(
+      (record) => record.feature === feature && record.path === canonicalPath
+    );
+    return app !== undefined && app.referenceProfile !== null
       ? []
       : [canonicalPath];
   });

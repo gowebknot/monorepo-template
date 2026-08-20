@@ -185,17 +185,17 @@ assertInvalid(
   manifest({ apps: [], features: ["web-vite"] }),
   /missing app metadata for selected feature: web-vite/
 );
-assertInvalid(
-  "TEST-MANIFEST-016",
-  manifest({
+test("TEST-MULTI-009b accepts two app records sharing the same feature", () => {
+  const value = manifest({
     apps: [
       validApps[0],
       { ...validApps[0], name: "portal", path: "apps/portal" }
     ],
     features: ["web-vite"]
-  }),
-  /duplicate app feature: web-vite/
-);
+  });
+
+  assert.deepEqual(read(value), value);
+});
 assertInvalid(
   "TEST-MANIFEST-017",
   manifest({

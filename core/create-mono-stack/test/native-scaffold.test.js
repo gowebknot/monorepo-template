@@ -34,7 +34,7 @@ test("TEST-COMMAND-001 invokes interactive Vite without a template", async (t) =
 
   await scaffoldNativeApps(
     {
-      appNames: { "web-vite": "dashboard" },
+      appNames: { "web-vite": ["dashboard"] },
       destination: fixture.destination,
       features: ["web-vite"]
     },
@@ -56,7 +56,7 @@ test("TEST-COMMAND-002 skips the nested NestJS install", async (t) => {
 
   await scaffoldNativeApps(
     {
-      appNames: { "api-nest": "api" },
+      appNames: { "api-nest": ["api"] },
       destination: fixture.destination,
       features: ["api-nest"]
     },
@@ -86,7 +86,7 @@ test("TEST-COMMAND-005 invokes create-next-app with non-interactive flags", asyn
 
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "web-next": "next" },
+      appNames: { "web-next": ["next"] },
       destination: fixture.destination,
       features: ["web-next"]
     },
@@ -124,7 +124,7 @@ test("TEST-COMMAND-006 invokes create-expo-app with non-interactive flags", asyn
 
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "mobile-expo": "expo" },
+      appNames: { "mobile-expo": ["expo"] },
       destination: fixture.destination,
       features: ["mobile-expo"]
     },
@@ -154,7 +154,7 @@ test("TEST-COMMAND-007 invokes React Native CLI with a PascalCase name and direc
 
   const apps = await scaffoldNativeApps(
     {
-      appNames: { "mobile-react-native": "mobile-app" },
+      appNames: { "mobile-react-native": ["mobile-app"] },
       destination: fixture.destination,
       features: ["mobile-react-native"]
     },
@@ -188,7 +188,7 @@ test("TEST-COMMAND-003 leaves rendered apps untouched after CLI failure", async 
   await assert.rejects(
     scaffoldNativeApps(
       {
-        appNames: { "web-vite": "web" },
+        appNames: { "web-vite": ["web"] },
         destination: fixture.destination,
         features: ["web-vite"]
       },
@@ -223,7 +223,7 @@ test("TEST-COMMAND-004 removes temporary install artifacts", async (t) => {
 
   await scaffoldNativeApps(
     {
-      appNames: { "web-vite": "portal" },
+      appNames: { "web-vite": ["portal"] },
       destination: fixture.destination,
       features: ["web-vite"]
     },

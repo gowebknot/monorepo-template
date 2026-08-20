@@ -75,6 +75,22 @@ test("rejects invalid feature selections before setup", () => {
   );
 });
 
+test("TEST-MULTI-005 appends repeated --app-name flags for the same feature", () => {
+  assert.deepEqual(
+    parseArguments(
+      [
+        "acme-platform",
+        "--app-name",
+        "web-next:next",
+        "--app-name",
+        "web-next:admin-next"
+      ],
+      "/workspace"
+    ).appNames,
+    { "web-next": ["next", "admin-next"] }
+  );
+});
+
 test("advertises the zero-argument interactive wizard in help", async () => {
   const messages = [];
 
@@ -341,7 +357,7 @@ test("runs native scaffolding for wizard-shaped app names", async () => {
   let scaffoldOptions;
   await createProject(
     {
-      appNames: { "web-vite": "dashboard", "api-nest": "api" },
+      appNames: { "web-vite": ["dashboard"], "api-nest": ["api"] },
       destination: "/workspace/acme-platform",
       features: ["web-vite", "api-nest"],
       projectName: "Acme Platform",
@@ -384,8 +400,8 @@ test("runs native scaffolding for wizard-shaped app names", async () => {
     }
   );
   assert.deepEqual(scaffoldOptions.appNames, {
-    "web-vite": "dashboard",
-    "api-nest": "api"
+    "web-vite": ["dashboard"],
+    "api-nest": ["api"]
   });
 });
 

@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   DEFAULT_FEATURES,
   FEATURE_DEFINITIONS,
+  defaultInstanceName,
   normalizeFeatures,
   serializeFeatureData
 } from "../src/feature-config.js";
@@ -53,6 +54,12 @@ test("keeps feature definitions stable and uniquely identified", () => {
     new Set(FEATURE_DEFINITIONS.map(({ id }) => id)).size,
     FEATURE_DEFINITIONS.length
   );
+});
+
+test("TEST-MULTI-001 defaultInstanceName derives sequential default names", () => {
+  assert.equal(defaultInstanceName("web-next", 0), "next-app-1");
+  assert.equal(defaultInstanceName("web-next", 1), "next-app-2");
+  assert.equal(defaultInstanceName("web-next", 2), "next-app-3");
 });
 
 test("TEST-FEATURE-001 documents every feature with a non-empty description", () => {
