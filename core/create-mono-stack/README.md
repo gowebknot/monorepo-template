@@ -113,6 +113,19 @@ pnpm template:update
 The update wrapper applies the local setting to Copier and its cached Git mirror without changing the
 generic `_src_path` in `.copier-answers.yml`.
 
+## Generated Project Management
+
+From a generated project, run the interactive manager:
+
+```sh
+pnpm dlx create-mono-stack manage .
+```
+
+The manager can add or permanently remove supported apps, and add or remove user-created workspace
+packages. Existing apps are preserved when adding another app. Template-owned packages such as
+`entities`, `env`, `db`, and `api-client` are never offered for removal. App and package removal
+requires explicit confirmation and runs `pnpm install` afterward.
+
 ## Local Development
 
 From the repository root:

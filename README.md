@@ -101,6 +101,14 @@ generic source URL while Git uses the local alias when needed:
 pnpm template:update
 ```
 
+To add or remove generated apps and user-created workspace packages through the interactive manager:
+
+```sh
+pnpm dlx create-mono-stack manage .
+```
+
+Template-owned workspace packages remain protected and cannot be removed.
+
 Review and resolve any reported conflicts before running the project checks. Keep the generated
 project's working tree clean before updating so user changes are easy to distinguish from template
 changes.

@@ -252,13 +252,12 @@ assertInvalid(
   }),
   /referenceProfile is incompatible with web-vite/
 );
-assertInvalid(
-  "TEST-MANIFEST-026",
-  manifest({
+test("TEST-MANIFEST-026 accepts a native app without a reference profile", () => {
+  const value = manifest({
     apps: [validApps[0], { ...validApps[1], referenceProfile: null }]
-  }),
-  /referenceProfile is incompatible with api-nest/
-);
+  });
+  assert.deepEqual(read(value), value);
+});
 
 test("TEST-MANIFEST-027 accepts a deferred-only selection", () => {
   const value = manifest({ apps: [], features: ["api-express"] });

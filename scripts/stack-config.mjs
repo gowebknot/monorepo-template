@@ -13,13 +13,13 @@ const stackFeatureIds = [
 ];
 const stackFeatureIdSet = new Set(stackFeatureIds);
 const appDefinitions = {
-  "api-nest": { generator: "nestjs", profiles: ["nestjs/default"] },
-  "mobile-expo": { generator: "expo", profiles: ["expo/default"] },
+  "api-nest": { generator: "nestjs", profiles: [null, "nestjs/default"] },
+  "mobile-expo": { generator: "expo", profiles: [null, "expo/default"] },
   "mobile-react-native": {
     generator: "react-native",
-    profiles: ["react-native/default"]
+    profiles: [null, "react-native/default"]
   },
-  "web-next": { generator: "next", profiles: ["next/default"] },
+  "web-next": { generator: "next", profiles: [null, "next/default"] },
   "web-vite": {
     generator: "vite",
     profiles: [

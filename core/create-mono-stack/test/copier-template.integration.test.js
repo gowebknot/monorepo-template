@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
   copyFile,
   mkdir,
@@ -23,6 +23,7 @@ import {
   runReferenceDevelopment,
   runReferencePreview
 } from "./copier-template.integration.runtime.js";
+import { addApp, addPackage } from "../src/project-management.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const temporaryRoot = join(root, ".tmp");
@@ -49,6 +50,39 @@ function run(command, args, options = {}) {
 
 function git(cwd, ...args) {
   return run("git", args, { cwd });
+}
+
+async function runPreview(projectRoot) {
+  const port = 4179;
+  const child = spawn(
+    "pnpm",
+    [
+      "--filter",
+      "admin",
+      "preview",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      String(port)
+    ],
+    { cwd: projectRoot, stdio: "ignore" }
+  );
+  try {
+    let response;
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      try {
+        response = await fetch(`http://127.0.0.1:${port}`);
+        if (response.ok) return;
+      } catch {
+        // The preview process may need a few seconds to bind its port.
+      }
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 500));
+    }
+    throw new Error(`managed app preview did not respond: ${response?.status}`);
+  } finally {
+    child.kill("SIGTERM");
+    await new Promise((resolvePromise) => child.once("close", resolvePromise));
+  }
 }
 
 test("creates and updates a customized project with Copier", async (t) => {
@@ -321,4 +355,31 @@ test("creates and updates a customized project with Copier", async (t) => {
   stage("reference-development.started");
   await runReferenceDevelopment(projectRoot);
   stage("reference-development.completed");
+
+  stage("managed-members.started");
+  const managedRun = async (command, args, options) =>
+    run(command, args, { ...options, timeout: 300_000 });
+  await addApp(
+    projectRoot,
+    { feature: "web-vite", name: "admin" },
+    { runCommand: managedRun }
+  );
+  await addPackage(projectRoot, "billing", { runCommand: managedRun });
+  await assert.rejects(
+    readFile(join(projectRoot, "apps/admin/dist/index.html"))
+  );
+  assert.match(
+    await readFile(join(projectRoot, "apps/web/package.json"), "utf8"),
+    /"name"/
+  );
+  run("pnpm", ["--filter", "admin", "build"], {
+    cwd: projectRoot,
+    timeout: 300_000
+  });
+  run("pnpm", ["--filter", "@repo/billing", "build"], {
+    cwd: projectRoot,
+    timeout: 300_000
+  });
+  await runPreview(projectRoot);
+  stage("managed-members.completed");
 });

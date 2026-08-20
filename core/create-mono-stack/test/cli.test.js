@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { tmpdir } from "node:os";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -99,6 +101,38 @@ test("advertises the zero-argument interactive wizard in help", async () => {
   assert.equal(messages.length, 1);
   assert.match(messages[0], /create-mono-stack\n/);
   assert.match(messages[0], /without arguments.*interactive setup/i);
+});
+
+test("TEST-MANAGE-001 routes manage to the project management prompt", async () => {
+  const projectRoot = await mkdtemp(join(tmpdir(), "manage-cli-"));
+  try {
+    await writeFile(
+      join(projectRoot, ".mono-stack.json"),
+      JSON.stringify({ schemaVersion: 3, features: ["web-vite"], apps: [] })
+    );
+    const input = { isTTY: true };
+    const output = { isTTY: true };
+    let prompted = false;
+    let managed;
+    await main(["manage", projectRoot], {
+      input,
+      manageProject: async (cwd, action) => {
+        managed = { action, cwd };
+      },
+      output,
+      promptForProjectManagement: async (options) => {
+        prompted = options.projectRoot === projectRoot;
+        return { action: "add-package", name: "billing" };
+      }
+    });
+    assert.equal(prompted, true);
+    assert.deepEqual(managed, {
+      action: { action: "add-package", name: "billing" },
+      cwd: projectRoot
+    });
+  } finally {
+    await rm(projectRoot, { force: true, recursive: true });
+  }
 });
 
 test("opens the project wizard when no arguments are passed in a TTY", async () => {

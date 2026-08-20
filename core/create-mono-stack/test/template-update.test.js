@@ -54,6 +54,60 @@ test("passes generated stack features to Copier during updates", () => {
   ]);
 });
 
+test("TEST-UPDATE-010 reuses recorded answers for a bare update", () => {
+  const calls = [];
+  const execute = (command, args) => {
+    calls.push({ args, command });
+    return command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+  };
+
+  updateTemplate([], {
+    ...validStackDependencies,
+    cwd: projectRoot,
+    environment: { PATH: "/usr/bin" },
+    execute,
+    exists: () => true,
+    platform: "darwin",
+    readFile: () => stackConfig
+  });
+
+  assert.deepEqual(calls.at(-1).args, [
+    "-m",
+    "copier",
+    "update",
+    ...expectedStackArguments,
+    "--defaults"
+  ]);
+});
+
+test("TEST-UPDATE-011 preserves explicit update arguments", () => {
+  const calls = [];
+  const execute = (command, args) => {
+    calls.push({ args, command });
+    return command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+  };
+
+  updateTemplate(["--vcs-ref", "v1.2.0"], {
+    ...validStackDependencies,
+    cwd: projectRoot,
+    environment: { PATH: "/usr/bin" },
+    execute,
+    exists: () => true,
+    platform: "darwin",
+    readFile: () => stackConfig
+  });
+
+  assert.deepEqual(calls.at(-1).args.slice(-3), [
+    "--defaults",
+    "--vcs-ref",
+    "v1.2.0"
+  ]);
+});
+
 test("rejects a missing stack manifest before invoking Copier", () => {
   let copierCalled = false;
   assert.throws(

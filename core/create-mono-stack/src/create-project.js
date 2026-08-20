@@ -10,10 +10,16 @@ import {
   preflightGit,
   sanitizeGitEnvironment
 } from "./git-setup.js";
+import { promptForProjectManagement } from "./management-wizard.js";
 import { cleanupFailedProject } from "./project-cleanup.js";
 import { promptForProjectArguments } from "./interactive-wizard.js";
 import { runInteractiveCommand } from "./interactive-command.js";
 import { confirmInstallation, requirePython } from "./python-runtime.js";
+import {
+  listUserPackages,
+  manageProject as runProjectManagement,
+  readManifest
+} from "./project-management.js";
 import {
   defaultInstanceName,
   normalizeFeatures,
@@ -36,8 +42,10 @@ const requirementsPath = fileURLToPath(
 const help = `Usage:
   create-mono-stack
   create-mono-stack <destination> [options]
+  create-mono-stack manage [project]
 
 Run without arguments in a terminal to open interactive setup.
+Run manage in a generated project to add or remove apps and user packages.
 
 Options:
   -n, --name <name>       Project display name (defaults to destination name)
@@ -409,11 +417,47 @@ export async function createProject(
   return scaffoldOptions.generatedStack;
 }
 
+async function runManagement(args, dependencies, input, output, log) {
+  if (args.length > 2) {
+    throw new Error("Management accepts at most one project directory.");
+  }
+  if (!input.isTTY || !output.isTTY) {
+    throw new Error("Project management requires an interactive terminal.");
+  }
+  const projectRoot = resolve(
+    dependencies.cwd ?? process.cwd(),
+    args[1] ?? "."
+  );
+  const manifest = await readManifest(projectRoot);
+  const packages = await listUserPackages(projectRoot);
+  const prompt =
+    dependencies.promptForProjectManagement ?? promptForProjectManagement;
+  const action = await prompt({
+    apps: manifest.apps,
+    input,
+    output,
+    packages,
+    projectRoot
+  });
+  if (!action) {
+    log("Project management cancelled.");
+    return;
+  }
+  const manage = dependencies.manageProject ?? runProjectManagement;
+  await manage(projectRoot, action, dependencies.managementDependencies);
+  log("Project management complete. Review changes, then run just check.");
+}
+
 export async function main(args = process.argv.slice(2), dependencies = {}) {
   const input = dependencies.input ?? process.stdin;
   const output = dependencies.output ?? process.stdout;
   const log = dependencies.log ?? console.log;
   let effectiveArgs = args;
+
+  if (effectiveArgs[0] === "manage") {
+    await runManagement(effectiveArgs, dependencies, input, output, log);
+    return;
+  }
 
   if (effectiveArgs.length === 0 && input.isTTY && output.isTTY) {
     const openWizard =

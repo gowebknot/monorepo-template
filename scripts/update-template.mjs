@@ -164,9 +164,12 @@ export function updateTemplate(args, dependencies = {}) {
     ...stackFeatureData(stackConfig).flatMap((data) => ["--data", data]),
     ...stackAppExcludes(stackConfig).flatMap((path) => ["--exclude", path])
   ];
+  const updateArguments = args.includes("--defaults")
+    ? args
+    : ["--defaults", ...args];
   const result = execute(
     python,
-    ["-m", "copier", "update", ...stackArguments, ...args],
+    ["-m", "copier", "update", ...stackArguments, ...updateArguments],
     {
       cwd,
       env,
