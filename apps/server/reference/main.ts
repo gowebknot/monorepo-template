@@ -1,20 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { referenceServerEnv } from '@repo/env/reference-server';
+import { ConfigService } from '@nestjs/config';
 
+import { parseAllowedOrigins } from './allowed-origins';
 import { ReferenceAppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(ReferenceAppModule);
-
-  const allowedOrigins = referenceServerEnv.REFERENCE_ALLOWED_ORIGINS.split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const config = app.get(ConfigService);
 
   app.enableCors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+    origin: parseAllowedOrigins(
+      config.getOrThrow<string>('REFERENCE_ALLOWED_ORIGINS'),
+    ),
   });
 
-  await app.listen(referenceServerEnv.REFERENCE_PORT);
+  await app.listen(config.getOrThrow<number>('REFERENCE_PORT'));
 }
 
 bootstrap().catch((error: unknown) => {

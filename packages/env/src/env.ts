@@ -1,28 +1,33 @@
-export * from "./global-env";
-export { createServerEnv, serverEnvSchema } from "./create-server-env";
+export * from "./global-env.js";
+export {
+  createServerEnv,
+  serverEnvSchema,
+  validateServerEnv
+} from "./create-server-env.js";
 export {
   createReferenceServerEnv,
-  referenceServerEnvSchema
-} from "./reference-server-env";
+  referenceServerEnvSchema,
+  validateReferenceServerEnv
+} from "./reference-server-env.js";
 export {
   createWebEnv,
   webClientEnvSchema,
   webEnvSchema,
   webServerEnvSchema
-} from "./create-web-env";
+} from "./create-web-env.js";
 export {
   createNextEnv,
   nextClientEnvSchema,
   nextEnvSchema,
   nextServerEnvSchema
-} from "./create-next-env";
+} from "./create-next-env.js";
 export {
   createExpoEnv,
   expoClientEnvSchema,
   expoEnvSchema,
   expoServerEnvSchema
-} from "./create-expo-env";
+} from "./create-expo-env.js";
 export {
   createReactNativeEnv,
   reactNativeEnvSchema
-} from "./create-react-native-env";
+} from "./create-react-native-env.js";

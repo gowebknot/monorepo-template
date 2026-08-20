@@ -18,7 +18,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const templateAdapters = new Map([
   [
     ".env.example",
-    "# Local development environment. Copying this file to .env is handled by create-mono-stack.\nNODE_ENV=development\nWEB_PUBLIC_APP_URL=http://localhost:5173\nWEB_PUBLIC_API_BASE_URL=http://localhost:3001\nNEXT_PUBLIC_APP_URL=http://localhost:3000\nNEXT_PUBLIC_API_BASE_URL=http://localhost:3001\nEXPO_PUBLIC_APP_URL=http://localhost:8081\nEXPO_PUBLIC_API_BASE_URL=http://localhost:3001\nRN_PUBLIC_APP_URL=http://localhost:8081\nRN_PUBLIC_API_BASE_URL=http://localhost:3001\nDATABASE_URL=./local.db\nPORT=3000\nREFERENCE_PORT=3001\nREFERENCE_ALLOWED_ORIGINS=http://localhost:5173\n"
+    "# Local development environment. Copying this file to .env is handled by create-mono-stack.\nNODE_ENV=development\nWEB_PUBLIC_APP_URL=http://localhost:5173\nWEB_PUBLIC_API_BASE_URL=http://localhost:3001\nNEXT_PUBLIC_APP_URL=http://localhost:3000\nNEXT_PUBLIC_API_BASE_URL=http://localhost:3001\nEXPO_PUBLIC_APP_URL=http://localhost:8081\nEXPO_PUBLIC_API_BASE_URL=http://localhost:3001\nRN_PUBLIC_APP_URL=http://localhost:8081\nRN_PUBLIC_API_BASE_URL=http://localhost:3001\nDATABASE_URL=./local.db\nPORT=3000\nALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000\nREFERENCE_PORT=3001\nREFERENCE_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000\n"
   ],
   [
     ".copier-answers.yml.jinja",
@@ -145,8 +145,9 @@ RN_PUBLIC_APP_URL=http://localhost:8081
 RN_PUBLIC_API_BASE_URL=http://localhost:3001
 DATABASE_URL=./local.db
 PORT=3000
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 REFERENCE_PORT=3001
-REFERENCE_ALLOWED_ORIGINS=http://localhost:5173
+REFERENCE_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 `;
 
   assert.equal(await readFile(join(root, ".env.example"), "utf8"), expected);

@@ -9,6 +9,10 @@ export const referenceServerEnvSchema = globalEnv.pick({
   REFERENCE_ALLOWED_ORIGINS: true
 });
 
+export const validateReferenceServerEnv = (
+  config: Record<string, unknown>
+): Record<string, unknown> => referenceServerEnvSchema.parse(config);
+
 export const createReferenceServerEnv = (
   runtimeEnv: NodeJS.ProcessEnv = process.env
 ) =>

@@ -1,2 +1,2 @@
-export { createReactNativeEnv } from "@/create-react-native-env";
-export { reactNativeEnvSchema } from "@/create-react-native-env";
+export { createReactNativeEnv } from "./create-react-native-env.js";
+export { reactNativeEnvSchema } from "./create-react-native-env.js";

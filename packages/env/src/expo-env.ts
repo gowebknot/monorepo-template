@@ -1,10 +1,10 @@
-import { createExpoEnv } from "@/create-expo-env";
+import { createExpoEnv } from "./create-expo-env.js";
 
-export { createExpoEnv } from "@/create-expo-env";
+export { createExpoEnv } from "./create-expo-env.js";
 export {
   expoClientEnvSchema,
   expoEnvSchema,
   expoServerEnvSchema
-} from "@/create-expo-env";
+} from "./create-expo-env.js";
 
 export const expoEnv = createExpoEnv();
