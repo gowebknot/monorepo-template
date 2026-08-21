@@ -171,7 +171,7 @@ test("creates and updates a customized project with Copier", async (t) => {
     containerName,
     "sh",
     "-c",
-    `python -m pip install --disable-pip-version-check --quiet --requirement /workspace/template/requirements/copier.txt && mkdir -p /tmp/copier-home && chown ${hostUser} /tmp/copier-home`
+    `apt-get update -qq && apt-get install --yes --no-install-recommends nodejs >/dev/null && python -m pip install --disable-pip-version-check --quiet --requirement /workspace/template/requirements/copier.txt && mkdir -p /tmp/copier-home && chown ${hostUser} /tmp/copier-home`
   );
   stage("copier-install.completed");
   docker(
@@ -302,6 +302,7 @@ test("creates and updates a customized project with Copier", async (t) => {
     containerName,
     "copier",
     "update",
+    "--trust",
     "--defaults",
     "--skip-answered",
     "--vcs-ref",

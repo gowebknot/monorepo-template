@@ -53,6 +53,7 @@ test("passes generated stack features to Copier during updates", () => {
     "-m",
     "copier",
     "update",
+    "--trust",
     ...expectedStackArguments,
     "--defaults"
   ]);
@@ -81,6 +82,7 @@ test("TEST-UPDATE-010 reuses recorded answers for a bare update", () => {
     "-m",
     "copier",
     "update",
+    "--trust",
     ...expectedStackArguments,
     "--defaults"
   ]);
@@ -182,23 +184,14 @@ test("updates through the SSH alias stored in local Git config", () => {
     },
     {
       command: `${projectRoot}/.venv/bin/python`,
-      args: ["-m", "copier", "update", ...expectedStackArguments, "--defaults"],
-      options: {
-        cwd: projectRoot,
-        env: {
-          GIT_CONFIG_COUNT: "2",
-          GIT_CONFIG_KEY_0: "credential.helper",
-          GIT_CONFIG_KEY_1: "url.git@github-webknot:.insteadOf",
-          GIT_CONFIG_VALUE_0: "",
-          GIT_CONFIG_VALUE_1: "git@github.com:",
-          PATH: "/usr/bin"
-        },
-        stdio: "inherit"
-      }
-    },
-    {
-      command: "node",
-      args: ["scripts/dev-ports.mjs"],
+      args: [
+        "-m",
+        "copier",
+        "update",
+        "--trust",
+        ...expectedStackArguments,
+        "--defaults"
+      ],
       options: {
         cwd: projectRoot,
         env: {
@@ -237,64 +230,6 @@ test("updates normally when the repository has no SSH alias", () => {
     0
   );
   assert.deepEqual(copierCall(calls).options.env, environment);
-});
-
-test("TEST-UPDATE-012 runs native preflight after Copier succeeds", () => {
-  const calls = [];
-  const execute = (command, args, options) => {
-    calls.push({ args, command, options });
-    return command === "git" ? { status: 1 } : { status: 0 };
-  };
-
-  assert.equal(
-    updateTemplate([], {
-      ...validStackDependencies,
-      cwd: projectRoot,
-      environment: { PATH: "/usr/bin" },
-      execute,
-      exists: () => true,
-      platform: "darwin"
-    }),
-    0
-  );
-
-  const copierIndex = calls.findIndex(({ args }) => args[1] === "copier");
-  const preflightIndex = calls.findIndex(
-    ({ command, args }) =>
-      command === "node" && args[0] === "scripts/dev-ports.mjs"
-  );
-  assert.ok(copierIndex >= 0);
-  assert.equal(preflightIndex, copierIndex + 1);
-  assert.equal(calls[preflightIndex].options.cwd, projectRoot);
-  assert.deepEqual(calls[preflightIndex].options.env, { PATH: "/usr/bin" });
-});
-
-test("TEST-UPDATE-013 skips native preflight after Copier fails", () => {
-  const calls = [];
-  const execute = (command, args, options) => {
-    calls.push({ args, command, options });
-    if (command === "git") return { status: 1 };
-    return { status: 1 };
-  };
-
-  assert.equal(
-    updateTemplate([], {
-      ...validStackDependencies,
-      cwd: projectRoot,
-      environment: { PATH: "/usr/bin" },
-      execute,
-      exists: () => true,
-      platform: "darwin"
-    }),
-    1
-  );
-  assert.equal(
-    calls.some(
-      ({ command, args }) =>
-        command === "node" && args[0] === "scripts/dev-ports.mjs"
-    ),
-    false
-  );
 });
 
 test("explains how to repair a missing update environment", () => {

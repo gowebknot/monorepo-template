@@ -169,7 +169,14 @@ export function updateTemplate(args, dependencies = {}) {
     : ["--defaults", ...args];
   const result = execute(
     python,
-    ["-m", "copier", "update", ...stackArguments, ...updateArguments],
+    [
+      "-m",
+      "copier",
+      "update",
+      "--trust",
+      ...stackArguments,
+      ...updateArguments
+    ],
     {
       cwd,
       env,
@@ -180,16 +187,7 @@ export function updateTemplate(args, dependencies = {}) {
     throw missingEnvironmentError(python, platform);
   }
   if (result.error) throw commandError(python, result);
-  if (result.status !== 0) return result.status ?? 1;
-
-  const preflight = execute("node", ["scripts/dev-ports.mjs"], {
-    cwd,
-    env,
-    stdio: "inherit"
-  });
-  if (preflight.error)
-    throw commandError("node scripts/dev-ports.mjs", preflight);
-  return preflight.status ?? 1;
+  return result.status ?? 1;
 }
 
 function main() {

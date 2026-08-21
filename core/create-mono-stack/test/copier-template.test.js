@@ -92,6 +92,9 @@ test("uses Copier-native project identity rendering", async () => {
 
   assert.equal(config._min_copier_version, "9.0.0");
   assert.equal(config._tasks, undefined);
+  assert.deepEqual(config._migrations, [
+    { command: "node scripts/dev-ports.mjs" }
+  ]);
   assert.deepEqual(config._envops, {
     block_start_string: "<%!",
     block_end_string: "!%>",
