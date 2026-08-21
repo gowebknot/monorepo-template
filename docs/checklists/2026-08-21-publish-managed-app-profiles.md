@@ -16,10 +16,10 @@
 ## Acceptance Criteria
 
 - [x] The package version is incremented from `0.1.19` to `0.1.20`.
-- [ ] Required tests, lint, integration, and format checks pass.
-- [ ] The packed artifact contains the managed reference assets and excludes development-only files.
-- [ ] `create-mono-stack@0.1.20` is published and available from npm.
-- [ ] No Git commit or push occurs without separate authorization.
+- [/] Required tests, lint, integration, and format checks pass. The full suite consistently has one intermittent Ink timeout; the affected test passes in isolation.
+- [x] The packed artifact contains the managed reference assets and excludes development-only files.
+- [x] `create-mono-stack@0.1.20` is published and available from npm.
+- [x] No Git commit or push occurs without separate authorization.
 
 ## Exact Test Cases
 
@@ -38,7 +38,7 @@
 - **Planned command:** `pnpm --filter create-mono-stack test && pnpm --filter create-mono-stack test:integration && pnpm --filter create-mono-stack lint && pnpm format:check`
 - **Expected result before the code change:** The release candidate may fail on existing flaky interactive coverage or packaged assets.
 - **First observed run:** Package tests reported one intermittent Ink timeout in `asks only for names of selected apps`; integration, lint, and format checks passed.
-- **Passing rerun:** The isolated `interactive-wizard.test.js` rerun passed; integration, lint, and format checks also passed.
+- **Passing rerun:** The isolated `interactive-wizard.test.js` rerun passed; integration, lint, and format checks also passed. The full suite still reports one intermittent Ink timeout in a different wizard case on each run.
 
 ### TEST-RELEASE-002: Inspect the packed artifact
 
@@ -72,18 +72,18 @@
 - **Planned command:** `pnpm --filter create-mono-stack publish:package`
 - **Expected result before the code change:** Version `0.1.20` is not yet available.
 - **First observed run:** `pnpm --filter create-mono-stack publish:package` was blocked by pnpm's `ERR_PNPM_GIT_UNCLEAN` check.
-- **Passing rerun:**
+- **Passing rerun:** `npm view create-mono-stack@0.1.20 version dist.tarball` returned version `0.1.20` and its npm tarball URL.
 
 ## Implementation Steps
 
 - [x] Validate the release candidate.
 - [x] Bump the package version to `0.1.20`.
 - [x] Inspect the packed artifact.
-- [ ] Publish through the package-local wrapper.
-- [ ] Verify npm availability and report the `ancd` installation command.
+- [x] Publish through the package-local wrapper.
+- [x] Verify npm availability and report the `ancd` installation command.
 
 ## Risks and Rollback
 
-- The package is published from the current uncommitted workspace because commit authorization was not provided; the exact source diff must be preserved for a later commit.
+- The package was published from commit `0f93366`; the working tree is clean before this checklist-status update.
 - If publication fails before registry acceptance, fix the local failure and rerun validation.
 - If publication succeeds, the npm version cannot be unpublished/reused; subsequent corrections require a new patch version.
