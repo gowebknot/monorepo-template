@@ -26,7 +26,7 @@ function defaultPort(generator, mode) {
   return BASE_PORTS[mode][generator] ?? 3000;
 }
 
-export function isPortAvailable(port, host = "127.0.0.1") {
+export function isPortAvailable(port, host = "0.0.0.0") {
   return new Promise((resolve) => {
     const server = createServer();
     server.once("error", () => resolve(false));
@@ -50,7 +50,8 @@ export async function allocateAppPorts(
       if (
         Number.isInteger(existing) &&
         existing > 0 &&
-        !used.get(mode).has(existing)
+        !used.get(mode).has(existing) &&
+        (await checkPort(existing))
       ) {
         used.get(mode).add(existing);
         continue;

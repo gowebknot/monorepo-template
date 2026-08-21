@@ -160,3 +160,10 @@
 - Port allocation does not automatically rewrite arbitrary user-authored API URLs; those mappings must remain explicit.
 - A port can become occupied after allocation, so runtime launchers must report the conflict clearly.
 - Mobile device networking and host LAN address discovery remain outside this change.
+
+## Updates
+
+- 2026-08-21: Post-release testing found that the implementation preserved saved ports without
+  rechecking whether the operating system was already using them. The generated `abcd` project
+  reproduced this with React Native port `8083` and `EADDRINUSE`. The correction is tracked in
+  [Revalidate Persisted Development Ports](./2026-08-21-revalidate-persisted-dev-ports.md).

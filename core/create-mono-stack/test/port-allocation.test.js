@@ -58,6 +58,22 @@ test("TEST-PORT-003 preserves existing assignments", async () => {
   assert.notEqual(assigned[1].ports.reference, 4101);
 });
 
+test("TEST-PORT-009 reassigns an occupied saved management port", async () => {
+  const assigned = await allocateAppPorts(
+    [
+      {
+        generator: "nestjs",
+        name: "server",
+        path: "apps/server",
+        ports: { dev: 4200, reference: 4301 }
+      }
+    ],
+    { checkPort: async (port) => port !== 4200 }
+  );
+
+  assert.deepEqual(assigned[0].ports, { dev: 4201, reference: 4301 });
+});
+
 test("TEST-PORT-004 configures generated app scripts", async () => {
   const writes = [];
   await configureAppScripts(

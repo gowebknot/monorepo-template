@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:net";
 import test from "node:test";
 
-import { allocateAppPorts, configureAppScripts } from "./dev-ports.mjs";
+import {
+  allocateAppPorts,
+  configureAppScripts,
+  isPortAvailable
+} from "./dev-ports.mjs";
 import { commandFor } from "./run-app.mjs";
 
 test("TEST-PORT-005 allocates unique generated-project ports", async () => {
@@ -16,6 +21,35 @@ test("TEST-PORT-005 allocates unique generated-project ports", async () => {
   for (const mode of ["dev", "reference"]) {
     const ports = apps.map((app) => app.ports[mode]);
     assert.equal(new Set(ports).size, ports.length);
+  }
+});
+
+test("TEST-PORT-008 reassigns an occupied saved runtime port", async () => {
+  const assigned = await allocateAppPorts(
+    [
+      {
+        generator: "react-native",
+        name: "mobile",
+        ports: { dev: 4100, reference: 4201 }
+      }
+    ],
+    { checkPort: async (port) => port !== 4100 }
+  );
+
+  assert.deepEqual(assigned[0].ports, { dev: 4101, reference: 4201 });
+});
+
+test("TEST-PORT-011 detects wildcard-bound ports", async () => {
+  const server = createServer();
+  await new Promise((resolve) =>
+    server.listen({ host: "0.0.0.0", port: 0 }, resolve)
+  );
+  const port = server.address().port;
+
+  try {
+    assert.equal(await isPortAvailable(port), false);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
   }
 });
 
