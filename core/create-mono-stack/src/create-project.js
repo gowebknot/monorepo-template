@@ -47,6 +47,7 @@ const genericGitHubSshPrefix = "git@github.com:";
 const requirementsPath = fileURLToPath(
   new URL("../requirements/copier.txt", import.meta.url)
 );
+const packageJsonUrl = new URL("../package.json", import.meta.url);
 const help = `Usage:
   create-mono-stack
   create-mono-stack <destination> [options]
@@ -76,6 +77,31 @@ Options:
                            NestJS app name (default: server)
   -h, --help              Show this help
 `;
+
+async function readLauncherTemplateRevision(read = readFile) {
+  const packageJson = JSON.parse(await read(packageJsonUrl, "utf8"));
+  return `v${packageJson.version}`;
+}
+
+async function requireCurrentTemplateRevision(
+  projectRoot,
+  expectedRevision,
+  read = readFile
+) {
+  let answers;
+  try {
+    answers = await read(join(projectRoot, ".copier-answers.yml"), "utf8");
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+  const match = answers?.match(/^_commit:\s*(\S+)/m);
+  const actualRevision = match?.[1]?.replace(/^['"]|['"]$/g, "");
+  if (actualRevision !== expectedRevision) {
+    throw new Error(
+      `Template update required before project management. Run \`pnpm template:update --defaults --vcs-ref ${expectedRevision}\` first.`
+    );
+  }
+}
 
 function commandError(command, stderr, signal, exitCode) {
   const detail = stderr.trim();
@@ -434,15 +460,24 @@ async function runManagement(args, dependencies, input, output, log) {
   if (args.length > 2) {
     throw new Error("Management accepts at most one project directory.");
   }
-  if (!input.isTTY || !output.isTTY) {
-    throw new Error("Project management requires an interactive terminal.");
-  }
   const projectRoot = resolve(
     dependencies.cwd ?? process.cwd(),
     args[1] ?? "."
   );
-  const manifest = await readManifest(projectRoot);
-  const packages = await listUserPackages(projectRoot);
+  const projectRead = dependencies.readFile ?? readFile;
+  const templateRevision =
+    dependencies.templateRevision ??
+    (await readLauncherTemplateRevision(dependencies.readPackageFile));
+  await requireCurrentTemplateRevision(
+    projectRoot,
+    templateRevision,
+    projectRead
+  );
+  if (!input.isTTY || !output.isTTY) {
+    throw new Error("Project management requires an interactive terminal.");
+  }
+  const manifest = await readManifest(projectRoot, projectRead);
+  const packages = await listUserPackages(projectRoot, { read: projectRead });
   const prompt =
     dependencies.promptForProjectManagement ?? promptForProjectManagement;
   const action = await prompt({

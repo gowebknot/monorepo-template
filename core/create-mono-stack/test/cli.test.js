@@ -110,6 +110,10 @@ test("TEST-MANAGE-001 routes manage to the project management prompt", async () 
       join(projectRoot, ".mono-stack.json"),
       JSON.stringify({ schemaVersion: 3, features: ["web-vite"], apps: [] })
     );
+    await writeFile(
+      join(projectRoot, ".copier-answers.yml"),
+      "_commit: v0.1.21\n"
+    );
     const input = { isTTY: true };
     const output = { isTTY: true };
     let prompted = false;
@@ -130,6 +134,44 @@ test("TEST-MANAGE-001 routes manage to the project management prompt", async () 
       action: { action: "add-package", name: "billing" },
       cwd: projectRoot
     });
+  } finally {
+    await rm(projectRoot, { force: true, recursive: true });
+  }
+});
+
+test("rejects management for a project on an older template revision", async () => {
+  const projectRoot = await mkdtemp(join(tmpdir(), "manage-cli-stale-"));
+  try {
+    await writeFile(
+      join(projectRoot, ".copier-answers.yml"),
+      "_commit: v0.1.19\n"
+    );
+    await assert.rejects(
+      () =>
+        main(["manage", projectRoot], {
+          input: { isTTY: true },
+          output: { isTTY: true },
+          templateRevision: "v0.1.21"
+        }),
+      /Template update required before project management.*v0\.1\.21/s
+    );
+  } finally {
+    await rm(projectRoot, { force: true, recursive: true });
+  }
+});
+
+test("rejects management when the template revision is missing", async () => {
+  const projectRoot = await mkdtemp(join(tmpdir(), "manage-cli-missing-"));
+  try {
+    await assert.rejects(
+      () =>
+        main(["manage", projectRoot], {
+          input: { isTTY: true },
+          output: { isTTY: true },
+          templateRevision: "v0.1.21"
+        }),
+      /Template update required before project management.*v0\.1\.21/s
+    );
   } finally {
     await rm(projectRoot, { force: true, recursive: true });
   }
