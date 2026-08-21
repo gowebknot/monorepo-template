@@ -18,7 +18,7 @@
 - [x] Current projects can enter management.
 - [x] Stale projects are rejected before prompts or side effects.
 - [x] Projects without Copier revision metadata are rejected with update instructions.
-- [ ] The guard is included in the next published launcher version.
+- [x] The guard is included in the published launcher version `0.1.21`.
 
 ## Exact Test Cases
 
@@ -77,5 +77,10 @@
 
 - [x] Add revision parsing and validation before management.
 - [x] Run focused and package tests.
-- [ ] Release `create-mono-stack@0.1.21`.
-- [ ] Verify `ancd` can add `mobileApp3` with `create-mono-stack@latest`.
+- [x] Release `create-mono-stack@0.1.21`.
+- [x] Verify `ancd` can add `mobileApp3` with the published `0.1.21` manager implementation.
+
+## Validation Notes
+
+- `ancd` was updated from `_commit: v0.1.19` to `v0.1.20`, then to `v0.1.21` after the guard release.
+- `mobileApp3` was created with `react-native/default`; Metro responded with HTTP `200` on port `8087`.
