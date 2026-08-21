@@ -33,7 +33,7 @@
   flaky (254-255/257 across 3 runs) on tests unrelated to this release's changed files (`skills/`,
   `package.json` version only) — see TEST-RELEASE-002 for detail. (TEST-RELEASE-002)
 - [x] Commit and tag `v0.1.22` are pushed to `origin/master`. (TEST-RELEASE-003)
-- [ ] `create-mono-stack@0.1.22` is published through `publish:package`.
+- [x] `create-mono-stack@0.1.22` is published through `publish:package`. (TEST-RELEASE-004)
 
 ## Exact Test Cases
 
@@ -131,18 +131,25 @@ master`), tagged `v0.1.22` and pushed. `git ls-remote origin master` and `git ls
   version-bump/validation steps beforehand.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package`
 - **Expected result before the code change:** Not applicable (no prior publish attempt this task).
-- **First observed run:** pending — will run after commit/push/tag.
-- **Passing rerun:** pending implementation.
+- **First observed run:** `pnpm --filter create-mono-stack publish:package` first failed with
+  `ERR_PNPM_GIT_UNCLEAN` because the checklist file had uncommitted edits (recording the TEST-RELEASE-003
+  results) after the release commit — not a bypass-worthy failure, so it was fixed by committing those
+  checklist updates (`c6621b5`) and pushing, rather than using `--no-git-checks`.
+- **Passing rerun:** After the working tree was clean, `pnpm --filter create-mono-stack publish:package`
+  succeeded: `+ create-mono-stack@0.1.22`. `npm view create-mono-stack version` confirms `0.1.22` on the
+  registry.
 
 ## Release Steps
 
-- [ ] Bump `core/create-mono-stack/package.json` to `0.1.22`.
-- [ ] Run validation (`pnpm skills:check`, `pnpm skills:test`, Prettier, `create-mono-stack` tests) and
+- [x] Bump `core/create-mono-stack/package.json` to `0.1.22`.
+- [x] Run validation (`pnpm skills:check`, `pnpm skills:test`, Prettier, `create-mono-stack` tests) and
       inspect status/diff/log.
-- [ ] Commit the intended files with a conventional commit.
-- [ ] Push the commit to `origin/master`.
-- [ ] Create and push tag `v0.1.22`.
-- [ ] Run `pnpm --filter create-mono-stack publish:package`.
+- [x] Commit the intended files with a conventional commit (`0803dc2`).
+- [x] Push the commit to `origin/master`.
+- [x] Create and push tag `v0.1.22`.
+- [x] Run `pnpm --filter create-mono-stack publish:package` (a second small commit, `c6621b5`, was
+      needed first to record TEST-RELEASE-003 results and satisfy pnpm's git-clean check before
+      publish would run).
 
 ## Risks and Follow-Up
 
