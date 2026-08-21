@@ -5,9 +5,10 @@ import test from "node:test";
 import {
   allocateAppPorts,
   configureAppScripts,
+  ensureProjectPorts,
   isPortAvailable
 } from "./dev-ports.mjs";
-import { commandFor } from "./run-app.mjs";
+import { commandFor, environmentFor } from "./run-app.mjs";
 
 test("TEST-PORT-005 allocates unique generated-project ports", async () => {
   const apps = await allocateAppPorts(
@@ -51,6 +52,130 @@ test("TEST-PORT-011 detects wildcard-bound ports", async () => {
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }
+});
+
+test("TEST-MOBILE-001 generates the named app root entry", async () => {
+  const writes = [];
+  const manifest = {
+    apps: [
+      {
+        generator: "react-native",
+        name: "mobile-app-1",
+        path: "apps/mobile-app-1",
+        ports: { dev: 4100, reference: 4101 }
+      },
+      {
+        generator: "react-native",
+        name: "customer-mobile",
+        path: "apps/customer-mobile",
+        ports: { dev: 4100, reference: 4101 }
+      }
+    ]
+  };
+
+  await ensureProjectPorts("/project", {
+    read: async (path) =>
+      path.endsWith(".mono-stack.json")
+        ? JSON.stringify(manifest)
+        : JSON.stringify({ scripts: {} }),
+    write: async (path, contents) => writes.push({ path, contents }),
+    checkPort: async () => true,
+    remove: async () => assert.fail("named apps must generate root files")
+  });
+
+  const entry = writes.find(({ path }) => path === "/project/index.js");
+  const metro = writes.find(({ path }) => path === "/project/metro.config.js");
+  assert.match(entry.contents, /apps\/mobile-app-1/);
+  assert.match(entry.contents, /apps\/customer-mobile/);
+  assert.match(metro.contents, /apps\/mobile-app-1/);
+  assert.match(metro.contents, /apps\/customer-mobile/);
+  assert.doesNotMatch(entry.contents, /apps\/mobile['"]\/index/);
+
+  let requiredEntry;
+  new Function("require", "process", entry.contents)(
+    (path) => {
+      requiredEntry = path;
+    },
+    { env: { MONO_STACK_APP_PATH: "apps/customer-mobile" } }
+  );
+  assert.equal(requiredEntry, "./apps/customer-mobile/index.js");
+
+  let requiredConfig;
+  const module = {};
+  new Function("require", "process", "module", metro.contents)(
+    (path) => {
+      requiredConfig = path;
+      return { path };
+    },
+    { env: { MONO_STACK_APP_PATH: "apps/customer-mobile" } },
+    module
+  );
+  assert.equal(requiredConfig, "./apps/customer-mobile/metro.config.js");
+});
+
+test("TEST-MOBILE-002 generates the canonical single app", async () => {
+  const writes = [];
+  const manifest = {
+    apps: [
+      {
+        generator: "react-native",
+        name: "mobile",
+        path: "apps/mobile",
+        ports: { dev: 4100, reference: 4101 }
+      }
+    ]
+  };
+
+  await ensureProjectPorts("/project", {
+    read: async (path) =>
+      path.endsWith(".mono-stack.json")
+        ? JSON.stringify(manifest)
+        : JSON.stringify({ scripts: {} }),
+    write: async (path, contents) => writes.push({ path, contents }),
+    checkPort: async () => true,
+    remove: async () => assert.fail("canonical app must generate root files")
+  });
+
+  assert.match(
+    writes.find(({ path }) => path === "/project/index.js").contents,
+    /apps\/mobile/
+  );
+  assert.match(
+    writes.find(({ path }) => path === "/project/metro.config.js").contents,
+    /apps\/mobile/
+  );
+});
+
+test("TEST-MOBILE-004 passes the selected app path to Metro", () => {
+  const env = environmentFor(
+    {
+      generator: "react-native",
+      path: "apps/customer-mobile",
+      ports: { dev: 4100, reference: 4101 }
+    },
+    "reference",
+    { PATH: "/bin" }
+  );
+
+  assert.equal(env.MONO_STACK_APP_PATH, "apps/customer-mobile");
+  assert.equal(env.PATH, "/bin");
+});
+
+test("TEST-MOBILE-005 removes generated native roots when no native app exists", async () => {
+  const removed = [];
+  const manifest = { apps: [{ generator: "vite", path: "apps/web" }] };
+
+  await ensureProjectPorts("/project", {
+    read: async (path) =>
+      path.endsWith(".mono-stack.json")
+        ? JSON.stringify(manifest)
+        : JSON.stringify({ scripts: {} }),
+    write: async () => {},
+    checkPort: async () => true,
+    remove: async (path) => removed.push(path)
+  });
+
+  assert.deepEqual(removed, ["/project/index.js", "/project/metro.config.js"]);
 });
 
 test("TEST-PORT-006 builds framework-specific port commands", () => {

@@ -1,5 +1,5 @@
 import { createServer } from "node:net";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
 export const PORT_MODES = ["dev", "reference"];
@@ -102,9 +102,50 @@ export async function configureAppScripts(
   }
 }
 
+export function reactNativeRootFiles(apps) {
+  const nativeApps = apps.filter((app) => app.generator === "react-native");
+  if (nativeApps.length === 0) return null;
+
+  const appPath = JSON.stringify(nativeApps[0].path);
+  const entryBranches = nativeApps
+    .map(
+      (app, index) =>
+        `${index === 0 ? "if" : "else if"} (appPath === ${JSON.stringify(app.path)}) {\n  require(${JSON.stringify(`./${app.path}/index.js`)});\n}`
+    )
+    .join(" ");
+  const metroBranches = nativeApps
+    .map(
+      (app, index) =>
+        `${index === 0 ? "if" : "else if"} (appPath === ${JSON.stringify(app.path)}) {\n  module.exports = require(${JSON.stringify(`./${app.path}/metro.config.js`)});\n}`
+    )
+    .join(" ");
+
+  return {
+    entry: `const appPath = process.env.MONO_STACK_APP_PATH ?? ${appPath};\n\n${entryBranches} else {\n  throw new Error(\`Unknown React Native app path: ${"${appPath}"}\`);\n}\n`,
+    metro: `const appPath = process.env.MONO_STACK_APP_PATH ?? ${appPath};\n\n${metroBranches} else {\n  throw new Error(\`Unknown React Native app path: ${"${appPath}"}\`);\n}\n`
+  };
+}
+
+async function syncNativeRootFiles(projectRoot, apps, write, remove) {
+  const rootFiles = reactNativeRootFiles(apps);
+  if (!rootFiles) {
+    await remove(join(projectRoot, "index.js"), { force: true });
+    await remove(join(projectRoot, "metro.config.js"), { force: true });
+    return;
+  }
+
+  await write(join(projectRoot, "index.js"), rootFiles.entry);
+  await write(join(projectRoot, "metro.config.js"), rootFiles.metro);
+}
+
 export async function ensureProjectPorts(
   projectRoot,
-  { read = readFile, write = writeFile, checkPort = isPortAvailable } = {}
+  {
+    read = readFile,
+    write = writeFile,
+    checkPort = isPortAvailable,
+    remove = rm
+  } = {}
 ) {
   const manifestPath = join(projectRoot, STACK_CONFIG_FILENAME);
   const manifest = JSON.parse(await read(manifestPath, "utf8"));
@@ -113,6 +154,7 @@ export async function ensureProjectPorts(
   const changed = JSON.stringify(next) !== JSON.stringify(manifest);
   if (changed) await write(manifestPath, `${JSON.stringify(next, null, 2)}\n`);
   await configureAppScripts(projectRoot, apps, { read, write });
+  await syncNativeRootFiles(projectRoot, apps, write, remove);
   return next;
 }
 

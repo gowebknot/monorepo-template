@@ -180,7 +180,16 @@ export function updateTemplate(args, dependencies = {}) {
     throw missingEnvironmentError(python, platform);
   }
   if (result.error) throw commandError(python, result);
-  return result.status ?? 1;
+  if (result.status !== 0) return result.status ?? 1;
+
+  const preflight = execute("node", ["scripts/dev-ports.mjs"], {
+    cwd,
+    env,
+    stdio: "inherit"
+  });
+  if (preflight.error)
+    throw commandError("node scripts/dev-ports.mjs", preflight);
+  return preflight.status ?? 1;
 }
 
 function main() {

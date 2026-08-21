@@ -52,7 +52,8 @@ function runUpdate(config, options = {}) {
   }
 
   assert.equal(updateTemplate(["--defaults"], dependencies), 0);
-  return calls.at(-1).args;
+  return calls.find(({ args }) => args[0] === "-m" && args[1] === "copier")
+    .args;
 }
 
 function exclusions(args) {

@@ -66,6 +66,21 @@ export function commandFor(app, mode, port) {
   }
 }
 
+export function environmentFor(app, mode, base = process.env) {
+  const port = app.ports[mode];
+  return {
+    ...base,
+    ...(app.generator === "react-native"
+      ? { MONO_STACK_APP_PATH: app.path }
+      : {}),
+    ...(app.generator === "nestjs"
+      ? mode === "reference"
+        ? { REFERENCE_PORT: String(port) }
+        : { PORT: String(port) }
+      : {})
+  };
+}
+
 function run(command, args, options) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { ...options, stdio: "inherit" });
@@ -89,14 +104,7 @@ export async function runApp(mode, projectRoot = process.cwd()) {
   if (!app) throw new Error(`No manifest app record found for ${appName}.`);
   const port = app.ports[mode];
   const launch = commandFor(app, mode, port);
-  const env = {
-    ...process.env,
-    ...(app.generator === "nestjs"
-      ? mode === "reference"
-        ? { REFERENCE_PORT: String(port) }
-        : { PORT: String(port) }
-      : {})
-  };
+  const env = environmentFor(app, mode);
   if (launch.prelude) {
     await run(launch.prelude[0], launch.prelude[1], { cwd: appRoot, env });
   }
