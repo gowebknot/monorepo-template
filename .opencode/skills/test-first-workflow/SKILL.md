@@ -122,6 +122,11 @@ than use a generic label. Copy the completed plan into detailed nested checklist
 small task breakdown, rule sources, open questions, acceptance criteria, exact cases, task-to-test
 map, implementation steps, verification commands, dependencies, and risks.
 
+Nest the implementation steps to the same depth and concreteness as the small task breakdown: exact
+files, exact functions, components, or symbols, exact config keys, and the edge cases each smallest
+task must handle. A one-line implementation summary per small task is not enough; use as many
+checklist levels as needed so the implementation plan is real nested detail, not a summary.
+
 When creating a checklist for a commit or release, include an `Implementation Description` section
 that summarizes the concrete implementation included in that commit or release. This section is a
 checklist content requirement, not a requirement to create a checklist for every commit or release.
@@ -174,6 +179,10 @@ adds another behavior or case.
 6. Record every result, including failures, before making another correction.
 7. Fix failures, rerun the checks, and record the passing result for each case ID.
 8. Refactor only after the behavior passes, without weakening or deleting useful checks.
+9. Write this item's status and results into the checklist file now. Do not select the next smallest
+   item until the checklist file on disk reflects this one's status; never defer this write until
+   later items are also finished.
+10. Return to step 1 for the next smallest task item.
 
 ## Non-Executable Changes
 
@@ -191,7 +200,8 @@ unless the requirement has explicitly changed or the assertion is demonstrably i
 
 ## Checklist Coordination
 
-Keep the active checklist synchronized with new rules, smaller task items, exact cases,
+Update the checklist immediately after each smallest item completes; never batch checklist edits until
+the task ends. Keep the active checklist synchronized with new rules, smaller task items, exact cases,
 implementation, and results. Add newly discovered work and cases before implementing them. Record
 failures when they happen, before fixing them, and do not mark a case passing without a passing rerun.
 Treat committed checklists as immutable history; append corrections only under a bottom `## Updates`

@@ -226,5 +226,7 @@ the exact situations above.
 8. Fix failures, rerun the checks, and record the passing result for each case ID.
 9. Mark the smallest item complete only after all of its cases pass.
 10. Mark parent items complete only after all smaller items below them are complete.
-11. For a later defect in committed prior work, append the update to the bottom of its original
+11. Write this item's status and results into the checklist file on disk before starting the next
+    smallest item. Do not move on while the file still shows the previous status.
+12. For a later defect in committed prior work, append the update to the bottom of its original
     checklist without changing the earlier content.

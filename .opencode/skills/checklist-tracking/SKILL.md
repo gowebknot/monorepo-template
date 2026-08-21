@@ -34,6 +34,9 @@ recorded, and link the original and new checklists in both directions.
 
 ## After Work
 
+Update items immediately when the smallest item finishes; never batch checklist edits until the task
+ends.
+
 1. Mark only items completed by the current task.
 2. Use `[x]` for complete task items, `[ ]` for incomplete items, and `[/]` for partial items.
 3. Add a concise inline explanation after a partial item describing what remains.
@@ -108,5 +111,7 @@ Before finalizing a task:
 - Confirm every changed status is allowed by its file's status legend.
 - Confirm partial and blocked work is explained without falsely marking it complete.
 - Report checklist items that cannot be matched confidently instead of guessing.
+- Confirm the Implementation Plan is not flatter than its matching Small Task Breakdown item; reject a
+  summary-only Implementation Plan that collapses nested implementation detail into one line.
 
 See [checklist policy](references/checklist-policy.md) for matching, nesting, and status rules.

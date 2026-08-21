@@ -184,11 +184,19 @@ text scan.
 
 ## Implementation Plan
 
+Use as many checklist levels as needed. Nest to the same depth and concreteness as the Small Task
+Breakdown: exact files, exact functions, components, or symbols, exact config keys, and every edge case
+the smallest task must handle. A one-line implementation summary per small task is not a plan.
+
 - [ ] <Workstream>
   - [ ] <Small task copied from Small Task Breakdown>
-    - [ ] Write the planned test IDs: <TEST-AREA-001>
-    - [ ] Make the smallest implementation change for those tests.
-    - [ ] Record the First observed run and later Passing rerun in the exact case blocks.
+    - [ ] <Exact file or module to change>
+      - [ ] <Exact function, component, or symbol to change>
+        - [ ] Write the planned test IDs: <TEST-AREA-001>
+        - [ ] <Exact step-by-step change, such as add a field, branch, or call>
+        - [ ] <Edge case this step must handle, or `None`>
+        - [ ] Make the smallest implementation change for those tests.
+        - [ ] Record the First observed run and later Passing rerun in the exact case blocks.
 - [ ] Preserve all affected contracts, consumers, and integration boundaries.
 - [ ] Record links to related implementation files and prior checklists.
 
