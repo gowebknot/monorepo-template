@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import test from "node:test";
 
 import {
   addApp,
   addPackage,
   listUserPackages,
+  MANAGEABLE_APP_DEFINITIONS,
   removeApp,
   removePackage
 } from "../src/project-management.js";
@@ -57,8 +58,31 @@ function commandRecorder(cwd) {
   const calls = [];
   const runCommand = async (command, args) => {
     calls.push({ args, command });
-    if (args.includes("create-next-app@latest")) {
-      await mkdir(join(cwd, "apps", "admin-next"), { recursive: true });
+    const appPath = args.find((value) => value.startsWith("apps/"));
+    if (appPath) {
+      const appRoot = join(cwd, appPath);
+      const appName = basename(appPath);
+      await mkdir(appRoot, { recursive: true });
+      await writeFile(
+        join(appRoot, "package.json"),
+        JSON.stringify({
+          name: appName,
+          version: "0.0.0",
+          dependencies: {
+            react: "19.2.3",
+            "react-dom": "19.2.3",
+            "react-native": "0.87.0"
+          },
+          devDependencies: {
+            typescript: "6.0.3",
+            vite: "8.0.0"
+          }
+        })
+      );
+      if (args[0] === "create" && args[1] === "vite") {
+        await mkdir(join(appRoot, "src"), { recursive: true });
+        await writeFile(join(appRoot, "src", "main.tsx"), "export {};");
+      }
     }
     if (args[0] === "package:create") {
       await mkdir(join(cwd, "packages", args[1]), { recursive: true });
@@ -96,6 +120,56 @@ test("TEST-MANAGE-002 adds an app without replacing existing apps", async () => 
   } finally {
     await cleanup(cwd);
   }
+});
+
+test("TEST-MANAGE-007 adds a React Native app with its reference profile", async () => {
+  const cwd = await project();
+  try {
+    const recorder = commandRecorder(cwd);
+    const app = await addApp(
+      cwd,
+      { feature: "mobile-react-native", name: "mobileApp3" },
+      recorder
+    );
+    const manifest = JSON.parse(
+      await readFile(join(cwd, ".mono-stack.json"), "utf8")
+    );
+    const packageJson = JSON.parse(
+      await readFile(join(cwd, "apps/mobileApp3/package.json"), "utf8")
+    );
+    assert.equal(app.referenceProfile, "react-native/default");
+    assert.equal(manifest.apps.at(-1).referenceProfile, "react-native/default");
+    assert.equal(packageJson.dependencies.nativewind, "5.0.0-preview.4");
+    assert.equal(
+      await readFile(
+        join(cwd, "apps/mobileApp3/src/screens/reference.tsx"),
+        "utf8"
+      ).then(() => true),
+      true
+    );
+    assert.equal(
+      await readFile(join(cwd, "apps/web/sentinel.txt"), "utf8"),
+      "keep"
+    );
+  } finally {
+    await cleanup(cwd);
+  }
+});
+
+test("TEST-MANAGE-001 assigns profiles to every supported generator", () => {
+  assert.deepEqual(
+    MANAGEABLE_APP_DEFINITIONS.map(({ feature, referenceProfile }) => [
+      feature,
+      referenceProfile
+    ]),
+    [
+      ["web-vite", "vite/react-ts"],
+      ["web-next", "next/default"],
+      ["api-nest", "nestjs/default"],
+      ["mobile-expo", "expo/default"],
+      ["mobile-react-native", "react-native/default"]
+    ]
+  );
 });
 
 test("TEST-MANAGE-003 removes an app and updates its feature", async () => {

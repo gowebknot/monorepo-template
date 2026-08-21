@@ -193,8 +193,8 @@ async function removeTemporaryArtifacts(root, dependencies) {
   }
 }
 
-async function applyReferenceProfile(
-  { name, nativeTarget, profileId, templateTarget },
+export async function applyReferenceProfile(
+  { name, nativeTarget, profileId, templateTarget, useManagedTemplate = false },
   dependencies
 ) {
   const nativePackage = JSON.parse(
@@ -210,12 +210,15 @@ async function applyReferenceProfile(
   }
 
   const profile = REFERENCE_PROFILES[profileId];
-  const profileTemplateTarget = profile.templateRoot ?? templateTarget;
+  const profileTemplateTarget =
+    profile.templateRoot ??
+    (useManagedTemplate ? profile.managedTemplateRoot : undefined) ??
+    templateTarget;
   const templatePackage = profile.codeOnly
     ? {}
     : JSON.parse(
         await dependencies.readFile(
-          join(templateTarget, "package.json"),
+          join(profileTemplateTarget, "package.json"),
           "utf8"
         )
       );
@@ -235,7 +238,7 @@ async function applyReferenceProfile(
     for (const entry of profile.overlayEntries) {
       const destination = join(nativeTarget, entry);
       await dependencies.rm(destination, { force: true, recursive: true });
-      await dependencies.cp(join(templateTarget, entry), destination, {
+      await dependencies.cp(join(profileTemplateTarget, entry), destination, {
         recursive: true
       });
     }

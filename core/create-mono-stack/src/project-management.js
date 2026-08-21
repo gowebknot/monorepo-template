@@ -14,6 +14,10 @@ import {
   validateName
 } from "./project-management-runtime.js";
 import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
+import {
+  applyReferenceProfile,
+  nativeScaffoldDependencies
+} from "./native-scaffold.js";
 
 export const MANAGEABLE_APP_DEFINITIONS = [
   {
@@ -21,13 +25,25 @@ export const MANAGEABLE_APP_DEFINITIONS = [
     generator: "vite",
     referenceProfile: "vite/react-ts"
   },
-  { feature: "web-next", generator: "next", referenceProfile: null },
-  { feature: "api-nest", generator: "nestjs", referenceProfile: null },
-  { feature: "mobile-expo", generator: "expo", referenceProfile: null },
+  {
+    feature: "web-next",
+    generator: "next",
+    referenceProfile: "next/default"
+  },
+  {
+    feature: "api-nest",
+    generator: "nestjs",
+    referenceProfile: "nestjs/default"
+  },
+  {
+    feature: "mobile-expo",
+    generator: "expo",
+    referenceProfile: "expo/default"
+  },
   {
     feature: "mobile-react-native",
     generator: "react-native",
-    referenceProfile: null
+    referenceProfile: "react-native/default"
   }
 ];
 
@@ -152,6 +168,16 @@ export async function addApp(
   }
   const [command, args] = commandForApp(definition, name);
   await runCommand(command, args, { cwd });
+  await applyReferenceProfile(
+    {
+      name,
+      nativeTarget: join(cwd, "apps", name),
+      profileId: definition.referenceProfile,
+      templateTarget: join(cwd, "apps", name),
+      useManagedTemplate: true
+    },
+    nativeScaffoldDependencies({})
+  );
   const app = {
     feature,
     generator: definition.generator,

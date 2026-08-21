@@ -4,6 +4,11 @@ import { fileURLToPath } from "node:url";
 const referenceTemplatesRoot = fileURLToPath(
   new URL("../reference-templates", import.meta.url)
 );
+const managedTemplatesRoot = join(referenceTemplatesRoot, "managed");
+
+function managedTemplate(name) {
+  return join(managedTemplatesRoot, name);
+}
 
 const reactTypeScriptDependencies = ["react", "react-dom"];
 const reactTypeScriptDevDependencies = [
@@ -65,6 +70,7 @@ export const REFERENCE_PROFILES = {
   "nestjs/default": {
     canonicalName: "server",
     generator: "nestjs",
+    managedTemplateRoot: managedTemplate("server"),
     overlayEntries: [
       ".prettierrc",
       "AGENTS.md",
@@ -99,6 +105,7 @@ export const REFERENCE_PROFILES = {
   "vite/react-ts": {
     canonicalName: "web",
     generator: "vite",
+    managedTemplateRoot: managedTemplate("web"),
     matches: matchesReactTypeScript,
     referenceEntries: [
       { destination: "reference/index.html", source: "index.html" },
@@ -109,6 +116,7 @@ export const REFERENCE_PROFILES = {
   "next/default": {
     canonicalName: "next",
     generator: "next",
+    managedTemplateRoot: managedTemplate("next"),
     referenceEntries: [
       { destination: ".env.example", source: ".env.example" },
       { destination: "AGENTS.md", source: "AGENTS.md" },
@@ -129,6 +137,7 @@ export const REFERENCE_PROFILES = {
   "expo/default": {
     canonicalName: "expo",
     generator: "expo",
+    managedTemplateRoot: managedTemplate("expo"),
     mergeScriptNames: ["dev"],
     nativeOwnedDependencies: ["expo", "react-native"],
     overlayEntries: [
@@ -153,6 +162,7 @@ export const REFERENCE_PROFILES = {
   "react-native/default": {
     canonicalName: "mobile",
     generator: "react-native",
+    managedTemplateRoot: managedTemplate("mobile"),
     mergeScriptNames: ["dev"],
     nativeOwnedDependencies: ["react-native"],
     overlayEntries: [

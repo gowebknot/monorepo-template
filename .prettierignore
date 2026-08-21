@@ -9,4 +9,5 @@ skills/shadcn
 .claude/skills/shadcn
 .opencode/skills/shadcn
 apps/web/src/routeTree.gen.ts
+core/create-mono-stack/reference-templates/managed/**
 .copier-answers.yml

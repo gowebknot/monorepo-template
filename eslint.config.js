@@ -7,7 +7,11 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["**/dist/**", "**/node_modules/**"]
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "core/create-mono-stack/reference-templates/**"
+    ]
   },
   {
     files: ["**/*.{js,mjs,ts}"],
