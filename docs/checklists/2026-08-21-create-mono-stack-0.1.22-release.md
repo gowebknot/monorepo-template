@@ -32,7 +32,7 @@
   Prettier all pass cleanly and deterministically. `core/create-mono-stack`'s own test suite is
   flaky (254-255/257 across 3 runs) on tests unrelated to this release's changed files (`skills/`,
   `package.json` version only) — see TEST-RELEASE-002 for detail. (TEST-RELEASE-002)
-- [ ] Commit and tag `v0.1.22` are pushed to `origin/master`.
+- [x] Commit and tag `v0.1.22` are pushed to `origin/master`. (TEST-RELEASE-003)
 - [ ] `create-mono-stack@0.1.22` is published through `publish:package`.
 
 ## Exact Test Cases
@@ -108,7 +108,10 @@
 - **Expected result before the code change:** No `v0.1.22` tag on remote; `master` at `aeeee32`.
 - **First observed run:** confirmed no `v0.1.22` tag exists yet (`git tag --sort=-creatordate` shows
   latest is `v0.1.21`); `origin/master` currently at `aeeee32` (confirmed during planning).
-- **Passing rerun:** pending implementation.
+- **Passing rerun:** committed as `0803dc2`, pushed to `origin/master` (`aeeee32..0803dc2 master ->
+master`), tagged `v0.1.22` and pushed. `git ls-remote origin master` and `git ls-remote --tags origin`
+  both confirm `0803dc23a7df2dd815703ddc92352fa5abca9b47` for `refs/heads/master` and
+  `refs/tags/v0.1.22`.
 
 ### TEST-RELEASE-004: Verify the package publishes to npm
 
