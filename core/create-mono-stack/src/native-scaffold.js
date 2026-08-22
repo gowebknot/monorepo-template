@@ -65,6 +65,26 @@ function appPath(root, name) {
   return join(root, "apps", name);
 }
 
+async function injectTailwindVitePlugin(nativeTarget, dependencies) {
+  const configPath = join(nativeTarget, "vite.config.ts");
+  let config = await dependencies.readFile(configPath, "utf8");
+
+  if (!config.includes('from "@tailwindcss/vite"')) {
+    config = `import tailwindcss from "@tailwindcss/vite";\n${config}`;
+  }
+  if (!config.includes("tailwindcss()")) {
+    if (!/plugins\s*:\s*\[/.test(config)) {
+      throw new Error(`Vite config has no plugins array: ${configPath}`);
+    }
+    config = config.replace(
+      /plugins\s*:\s*\[/,
+      (match) => `${match}\n    tailwindcss(),`
+    );
+  }
+
+  await dependencies.writeFile(configPath, config);
+}
+
 function temporaryAppName(generator, name) {
   return `${generator}-${name}`;
 }
@@ -242,6 +262,9 @@ export async function applyReferenceProfile(
         recursive: true
       });
     }
+  }
+  if (profile.postProcess === "tailwind-vite") {
+    await injectTailwindVitePlugin(nativeTarget, dependencies);
   }
   const packageJson = mergeProfilePackageJson(
     nativePackage,

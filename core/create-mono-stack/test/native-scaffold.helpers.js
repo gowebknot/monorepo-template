@@ -25,6 +25,7 @@ export const renderedWebPackage = {
   },
   devDependencies: {
     eslint: "^10.6.0",
+    "@tailwindcss/vite": "^4.3.3",
     typescript: "^7.0.0",
     vite: "^8.1.1"
   }
@@ -77,7 +78,11 @@ export const reactTypeScriptNativeTree = {
   "tsconfig.app.json": '{"native":"app"}',
   "tsconfig.json": '{"native":"root"}',
   "tsconfig.node.json": '{"native":"node"}',
-  "vite.config.ts": "native-vite"
+  "vite.config.ts": `import react from "@vitejs/plugin-react";
+
+export default {
+  plugins: [react()]
+}; // native-vite`
 };
 
 export const reactCompilerTypeScriptNativeTree = {
@@ -90,7 +95,11 @@ export const reactCompilerTypeScriptNativeTree = {
       "babel-plugin-react-compiler": "^1.0.0"
     }
   }),
-  "vite.config.ts": "native-react-compiler-vite"
+  "vite.config.ts": `import react from "@vitejs/plugin-react";
+
+export default {
+  plugins: [react()]
+}; // native-react-compiler-vite`
 };
 
 export function delegatedReactNativeTree(dependency) {

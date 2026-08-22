@@ -106,6 +106,7 @@ export const REFERENCE_PROFILES = {
     canonicalName: "web",
     generator: "vite",
     managedTemplateRoot: managedTemplate("web"),
+    postProcess: "tailwind-vite",
     matches: matchesReactTypeScript,
     referenceEntries: [
       { destination: "reference/index.html", source: "index.html" },

@@ -17,6 +17,7 @@ function dependencies(fixture, overrides = {}) {
   return {
     ...nativeScaffoldDependencies({}),
     runCommand: fixture.runCommand,
+    runInteractiveCommand: fixture.runInteractiveCommand,
     temporaryRoot: fixture.temporaryRoot,
     ...overrides
   };
@@ -49,6 +50,29 @@ test("TEST-COMMAND-001 invokes interactive Vite without a template", async (t) =
     }
   ]);
   assert.equal(fixture.calls[0].args.includes("--template"), false);
+});
+
+test("TEST-TAILWIND-001 activates Tailwind in generated React apps", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "web-vite": ["dashboard"] },
+      destination: fixture.destination,
+      features: ["web-vite"]
+    },
+    dependencies(fixture)
+  );
+
+  const appRoot = join(fixture.destination, "apps/dashboard");
+  const viteConfig = await fixture.read(join(appRoot, "vite.config.ts"));
+  const packageJson = JSON.parse(
+    await fixture.read(join(appRoot, "package.json"))
+  );
+
+  assert.match(viteConfig, /import tailwindcss from "@tailwindcss\/vite"/);
+  assert.match(viteConfig, /tailwindcss\(\)/);
+  assert.equal(packageJson.devDependencies["@tailwindcss/vite"], "^4.3.3");
 });
 
 test("TEST-COMMAND-002 skips the nested NestJS install", async (t) => {
@@ -194,6 +218,10 @@ test("TEST-COMMAND-003 leaves rendered apps untouched after CLI failure", async 
       },
       dependencies(fixture, {
         runCommand: async (...args) => {
+          calls.push(args);
+          throw new Error("Vite failed");
+        },
+        runInteractiveCommand: async (...args) => {
           calls.push(args);
           throw new Error("Vite failed");
         }
