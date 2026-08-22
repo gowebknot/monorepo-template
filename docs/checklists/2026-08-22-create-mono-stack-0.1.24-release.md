@@ -144,3 +144,16 @@ Validation failure: the first and second post-fix `just check` runs failed the s
 
 - [ ] The npm package does not contain `skills/` because of its `files` allowlist; the new skill reaches generated projects through the pushed template repository.
 - [ ] Do not publish if `.npmrc.auth` or the configured auth file is missing; report the blocker without exposing credentials.
+
+## Updates
+
+### 2026-08-22: Release completed
+
+- Version and artifact validation passed: `create-mono-stack@0.1.24` was reported by `npm pack --dry-run`; the artifact contained 274 files and no `skills/` or `.npmrc.auth` content.
+- The release blockers were corrected: the management fixture now uses `v0.1.24`, and `packages/ui/CLAUDE.md` imports `@AGENTS.md`.
+- `just check` passed after retrying the transient Ink timing failure; the focused package suite passed all 257 tests and the skill suite passed all 97 tests. Existing React Compiler warnings remained warnings only.
+- Commit `135516e5de3ef7640adb44a4537323eb53c32a9b` was pushed to `origin/master`.
+- Tag `v0.1.24` was pushed and points to the same commit.
+- `pnpm --filter create-mono-stack publish:package` succeeded.
+- `npm view create-mono-stack@0.1.24 version dist-tags --json` reports version `0.1.24` and `latest: 0.1.24`.
+- Final verification found a clean worktree.
