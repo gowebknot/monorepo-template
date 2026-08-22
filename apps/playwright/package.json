@@ -1,0 +1,17 @@
+{
+  "name": "playwright-tests",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "install:browsers": "playwright install chromium",
+    "lint": "eslint playwright.config.ts tests"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "eslint": "^10.6.0"
+  }
+}

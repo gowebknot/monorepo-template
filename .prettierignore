@@ -11,3 +11,4 @@ skills/shadcn
 apps/web/src/routeTree.gen.ts
 core/create-mono-stack/reference-templates/managed/**
 .copier-answers.yml
+test-results

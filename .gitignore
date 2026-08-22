@@ -10,3 +10,4 @@ dist
 .npmrc.auth
 *.log
 *.db
+test-results
