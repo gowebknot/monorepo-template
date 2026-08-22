@@ -1,7 +1,6 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { buttonVariants, cn } from "@repo/ui";
 
 export default function ReferenceIndexPage() {
   return (

@@ -281,6 +281,9 @@ importers:
       "@repo/query-client":
         specifier: workspace:^
         version: link:../../packages/query-client
+      "@repo/ui":
+        specifier: workspace:^
+        version: link:../../packages/ui
       "@tanstack/react-form":
         specifier: ^1.33.2
         version: 1.33.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -478,6 +481,9 @@ importers:
       "@repo/query-client":
         specifier: workspace:^
         version: link:../../packages/query-client
+      "@repo/ui":
+        specifier: workspace:^
+        version: link:../../packages/ui
       "@tailwindcss/vite":
         specifier: ^4.3.3
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
@@ -714,6 +720,54 @@ importers:
       react:
         specifier: ^19.2.8
         version: 19.2.8
+      typescript:
+        specifier: ^7.0.0
+        version: 7.0.2
+      unplugin-dts:
+        specifier: ^1.0.3
+        version: 1.0.3(esbuild@0.28.1)(rolldown@1.1.5)(typescript@7.0.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))(webpack@5.106.2(esbuild@0.28.1))
+      vite:
+        specifier: ^8.1.1
+        version: 8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)
+
+  packages/ui:
+    devDependencies:
+      "@base-ui/react":
+        specifier: ^1.6.0
+        version: 1.6.0(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      "@hugeicons/core-free-icons":
+        specifier: ^4.2.3
+        version: 4.2.3
+      "@hugeicons/react":
+        specifier: ^1.1.9
+        version: 1.1.9(react@19.2.8)
+      "@types/react":
+        specifier: ^19.2.17
+        version: 19.2.17
+      "@typescript/typescript6":
+        specifier: 6.0.2
+        version: 6.0.2
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: ^19.2.7
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.7
+        version: 19.2.8(react@19.2.8)
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
       typescript:
         specifier: ^7.0.0
         version: 7.0.2
