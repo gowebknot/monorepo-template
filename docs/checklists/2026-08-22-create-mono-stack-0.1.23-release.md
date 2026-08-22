@@ -20,9 +20,9 @@
 - [x] The package artifact contains the intended files and no credentials or unrelated files.
 - [x] Shared UI package and both web consumers pass their focused checks.
 - [x] `create-mono-stack` tests and lint pass without bypass flags.
-- [ ] The release commit is pushed to `origin/master`.
-- [ ] Tag `v0.1.23` is pushed to `origin`.
-- [ ] `create-mono-stack@0.1.23` is published through `publish:package`.
+- [x] The release commit is pushed to `origin/master`.
+- [x] Tag `v0.1.23` is pushed to `origin`.
+- [x] `create-mono-stack@0.1.23` is published through `publish:package`.
 
 ## Exact Test Cases
 
@@ -74,8 +74,8 @@
 - **Must not happen:** No amend, force-push, or skipped commit hook.
 - **Planned command:** `git push origin master && git tag v0.1.23 && git push origin v0.1.23`
 - **Expected result before the code change:** No release commit or `v0.1.23` tag exists remotely.
-- **First observed run:** Pending validation and commit.
-- **Passing rerun:** Pending remote verification.
+- **First observed run:** The release commit and tag did not exist remotely before the release sequence.
+- **Passing rerun:** `git ls-remote origin refs/heads/master refs/tags/v0.1.23` reports both refs at `8062a4c67013cf4ab3a33de8f4f137307b378390`.
 
 ### TEST-RELEASE-004: Publish npm package
 
@@ -91,16 +91,16 @@
 - **Must not happen:** No direct registry command, credentials in git, or bypass flags.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package`
 - **Expected result before the code change:** `0.1.23` is not yet published.
-- **First observed run:** Pending remote release.
-- **Passing rerun:** Pending publish verification.
+- **First observed run:** `create-mono-stack@0.1.23` was not yet published before the release sequence.
+- **Passing rerun:** `pnpm --filter create-mono-stack publish:package` succeeded; `npm view create-mono-stack@0.1.23 version dist-tags --json` reports version `0.1.23` and `latest: 0.1.23`.
 
 ## Release Steps
 
 - [x] Inspect status, diff, log, remote, and current package version.
 - [x] Bump `core/create-mono-stack/package.json` to `0.1.23`.
 - [x] Run and record all release validation.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push `v0.1.23`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, and final clean status.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push `v0.1.23`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, and final clean status.
