@@ -26,10 +26,10 @@
 
 - [x] `core/create-mono-stack/package.json` reports `0.1.26`.
 - [x] Package tests, lint, required checks, artifact dry-run, and whitespace validation pass.
-- [ ] A Conventional Commit containing only intended release changes is pushed to `origin/master`.
-- [ ] Annotated tag `v0.1.26` is created and pushed at the release commit.
-- [ ] `create-mono-stack@0.1.26` is published through `pnpm --filter create-mono-stack publish:package`.
-- [ ] Remote refs, npm metadata, artifact contents, and final worktree state are verified.
+- [x] A Conventional Commit containing only intended release changes is pushed to `origin/master`.
+- [x] Annotated tag `v0.1.26` is created and pushed at the release commit.
+- [x] `create-mono-stack@0.1.26` is published through `pnpm --filter create-mono-stack publish:package`.
+- [x] Remote refs, npm metadata, artifact contents, and final worktree state are verified.
 
 ## Exact Test Cases
 
@@ -81,8 +81,8 @@
 - **Must not happen:** No amend, force-push, skipped hooks, or unrelated staged files.
 - **Planned command:** `git push origin master && git tag -a v0.1.26 -m "Release v0.1.26" && git push origin v0.1.26`
 - **Expected result before the code change:** No release commit or `v0.1.26` tag exists remotely.
-- **First observed run:** Pending.
-- **Passing rerun:** Pending.
+- **First observed run:** Release commit `8f9a1a2` was pushed to `origin/master`; annotated tag `v0.1.26` was pushed and dereferences to commit `8f9a1a289883e837488db8300ea0c1c52d619e37`.
+- **Passing rerun:** `git ls-remote` confirmed both remote refs point to the release commit.
 
 ### TEST-RELEASE-004: Publish npm package
 
@@ -98,8 +98,8 @@
 - **Must not happen:** No direct `npm publish` or credentials in Git.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package && npm view create-mono-stack@0.1.26 version dist-tags --json`
 - **Expected result before the code change:** `0.1.26` is not published.
-- **First observed run:** Pending.
-- **Passing rerun:** Pending.
+- **First observed run:** The publish wrapper completed successfully; the immediate package-specific npm lookup returned `E404` during registry propagation.
+- **Passing rerun:** `npm view create-mono-stack version dist-tags --json` reported version `0.1.26` and `latest: 0.1.26`.
 
 ## Test-To-Task Map
 
@@ -115,12 +115,12 @@
 - [x] Inspect status, diff, log, remote, package version, existing tag, and auth-file presence.
 - [x] Bump `core/create-mono-stack/package.json` to `0.1.26`.
 - [x] Run and record release validation.
-- [ ] Inspect the final diff and stage only intended files.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push `v0.1.26`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, package artifact, and final status.
+- [x] Inspect the final diff and stage only intended files.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push `v0.1.26`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, package artifact, and final status.
 
 ## Risks And Follow-Up
 
@@ -133,3 +133,5 @@
 - First `just check` run passed lint, builds, and typechecks but failed `format:check` because this new checklist needed Prettier formatting; no source or test failures occurred.
 - The second gate run passed formatting, skills checks, and all but one template test; `TEST-MANAGE-001` still referenced `_commit: v0.1.25` after the version bump and failed before package artifact checks ran.
 - Final validation passed with `just check`, package dry-run, and `git diff --check`; standard lint output retained two existing React Compiler compatibility warnings and no errors.
+- The publish wrapper reported success, but the immediate `npm view create-mono-stack@0.1.26 version dist-tags --json` lookup returned `E404`; npm metadata verification is pending a propagation retry.
+- Final verification succeeded after propagation: npm reports `0.1.26` as `latest`; remote `master` and `v0.1.26` resolve to the release commit.
