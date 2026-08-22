@@ -124,3 +124,15 @@ Validation failure: the first focused package test run reported one stale curren
 
 - [ ] npm publication is irreversible for this version; any correction requires a new patch version.
 - [ ] Do not publish if authentication is missing or package validation fails.
+
+## Updates
+
+### 2026-08-22: Release completed
+
+- Version and artifact validation passed: `create-mono-stack@0.1.25` was reported by `npm pack --dry-run`; the artifact contained 274 files and no credentials.
+- The stale management fixture was updated to `_commit: v0.1.25`; `just check` then passed, including 257 launcher tests, 97 skill tests, lint, typecheck, formatting, and template checks. Playwright E2E passed all 3 tests.
+- Commit `d10e79fd28097ad3667648e7db4e705393ff0131` was pushed to `origin/master`.
+- Annotated tag `v0.1.25` was pushed and resolves to the release commit.
+- `pnpm --filter create-mono-stack publish:package` succeeded.
+- `npm view create-mono-stack@0.1.25 version dist-tags --json` reports version `0.1.25` and `latest: 0.1.25`.
+- Final verification found a clean worktree before this documentation update.
