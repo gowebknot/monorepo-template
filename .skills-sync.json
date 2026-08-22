@@ -22,6 +22,9 @@
     "create-portable-skill": {
       "hash": "8c6b0a47fc36c1fded152ac452243d16b082f80ebbde598aa66c8fbbea84cc93"
     },
+    "e2e-regression-test-writer": {
+      "hash": "f2dbbd2cd18fa00c163a984429d41befa67f9ad6a317b8e4dace52d524487286"
+    },
     "end-to-end-api-flow": {
       "hash": "8bd73611368abeaf9382b313788be6d6bfdca505d8cc7c37927f9faec8df04d4"
     },
