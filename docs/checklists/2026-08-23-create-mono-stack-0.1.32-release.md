@@ -80,8 +80,10 @@
 - **Must not happen:** No amend, force-push, skipped hooks, or unrelated staged files.
 - **Planned command:** `git push origin master && git tag -a v0.1.32 -m "Release v0.1.32" && git push origin v0.1.32`
 - **Expected result before the code change:** No release commit or `v0.1.32` tag exists remotely.
-- **First observed run:** Pending implementation.
-- **Passing rerun:** Pending validation.
+- **First observed run:** Commit `405e72c` was created after all validation passed; `v0.1.32` did not
+  exist remotely.
+- **Passing rerun:** `master` was pushed, annotated `v0.1.32` was created and pushed, and both
+  `origin/master` and the peeled tag resolve to `405e72c`.
 
 ### TEST-RELEASE-012: Publish npm package
 
@@ -97,21 +99,34 @@
 - **Must not happen:** No direct npm publish or credentials in Git.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package && npm view create-mono-stack@0.1.32 version dist-tags --json`
 - **Expected result before the code change:** `0.1.32` is not published.
-- **First observed run:** Pending implementation.
-- **Passing rerun:** Pending validation.
+- **First observed run:** Before publication, npm did not report `create-mono-stack@0.1.32`.
+- **Passing rerun:** The package wrapper published successfully; npm reports version `0.1.32` and
+  `latest: 0.1.32`.
 
 ## Release Steps
 
 - [x] Bump package version and current-template fixture.
 - [x] Run and record release validation.
 - [x] Inspect final diff and stage only intended files.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push annotated `v0.1.32`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact, and final status.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push annotated `v0.1.32`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact, and final status.
 
 ## Risks And Follow-Up
 
 - npm publication is irreversible for this version; corrections require a new patch version.
 - Do not publish if authentication is missing or package validation fails.
+
+## Updates
+
+### 2026-08-23: Release completed
+
+- Release commit `405e72c` was created with passing commit hooks.
+- `master` was pushed to `origin`.
+- Annotated tag `v0.1.32` was created and pushed; its peeled commit is
+  `405e72c553066513060d021316a2ce0bf9170615`.
+- `create-mono-stack@0.1.32` was published through `pnpm --filter create-mono-stack publish:package`.
+- npm reports `0.1.32` as the `latest` version.
+- The package dry-run reported 288 files and no credentials; the post-release worktree was clean.
