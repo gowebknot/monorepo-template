@@ -112,7 +112,7 @@ test("TEST-MANAGE-001 routes manage to the project management prompt", async () 
     );
     await writeFile(
       join(projectRoot, ".copier-answers.yml"),
-      "_commit: v0.1.28\n"
+      "_commit: v0.1.29\n"
     );
     const input = { isTTY: true };
     const output = { isTTY: true };

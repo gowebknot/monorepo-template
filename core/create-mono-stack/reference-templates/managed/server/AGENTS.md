@@ -8,7 +8,7 @@ The main application (`src/`) is intentionally minimal and exposes only a health
 
 ## Rules
 
-- This app intentionally keeps Nest's default toolchain (no `"type": "module"` in `package.json`, so it runs as CommonJS at runtime despite `tsconfig.json`'s `module`/`moduleResolution: "nodenext"`; its own `eslint.config.mjs`/`.prettierrc`, Jest) instead of the repo's ESM-everywhere convention — same kind of deliberate, self-contained exception `packages/entities` and `packages/env` make for their own build tooling.
+- This app intentionally keeps Nest's default CommonJS runtime (no `"type": "module"` in `package.json`, so it runs as CommonJS at runtime despite `tsconfig.json`'s `module`/`moduleResolution: "nodenext"`; its own `eslint.config.mjs`/`.prettierrc`, Vitest) instead of the repo's ESM-everywhere convention — same kind of deliberate, self-contained exception `packages/entities` and `packages/env` make for their own build tooling.
 - Do not read `process.env` directly. Import config from `@repo/env/server` (see `serverEnv` usage in `src/main.ts`) or `@repo/env/reference-server` for the reference entry point.
 - Add any new required environment variables to `packages/env`'s `globalEnv` first, then pick them into `serverEnvSchema` or `referenceServerEnvSchema`, before consuming them here.
 - The reference server (`reference/main.ts`) is the only place that imports `@repo/db/example`. The real server (`src/`) must not depend on database modules or example CRUD code.

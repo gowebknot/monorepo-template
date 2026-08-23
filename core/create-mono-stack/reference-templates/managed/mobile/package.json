@@ -8,6 +8,7 @@
     "dev:reference": "react-native start --port 8082",
     "ios": "react-native run-ios",
     "start": "react-native start --port 8082",
+    "test": "vitest run",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "postcss": "^8.5.4",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.11",
     "zod": "^4.4.3"
   },
   "engines": {

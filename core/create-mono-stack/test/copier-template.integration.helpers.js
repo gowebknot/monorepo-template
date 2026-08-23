@@ -53,6 +53,8 @@ export async function assertGeneratedProject({
     await readFile(join(projectRoot, "apps/server/package.json"), "utf8")
   );
   assert.equal(webPackage.version, "1.0.0");
+  assert.equal(webPackage.scripts.test, "vitest run");
+  assert.equal(webPackage.devDependencies.vitest, "^4.1.11");
   assert.equal(
     webPackage.scripts["dev:reference"],
     "node ../../scripts/run-app.mjs reference"
@@ -64,6 +66,20 @@ export async function assertGeneratedProject({
   assert.equal(webPackage.scripts.build, "tsc -b && vite build");
   assert.equal(webPackage.dependencies["@repo/api-client"], "workspace:^");
   assert.equal(serverPackage.version, "1.0.0");
+  assert.equal(serverPackage.scripts.test, "vitest run");
+  assert.equal(
+    serverPackage.scripts["test:e2e"],
+    "vitest run --config ./vitest.e2e.config.ts"
+  );
+  assert.equal(serverPackage.devDependencies.jest, undefined);
+  assert.equal(serverPackage.devDependencies["ts-jest"], undefined);
+  assert.equal(serverPackage.jest, undefined);
+  await access(join(projectRoot, "apps/web/vitest.config.ts"));
+  await access(join(projectRoot, "apps/server/vitest.config.ts"));
+  await access(join(projectRoot, "apps/server/vitest.e2e.config.ts"));
+  await assert.rejects(
+    readFile(join(projectRoot, "apps/server/test/jest-e2e.json"), "utf8")
+  );
   assert.equal(
     serverPackage.scripts["build:reference"],
     "nest build --config nest-cli.reference.json"
@@ -164,7 +180,8 @@ export function assertReferenceTaskGraph(graph) {
         "@repo/api-client#build",
         "@repo/entities#build",
         "@repo/env#build",
-        "@repo/query-client#build"
+        "@repo/query-client#build",
+        "@repo/ui#build"
       ]
     ],
     ["server#dev:reference", ["@repo/db#build", "@repo/env#build"]]
@@ -185,6 +202,18 @@ export async function assertReferenceBuilds({ projectRoot, run }) {
     timeout: 180_000
   });
   run("pnpm", ["--filter", "web", "build:reference"], {
+    cwd: projectRoot,
+    timeout: 180_000
+  });
+  run("pnpm", ["--filter", "web", "test"], {
+    cwd: projectRoot,
+    timeout: 180_000
+  });
+  run("pnpm", ["--filter", "server", "test"], {
+    cwd: projectRoot,
+    timeout: 180_000
+  });
+  run("pnpm", ["--filter", "server", "test:e2e"], {
     cwd: projectRoot,
     timeout: 180_000
   });

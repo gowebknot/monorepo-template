@@ -16,7 +16,8 @@ export const renderedWebPackage = {
   scripts: {
     build: "pnpm routes:generate && tsc -b && vite build",
     "dev:reference": "vite",
-    "routes:generate": "tsr generate"
+    "routes:generate": "tsr generate",
+    test: "vitest run"
   },
   dependencies: {
     "@repo/env": "workspace:^",
@@ -27,7 +28,8 @@ export const renderedWebPackage = {
     eslint: "^10.6.0",
     "@tailwindcss/vite": "^4.3.3",
     typescript: "^7.0.0",
-    vite: "^8.1.1"
+    vite: "^8.1.1",
+    vitest: "^4.1.11"
   }
 };
 
@@ -40,7 +42,12 @@ export const renderedServerPackage = {
     "build:reference": "nest build --config nest-cli.reference.json",
     dev: "nest start --watch",
     "dev:reference": "nest start --config nest-cli.reference.json --watch",
-    typecheck: "tsc --noEmit -p tsconfig.json"
+    typecheck: "tsc --noEmit -p tsconfig.json",
+    test: "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:debug": "vitest run --inspect-brk",
+    "test:e2e": "vitest run --config ./vitest.e2e.config.ts"
   },
   dependencies: {
     "@nestjs/common": "^11.0.1",
@@ -49,7 +56,9 @@ export const renderedServerPackage = {
   },
   devDependencies: {
     "@nestjs/cli": "^11.0.0",
-    typescript: "^7.0.0"
+    typescript: "^7.0.0",
+    vitest: "^4.1.11",
+    "@vitest/coverage-v8": "^4.1.11"
   }
 };
 
@@ -149,7 +158,8 @@ export const renderedNextPackage = {
     "build:reference": "next build reference",
     dev: "next dev",
     "dev:reference": "next dev reference",
-    "start:reference": "next start reference"
+    "start:reference": "next start reference",
+    test: "vitest run"
   },
   dependencies: {
     "@repo/api-client": "workspace:^",
@@ -160,7 +170,7 @@ export const renderedNextPackage = {
     next: "^14.0.0",
     react: "^18.0.0"
   },
-  devDependencies: { typescript: "^7.0.0" }
+  devDependencies: { typescript: "^7.0.0", vitest: "^4.1.11" }
 };
 
 export const renderedExpoPackage = {
@@ -170,7 +180,8 @@ export const renderedExpoPackage = {
   scripts: {
     dev: "expo start",
     "dev:reference": "expo start",
-    start: "expo start"
+    start: "expo start",
+    test: "vitest run"
   },
   dependencies: {
     "@repo/api-client": "workspace:^",
@@ -183,7 +194,7 @@ export const renderedExpoPackage = {
     react: "^18.0.0",
     "react-native-safe-area-context": "5.9.1"
   },
-  devDependencies: { typescript: "^7.0.0" }
+  devDependencies: { typescript: "^7.0.0", vitest: "^4.1.11" }
 };
 
 export const renderedMobilePackage = {
@@ -193,7 +204,8 @@ export const renderedMobilePackage = {
   scripts: {
     dev: "react-native start",
     "dev:reference": "react-native start",
-    start: "react-native start"
+    start: "react-native start",
+    test: "vitest run"
   },
   dependencies: {
     "@react-navigation/native": "^7.0.0",
@@ -207,7 +219,7 @@ export const renderedMobilePackage = {
     "react-native": "^0.75.0",
     "react-native-safe-area-context": "5.9.1"
   },
-  devDependencies: { typescript: "^7.0.0" }
+  devDependencies: { typescript: "^7.0.0", vitest: "^4.1.11" }
 };
 
 export const nextNativeTree = {
@@ -217,16 +229,21 @@ export const nextNativeTree = {
     name: "next-next",
     private: true,
     version: "0.1.0",
-    scripts: { build: "next build", dev: "next dev" },
+    scripts: { build: "next build", dev: "next dev", test: "vitest run" },
     dependencies: {
       next: "^15.0.0",
       react: "^19.0.0",
       "react-dom": "^19.0.0"
     },
-    devDependencies: { "@types/node": "^22.0.0", typescript: "^5.6.0" }
+    devDependencies: {
+      "@types/node": "^22.0.0",
+      typescript: "^5.6.0",
+      vitest: "^4.1.11"
+    }
   }),
   "src/app/page.tsx": "next-native-page",
-  "tsconfig.json": '{"native":"next"}'
+  "tsconfig.json": '{"native":"next"}',
+  "vitest.config.ts": "native-vitest-config"
 };
 
 export const expoNativeTree = {
@@ -237,16 +254,17 @@ export const expoNativeTree = {
     name: "expo-expo",
     private: true,
     version: "1.0.0",
-    scripts: { start: "expo start" },
+    scripts: { start: "expo start", test: "vitest run" },
     dependencies: {
       expo: "^52.0.0",
       react: "^19.0.0",
       "react-native": "^0.76.0",
       "react-native-safe-area-context": "^5.5.2"
     },
-    devDependencies: { typescript: "^5.6.0" }
+    devDependencies: { typescript: "^5.6.0", vitest: "^4.1.11" }
   }),
-  "tsconfig.json": '{"native":"expo"}'
+  "tsconfig.json": '{"native":"expo"}',
+  "vitest.config.ts": "native-vitest-config"
 };
 
 export const reactNativeNativeTree = {
@@ -265,7 +283,8 @@ export const reactNativeNativeTree = {
     },
     devDependencies: { typescript: "^5.6.0" }
   }),
-  "tsconfig.json": '{"native":"rn"}'
+  "tsconfig.json": '{"native":"rn"}',
+  "vitest.config.ts": "native-vitest-config"
 };
 
 export const nestNativeTree = {
@@ -286,7 +305,9 @@ export const nestNativeTree = {
   "src/native.controller.ts": "native-controller",
   "test/native.e2e-spec.ts": "native-test",
   "tsconfig.build.json": '{"native":true}',
-  "tsconfig.json": '{"native":true}'
+  "tsconfig.json": '{"native":true}',
+  "vitest.config.ts": "native-vitest-config",
+  "vitest.e2e.config.ts": "native-vitest-e2e-config"
 };
 
 const renderedWebTree = {
@@ -300,7 +321,8 @@ const renderedWebTree = {
   "tsconfig.app.json": '{"marker":"app-tsconfig"}',
   "tsconfig.json": '{"marker":"root-tsconfig"}',
   "tsconfig.node.json": '{"marker":"node-tsconfig"}',
-  "vite.config.ts": "vite-config-marker"
+  "vite.config.ts": "vite-config-marker",
+  "vitest.config.ts": "vitest-config-marker"
 };
 
 const renderedServerTree = {
@@ -317,7 +339,9 @@ const renderedServerTree = {
   "test/app.e2e-spec.ts": "template-test",
   "tsconfig.build.json": '{"marker":"build-tsconfig"}',
   "tsconfig.json": '{"marker":"root-tsconfig"}',
-  "tsconfig.reference.build.json": '{"marker":"reference-tsconfig"}'
+  "tsconfig.reference.build.json": '{"marker":"reference-tsconfig"}',
+  "vitest.config.ts": "vitest-config-marker",
+  "vitest.e2e.config.ts": "vitest-e2e-config-marker"
 };
 
 const renderedNextTree = {
@@ -331,7 +355,8 @@ const renderedNextTree = {
   ".env.example": "next-env-example",
   "package.json": JSON.stringify(renderedNextPackage),
   "src/app/page.tsx": "next-template-page",
-  "src/app/reference/todos/page.tsx": "next-template-todos"
+  "src/app/reference/todos/page.tsx": "next-template-todos",
+  "vitest.config.ts": "vitest-config-marker"
 };
 
 const renderedExpoTree = {
@@ -359,7 +384,8 @@ const renderedExpoTree = {
   "components/todo-list.tsx": "expo-template-list",
   "lib/bug-report-form.ts": "expo-template-form-options",
   "lib/query-client.ts": "expo-template-query",
-  "tsconfig.json": "expo-tsconfig"
+  "tsconfig.json": "expo-tsconfig",
+  "vitest.config.ts": "vitest-config-marker"
 };
 
 const renderedMobileTree = {
@@ -385,7 +411,8 @@ const renderedMobileTree = {
   "src/screens/table-demo.tsx": "mobile-template-table",
   "src/screens/todo-detail.tsx": "mobile-template-detail",
   "src/screens/todos.tsx": "mobile-template-todos",
-  "tsconfig.json": "mobile-tsconfig"
+  "tsconfig.json": "mobile-tsconfig",
+  "vitest.config.ts": "vitest-config-marker"
 };
 
 export async function writeTree(root, entries) {

@@ -71,6 +71,13 @@ export const REFERENCE_PROFILES = {
     canonicalName: "server",
     generator: "nestjs",
     managedTemplateRoot: managedTemplate("server"),
+    replaceScriptNames: [
+      "test",
+      "test:watch",
+      "test:cov",
+      "test:debug",
+      "test:e2e"
+    ],
     overlayEntries: [
       ".prettierrc",
       "AGENTS.md",
@@ -83,7 +90,9 @@ export const REFERENCE_PROFILES = {
       "test",
       "tsconfig.build.json",
       "tsconfig.json",
-      "tsconfig.reference.build.json"
+      "tsconfig.reference.build.json",
+      "vitest.config.ts",
+      "vitest.e2e.config.ts"
     ]
   },
   "vite/react-router-v7": delegatedProfile(
@@ -106,9 +115,11 @@ export const REFERENCE_PROFILES = {
     canonicalName: "web",
     generator: "vite",
     managedTemplateRoot: managedTemplate("web"),
+    mergeScriptNames: ["test"],
     postProcess: "tailwind-vite",
     matches: matchesReactTypeScript,
     referenceEntries: [
+      { destination: "vitest.config.ts", source: "vitest.config.ts" },
       { destination: "reference/index.html", source: "index.html" },
       { destination: "reference/src", source: "src" }
     ],
@@ -118,7 +129,9 @@ export const REFERENCE_PROFILES = {
     canonicalName: "next",
     generator: "next",
     managedTemplateRoot: managedTemplate("next"),
+    mergeScriptNames: ["test"],
     referenceEntries: [
+      { destination: "vitest.config.ts", source: "vitest.config.ts" },
       { destination: ".env.example", source: ".env.example" },
       { destination: "AGENTS.md", source: "AGENTS.md" },
       { destination: "CLAUDE.md", source: "CLAUDE.md" },
@@ -139,7 +152,7 @@ export const REFERENCE_PROFILES = {
     canonicalName: "expo",
     generator: "expo",
     managedTemplateRoot: managedTemplate("expo"),
-    mergeScriptNames: ["dev"],
+    mergeScriptNames: ["dev", "test"],
     nativeOwnedDependencies: ["expo", "react-native"],
     overlayEntries: [
       "AGENTS.md",
@@ -157,14 +170,15 @@ export const REFERENCE_PROFILES = {
       "metro.config.js",
       "nativewind-env.d.ts",
       "postcss.config.js",
-      "tsconfig.json"
+      "tsconfig.json",
+      "vitest.config.ts"
     ]
   },
   "react-native/default": {
     canonicalName: "mobile",
     generator: "react-native",
     managedTemplateRoot: managedTemplate("mobile"),
-    mergeScriptNames: ["dev"],
+    mergeScriptNames: ["dev", "test"],
     nativeOwnedDependencies: ["react-native"],
     overlayEntries: [
       ".env.example",
@@ -179,7 +193,8 @@ export const REFERENCE_PROFILES = {
       "nativewind-env.d.ts",
       "postcss.config.js",
       "src",
-      "tsconfig.json"
+      "tsconfig.json",
+      "vitest.config.ts"
     ]
   }
 };
@@ -264,7 +279,8 @@ export function mergeProfilePackageJson(
   templatePackage,
   selectedName,
   mergeScriptNames = [],
-  nativeOwnedDependencies = null
+  nativeOwnedDependencies = null,
+  replaceScriptNames = []
 ) {
   const nativeDependencyNames = new Set([
     ...Object.keys(nativePackage.dependencies ?? {}),
@@ -273,6 +289,7 @@ export function mergeProfilePackageJson(
   const referenceScripts = Object.fromEntries(
     Object.entries(templatePackage.scripts ?? {}).filter(([name]) => {
       if (name.endsWith(":reference")) return true;
+      if (replaceScriptNames.includes(name)) return true;
       return (
         mergeScriptNames.includes(name) &&
         nativePackage.scripts?.[name] === undefined

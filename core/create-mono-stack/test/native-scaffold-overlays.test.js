@@ -58,6 +58,14 @@ test("TEST-REFERENCE-009 copies an isolated React TypeScript reference", async (
   assert.equal(await fixtureText(root, "src/main.tsx"), "native-main");
   assert.equal(await fixtureText(root, "src/App.tsx"), "native-app");
   assert.equal(
+    await fixtureText(root, "vitest.config.ts"),
+    "vitest-config-marker"
+  );
+  assert.equal(
+    JSON.parse(await fixtureText(root, "package.json")).scripts.test,
+    "vitest run"
+  );
+  assert.equal(
     await fixtureText(root, "reference/src/template-only.tsx"),
     "template-only"
   );
@@ -95,7 +103,8 @@ test("TEST-REFERENCE-008 preserves every native Vite file", async (t) => {
     ["tsconfig.app.json", "native"],
     ["tsconfig.json", "native"],
     ["tsconfig.node.json", "native"],
-    ["vite.config.ts", "native-react-compiler-vite"]
+    ["vite.config.ts", "native-react-compiler-vite"],
+    ["vitest.config.ts", "vitest-config-marker"]
   ]);
 
   for (const [path, marker] of expectedMarkers) {
@@ -147,13 +156,18 @@ test("TEST-OVERLAY-007 copies exact NestJS profile configuration", async (t) => 
     ["nest-cli.reference.json", "nest-reference"],
     ["tsconfig.build.json", "build-tsconfig"],
     ["tsconfig.json", "root-tsconfig"],
-    ["tsconfig.reference.build.json", "reference-tsconfig"]
+    ["tsconfig.reference.build.json", "reference-tsconfig"],
+    ["vitest.config.ts", "vitest-config-marker"],
+    ["vitest.e2e.config.ts", "vitest-e2e-config-marker"]
   ]);
 
   for (const [path, marker] of expectedMarkers) {
     assert.match(await fixtureText(root, path), new RegExp(marker));
   }
   assert.equal(apps[0].referenceProfile, "nestjs/default");
+  const packageJson = JSON.parse(await fixtureText(root, "package.json"));
+  assert.equal(packageJson.scripts.test, "vitest run");
+  assert.equal(packageJson.jest, undefined);
 });
 
 test("TEST-OVERLAY-008 copies NestJS agent memory files", async (t) => {
@@ -305,6 +319,10 @@ test("TEST-OVERLAY-009 keeps the generated Next app and copies the demo into ref
     await fixtureText(root, "reference/next.config.ts"),
     "next-template-config"
   );
+  assert.equal(
+    await fixtureText(root, "vitest.config.ts"),
+    "vitest-config-marker"
+  );
   // Agent docs + env example land at the app root.
   assert.equal(await fixtureText(root, "AGENTS.md"), "next-agent-marker");
   assert.equal(await fixtureText(root, "CLAUDE.md"), "next-claude-marker");
@@ -361,6 +379,11 @@ test("TEST-OVERLAY-010 overlays the Expo canonical app and merges dependencies",
   assert.equal(packageJson.dependencies["expo-router"], "^3.0.0");
   assert.equal(packageJson.scripts.dev, "expo start");
   assert.equal(packageJson.scripts["dev:reference"], "expo start");
+  assert.equal(packageJson.scripts.test, "vitest run");
+  assert.equal(
+    await fixtureText(root, "vitest.config.ts"),
+    "vitest-config-marker"
+  );
   assert.equal(apps[0].referenceProfile, "expo/default");
   assert.equal(apps[0].selection, undefined);
 });
@@ -395,6 +418,11 @@ test("TEST-OVERLAY-011 overlays the bare React Native canonical app and merges d
     "mobile-metro-config"
   );
   assert.equal(await fixtureText(root, "index.js"), "mobile-entry");
+  assert.equal(packageJson.scripts.test, "vitest run");
+  assert.equal(
+    await fixtureText(root, "vitest.config.ts"),
+    "vitest-config-marker"
+  );
   assert.equal(packageJson.dependencies["react-native"], "^0.76.0");
   assert.equal(
     packageJson.dependencies["react-native-safe-area-context"],

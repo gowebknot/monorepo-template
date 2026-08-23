@@ -7,6 +7,7 @@
     "dev:reference": "next dev reference",
     "build": "next build",
     "build:reference": "next build reference",
+    "test": "vitest run",
     "start": "next start",
     "start:reference": "next start reference",
     "lint": "eslint",
@@ -47,7 +48,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@9.15.4"
 }

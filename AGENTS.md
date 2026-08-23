@@ -4,7 +4,7 @@
 
 ```
 apps/
-  server/      # server — NestJS example API app (own CommonJS/Jest toolchain, see apps/server/AGENTS.md)
+  server/      # server — NestJS example API app (own CommonJS/Vitest toolchain, see apps/server/AGENTS.md)
 core/
   create-mono-stack/ # source-only npm launcher and Copier test owner; excluded from generated projects
 packages/

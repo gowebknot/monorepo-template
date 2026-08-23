@@ -268,7 +268,7 @@ for (const { profileId, generator, canonicalName } of [
     assert.ok(profile.overlayEntries.includes("babel.config.js"));
     assert.ok(profile.overlayEntries.includes("metro.config.js"));
     assert.ok(profile.overlayEntries.includes("nativewind-env.d.ts"));
-    assert.deepEqual(profile.mergeScriptNames, ["dev"]);
+    assert.deepEqual(profile.mergeScriptNames, ["dev", "test"]);
   });
 }
 
@@ -369,6 +369,20 @@ test("TEST-MERGE-001 keeps native versions for overlapping dependencies", () => 
   assert.equal(merged.dependencies.react, "^20.0.0");
   assert.equal(merged.devDependencies.typescript, "~6.0.2");
   assert.equal(merged.devDependencies.vite, "^9.0.0");
+});
+
+test("TEST-MERGE-011 replaces selected native scripts", () => {
+  const merged = mergeProfilePackageJson(
+    { name: "server", scripts: { test: "jest", build: "nest build" } },
+    { scripts: { test: "vitest run" } },
+    "server",
+    [],
+    null,
+    ["test"]
+  );
+
+  assert.equal(merged.scripts.test, "vitest run");
+  assert.equal(merged.scripts.build, "nest build");
 });
 
 test("TEST-MERGE-002 adds template-only dependencies", () => {
