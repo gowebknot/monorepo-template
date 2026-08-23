@@ -121,5 +121,5 @@
 - Annotated tag `v0.1.30` was created and pushed.
 - `create-mono-stack@0.1.30` was published through `pnpm --filter create-mono-stack publish:package`.
 - npm reports `0.1.30` as the `latest` version.
-- Remote `master` and the peeled `v0.1.30` tag both resolve to `bebe03cbe78c9b089fdb96cc2fc861e90fa960f0`.
-- The package dry-run reported 288 files and no credentials; final worktree verification was clean before this checklist update.
+- The peeled `v0.1.30` tag resolves to release commit `bebe03cbe78c9b089fdb96cc2fc861e90fa960f0`; `origin/master` includes follow-up documentation commit `7a685a132f5c289a80de2f3815bc6fd98e071c9a`.
+- The package dry-run reported 288 files and no credentials; final worktree verification is clean after the documentation follow-up.
