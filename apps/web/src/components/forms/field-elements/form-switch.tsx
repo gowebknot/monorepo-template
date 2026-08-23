@@ -16,18 +16,25 @@ export const FormSwitch = (props: FormSwitchProps) => {
       isInvalid={isInvalid}
       errors={field.state.meta.errors}
     >
-      <FieldContent>
+      <FieldContent data-testid="web-form-switch-content">
         {labelProps && (
-          <FieldLabel {...labelProps} htmlFor={inputId}>
+          <FieldLabel
+            {...labelProps}
+            data-testid="web-form-switch-label"
+            htmlFor={inputId}
+          >
             <span>{labelProps.children}</span>
           </FieldLabel>
         )}
         {labelProps?.children && (
-          <FieldDescription>{labelProps.children}</FieldDescription>
+          <FieldDescription data-testid="web-form-switch-description">
+            {labelProps.children}
+          </FieldDescription>
         )}
       </FieldContent>
       <Switch
         {...switchProps}
+        data-testid="web-form-switch"
         id={inputId}
         checked={field.state.value}
         onCheckedChange={(checked) => field.handleChange(checked)}

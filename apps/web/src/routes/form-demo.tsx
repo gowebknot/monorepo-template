@@ -38,14 +38,14 @@ function FormDemo() {
 
   return (
     <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full sm:max-w-lg">
-        <CardHeader>
-          <CardTitle>Bug Report</CardTitle>
-          <CardDescription>
+      <Card data-testid="web-form-demo-card" className="w-full sm:max-w-lg">
+        <CardHeader data-testid="web-form-demo-header">
+          <CardTitle data-testid="web-form-demo-title">Bug Report</CardTitle>
+          <CardDescription data-testid="web-form-demo-description">
             Help us improve by reporting bugs you encounter.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent data-testid="web-form-demo-content">
           <bugForm.AppForm>
             <form
               method="POST"
@@ -55,8 +55,12 @@ function FormDemo() {
               <bugForm.AppField name="title">
                 {(field) => (
                   <field.FormInput
+                    data-testid="web-form-demo-title-input"
                     placeholder="Login button not working on mobile"
-                    labelProps={{ children: "Bug Title" }}
+                    labelProps={{
+                      children: "Bug Title",
+                      "data-testid": "web-form-demo-title-label"
+                    }}
                     autoComplete="off"
                   />
                 )}
@@ -65,9 +69,13 @@ function FormDemo() {
               <bugForm.AppField name="password">
                 {(field) => (
                   <field.FormInput
+                    data-testid="web-form-demo-password-input"
                     isPasswordType
                     placeholder="••••••••"
-                    labelProps={{ children: "Password" }}
+                    labelProps={{
+                      children: "Password",
+                      "data-testid": "web-form-demo-password-label"
+                    }}
                     autoComplete="off"
                   />
                 )}
@@ -76,10 +84,14 @@ function FormDemo() {
               <bugForm.AppField name="description">
                 {(field) => (
                   <field.FormTextarea
+                    data-testid="web-form-demo-description-input"
                     placeholder="I'm having an issue with..."
                     rows={6}
                     className="min-h-24 resize-none"
-                    labelProps={{ children: "Description" }}
+                    labelProps={{
+                      children: "Description",
+                      "data-testid": "web-form-demo-description-label"
+                    }}
                   />
                 )}
               </bugForm.AppField>
@@ -87,12 +99,31 @@ function FormDemo() {
               <bugForm.AppField name="category">
                 {(field) => (
                   <field.FormSelect
+                    data-testid="web-form-demo-category-select"
                     placeholder="Select a category"
-                    labelProps={{ children: "Category" }}
+                    labelProps={{
+                      children: "Category",
+                      "data-testid": "web-form-demo-category-label"
+                    }}
                   >
-                    <SelectItem value="bug">Bug</SelectItem>
-                    <SelectItem value="feature">Feature</SelectItem>
-                    <SelectItem value="docs">Documentation</SelectItem>
+                    <SelectItem
+                      data-testid="web-form-demo-category-bug"
+                      value="bug"
+                    >
+                      Bug
+                    </SelectItem>
+                    <SelectItem
+                      data-testid="web-form-demo-category-feature"
+                      value="feature"
+                    >
+                      Feature
+                    </SelectItem>
+                    <SelectItem
+                      data-testid="web-form-demo-category-docs"
+                      value="docs"
+                    >
+                      Documentation
+                    </SelectItem>
                   </field.FormSelect>
                 )}
               </bugForm.AppField>
@@ -100,8 +131,10 @@ function FormDemo() {
               <bugForm.AppField name="isPublic">
                 {(field) => (
                   <field.FormSwitch
+                    data-testid="web-form-demo-public-switch"
                     labelProps={{
-                      children: "Make this report publicly visible"
+                      children: "Make this report publicly visible",
+                      "data-testid": "web-form-demo-public-label"
                     }}
                   />
                 )}
@@ -110,14 +143,19 @@ function FormDemo() {
               <bugForm.AppField name="agreeToTerms">
                 {(field) => (
                   <field.FormCheckbox
+                    data-testid="web-form-demo-terms-checkbox"
                     labelProps={{
-                      children: "I agree to the terms and conditions"
+                      children: "I agree to the terms and conditions",
+                      "data-testid": "web-form-demo-terms-label"
                     }}
                   />
                 )}
               </bugForm.AppField>
 
-              <bugForm.SubmitButton className="w-full">
+              <bugForm.SubmitButton
+                data-testid="web-form-demo-submit"
+                className="w-full"
+              >
                 Submit
               </bugForm.SubmitButton>
             </form>

@@ -29,12 +29,15 @@ export function FieldWrapper({
 }: FieldWrapperProps) {
   return (
     <Field
+      data-testid="web-field"
       orientation={orientation}
       data-invalid={isInvalid}
       className={cn(hidden && "hidden")}
     >
       {children}
-      {isInvalid && <FieldError errors={errors} />}
+      {isInvalid && (
+        <FieldError data-testid="web-field-error" errors={errors} />
+      )}
     </Field>
   );
 }

@@ -12,11 +12,16 @@ export const FormTextarea = (props: FormTextareaProps) => {
 
   return (
     <FieldWrapper isInvalid={isInvalid} errors={field.state.meta.errors}>
-      <FieldLabel {...labelProps} htmlFor={inputId}>
+      <FieldLabel
+        data-testid="web-form-textarea-label"
+        {...labelProps}
+        htmlFor={inputId}
+      >
         <span>{labelProps?.children}</span>
       </FieldLabel>
       <Textarea
         {...textareaProps}
+        data-testid="web-form-textarea"
         id={inputId}
         value={field.state.value}
         onBlur={field.handleBlur}

@@ -32,7 +32,11 @@ export const FormSelect = ({
 
   return (
     <FieldWrapper isInvalid={isInvalid} errors={field.state.meta.errors}>
-      <FieldLabel {...labelProps} htmlFor={inputId}>
+      <FieldLabel
+        {...labelProps}
+        data-testid="next-form-select-label"
+        htmlFor={inputId}
+      >
         <span>{labelProps?.children}</span>
       </FieldLabel>
       <Select
@@ -41,12 +45,18 @@ export const FormSelect = ({
       >
         <SelectTrigger
           {...selectTriggerProps}
+          data-testid="next-form-select-trigger"
           id={inputId}
           aria-invalid={isInvalid}
         >
-          <SelectValue placeholder={placeholder} />
+          <SelectValue
+            data-testid="next-form-select-value"
+            placeholder={placeholder}
+          />
         </SelectTrigger>
-        <SelectContent>{children}</SelectContent>
+        <SelectContent data-testid="next-form-select-content">
+          {children}
+        </SelectContent>
       </Select>
     </FieldWrapper>
   );

@@ -66,8 +66,12 @@ function TodosPage() {
             <createForm.AppField name="userId">
               {(field) => (
                 <field.FormInput
+                  data-testid="web-create-todo-user-id"
                   placeholder="User ID"
-                  labelProps={{ children: "User ID" }}
+                  labelProps={{
+                    children: "User ID",
+                    "data-testid": "web-create-todo-user-id-label"
+                  }}
                   autoComplete="off"
                 />
               )}
@@ -75,13 +79,20 @@ function TodosPage() {
             <createForm.AppField name="title">
               {(field) => (
                 <field.FormInput
+                  data-testid="web-create-todo-title"
                   placeholder="Todo title"
-                  labelProps={{ children: "Title" }}
+                  labelProps={{
+                    children: "Title",
+                    "data-testid": "web-create-todo-title-label"
+                  }}
                   autoComplete="off"
                 />
               )}
             </createForm.AppField>
-            <createForm.SubmitButton className="w-full">
+            <createForm.SubmitButton
+              data-testid="web-create-todo-submit"
+              className="w-full"
+            >
               Create Todo
             </createForm.SubmitButton>
           </form>
@@ -91,6 +102,7 @@ function TodosPage() {
       <section className="mb-8">
         <h2 className="mb-2 text-xl font-semibold">Filter by User</h2>
         <Input
+          data-testid="web-todo-user-filter"
           placeholder="Enter a User ID to load todos"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
@@ -101,17 +113,19 @@ function TodosPage() {
         {isLoading && <p>Loading todos...</p>}
         {todos && todos.length === 0 && <p>No todos found for this user.</p>}
         {todos && todos.length > 0 && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Actions</TableHead>
+          <Table data-testid="web-todos-table">
+            <TableHeader data-testid="web-todos-table-header">
+              <TableRow data-testid="web-todos-table-header-row">
+                <TableHead data-testid="web-todos-title-head">Title</TableHead>
+                <TableHead data-testid="web-todos-actions-head">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody data-testid="web-todos-table-body">
               {todos.map((todo) => (
-                <TableRow key={todo.id}>
-                  <TableCell>
+                <TableRow data-testid={`web-todo-row-${todo.id}`} key={todo.id}>
+                  <TableCell data-testid={`web-todo-title-cell-${todo.id}`}>
                     <Link
                       to="/reference/todos/$todoId"
                       params={{ todoId: todo.id }}
@@ -120,8 +134,9 @@ function TodosPage() {
                       {todo.title}
                     </Link>
                   </TableCell>
-                  <TableCell>
+                  <TableCell data-testid={`web-todo-actions-cell-${todo.id}`}>
                     <Button
+                      data-testid={`web-todo-delete-${todo.id}`}
                       variant="destructive"
                       size="sm"
                       onClick={() => removeTodo.mutate(todo.id)}

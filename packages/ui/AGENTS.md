@@ -15,6 +15,9 @@
 - Do not read `process.env` directly in this package. Runtime configuration should be passed in by consumers or imported from `@repo/env` when appropriate.
 - Keep runtime-only peer dependencies external in `vite.config.ts`.
 - Add package-specific rules here when this package gains concrete responsibilities.
+- Every rendered shared component requires a consumer-provided, non-empty `data-testid` prop and
+  must forward it to its rendered test target. Non-rendering helpers are exceptions only when
+  documented by the shared-component checker.
 
 ## Source Layout
 

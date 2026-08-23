@@ -16,7 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen antialiased">
         <Providers>{children}</Providers>
-        <Toaster richColors />
+        <Toaster data-testid="next-toaster" richColors />
       </body>
     </html>
   );

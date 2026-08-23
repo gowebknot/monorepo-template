@@ -3,8 +3,12 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import type { TestIdProps } from "@/lib/test-id";
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+function Textarea({
+  className,
+  ...props
+}: React.ComponentProps<"textarea"> & TestIdProps) {
   return (
     <textarea
       data-slot="textarea"

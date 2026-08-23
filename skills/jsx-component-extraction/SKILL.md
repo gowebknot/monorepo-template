@@ -39,4 +39,6 @@ Keep React render trees readable and keep JSX focused on describing UI structure
 - Extracted components have typed props and no accidental behavior changes.
 - JSX does not contain non-trivial data transformation or business logic.
 - Accessibility attributes, keyboard behavior, loading states, and error states remain intact.
+- Rendered `@repo/ui` components have meaningful consumer-provided `data-testid` props, including
+  extracted subcomponents; do not bypass the shared-component checker.
 - Focused tests, type checks, lint, and formatting pass for the affected package.

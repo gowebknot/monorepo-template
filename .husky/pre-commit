@@ -1,2 +1,3 @@
 pnpm lint-staged
 pnpm skills:check -- --staged
+node scripts/shared-component-testids.mjs

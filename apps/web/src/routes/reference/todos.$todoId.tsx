@@ -99,15 +99,21 @@ function TodoDetailPage() {
           {isEditing ? (
             <div className="flex items-center gap-2">
               <Input
+                data-testid="web-todo-edit-input"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 className="max-w-md"
                 autoFocus
               />
-              <Button size="sm" onClick={saveTitle}>
+              <Button
+                data-testid="web-todo-save-title"
+                size="sm"
+                onClick={saveTitle}
+              >
                 Save
               </Button>
               <Button
+                data-testid="web-todo-cancel-edit"
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsEditing(false)}
@@ -118,7 +124,12 @@ function TodoDetailPage() {
           ) : (
             <span>
               {todo.title}{" "}
-              <Button variant="ghost" size="sm" onClick={startEditing}>
+              <Button
+                data-testid="web-todo-start-edit"
+                variant="ghost"
+                size="sm"
+                onClick={startEditing}
+              >
                 Edit
               </Button>
             </span>
@@ -139,18 +150,31 @@ function TodoDetailPage() {
             <itemForm.AppField name="title">
               {(field) => (
                 <field.FormInput
+                  data-testid="web-add-item-title"
                   placeholder="Item title"
-                  labelProps={{ children: "Title" }}
+                  labelProps={{
+                    children: "Title",
+                    "data-testid": "web-add-item-title-label"
+                  }}
                   autoComplete="off"
                 />
               )}
             </itemForm.AppField>
             <itemForm.AppField name="completed">
               {(field) => (
-                <field.FormSwitch labelProps={{ children: "Completed" }} />
+                <field.FormSwitch
+                  data-testid="web-add-item-completed"
+                  labelProps={{
+                    children: "Completed",
+                    "data-testid": "web-add-item-completed-label"
+                  }}
+                />
               )}
             </itemForm.AppField>
-            <itemForm.SubmitButton className="w-full">
+            <itemForm.SubmitButton
+              data-testid="web-add-item-submit"
+              className="w-full"
+            >
               Add Item
             </itemForm.SubmitButton>
           </form>
@@ -162,19 +186,24 @@ function TodoDetailPage() {
         {itemsLoading && <p>Loading items...</p>}
         {items && items.length === 0 && <p>No items yet.</p>}
         {items && items.length > 0 && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">Done</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Actions</TableHead>
+          <Table data-testid="web-items-table">
+            <TableHeader data-testid="web-items-table-header">
+              <TableRow data-testid="web-items-table-header-row">
+                <TableHead data-testid="web-items-done-head" className="w-12">
+                  Done
+                </TableHead>
+                <TableHead data-testid="web-items-title-head">Title</TableHead>
+                <TableHead data-testid="web-items-actions-head">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody data-testid="web-items-table-body">
               {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
+                <TableRow data-testid={`web-item-row-${item.id}`} key={item.id}>
+                  <TableCell data-testid={`web-item-done-cell-${item.id}`}>
                     <Checkbox
+                      data-testid={`web-item-completed-${item.id}`}
                       checked={item.completed}
                       onCheckedChange={(checked) =>
                         updateItem.mutate({
@@ -185,14 +214,16 @@ function TodoDetailPage() {
                     />
                   </TableCell>
                   <TableCell
+                    data-testid={`web-item-title-cell-${item.id}`}
                     className={
                       item.completed ? "text-muted-foreground line-through" : ""
                     }
                   >
                     {item.title}
                   </TableCell>
-                  <TableCell>
+                  <TableCell data-testid={`web-item-actions-cell-${item.id}`}>
                     <Button
+                      data-testid={`web-item-delete-${item.id}`}
                       variant="destructive"
                       size="sm"
                       onClick={() => removeItem.mutate(item.id)}

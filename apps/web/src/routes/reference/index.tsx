@@ -15,10 +15,12 @@ function ReferenceIndex() {
       </p>
       <div className="flex gap-4">
         <Link to="/reference/todos">
-          <Button>Todos</Button>
+          <Button data-testid="web-reference-todos">Todos</Button>
         </Link>
         <Link to="/">
-          <Button variant="secondary">Back to Home</Button>
+          <Button data-testid="web-reference-home" variant="secondary">
+            Back to Home
+          </Button>
         </Link>
       </div>
     </div>

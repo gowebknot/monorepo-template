@@ -11,6 +11,7 @@
     "routes:generate:reference": "node --eval \"process.chdir('reference'); process.argv = ['node', 'tsr', 'generate']; import('@tanstack/router-cli');\"",
     "routes:generate": "tsr generate",
     "build": "pnpm routes:generate && tsc -b && vite build",
+    "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview"
   },

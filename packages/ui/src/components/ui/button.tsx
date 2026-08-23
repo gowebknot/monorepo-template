@@ -2,6 +2,7 @@
 
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { buttonVariants, type ButtonVariantProps } from "@/lib/button-variants";
+import type { TestIdProps } from "@/lib/test-id";
 import { cn } from "@/lib/utils";
 
 function Button({
@@ -9,7 +10,7 @@ function Button({
   variant = "default",
   size = "default",
   ...props
-}: ButtonPrimitive.Props & ButtonVariantProps) {
+}: ButtonPrimitive.Props & ButtonVariantProps & TestIdProps) {
   return (
     <ButtonPrimitive
       data-slot="button"

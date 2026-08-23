@@ -4,8 +4,13 @@ import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
 
 import { cn } from "@/lib/utils";
+import type { TestIdProps } from "@/lib/test-id";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+function Input({
+  className,
+  type,
+  ...props
+}: React.ComponentProps<"input"> & TestIdProps) {
   return (
     <InputPrimitive
       type={type}

@@ -17,7 +17,7 @@
       "hash": "bc3cb2b0da52bb31878c2a92aa039496015f30f68c3008b640f4e97eedf821b5"
     },
     "create-minimal-package": {
-      "hash": "66c43647549e31069e6ef532ab660c709cecd7a433df78d4bb376a92e67a83e4"
+      "hash": "313c322789b61b8dd64d0df7808ab0360fb68225b64feefbc12f5b4b52f5bb14"
     },
     "create-portable-skill": {
       "hash": "8c6b0a47fc36c1fded152ac452243d16b082f80ebbde598aa66c8fbbea84cc93"
@@ -29,10 +29,10 @@
       "hash": "8bd73611368abeaf9382b313788be6d6bfdca505d8cc7c37927f9faec8df04d4"
     },
     "frontend-standards": {
-      "hash": "83dfc3863d706479bbb613f8a64e68783390287510037cd42e8c82f2c5b12fe6"
+      "hash": "d791eeb6fd14313ec4e280e2ba8bfd201126ea83e35bf0be4e4e86a62a8e9b7a"
     },
     "jsx-component-extraction": {
-      "hash": "7689bd916547eae555176eeabfafa37079cd1faf4d1eeba1d3ec8fe943ff505f"
+      "hash": "61cce7e03e7db57cb8e2bdbffa1b7683841896a13f6af2bbad245e4415c23813"
     },
     "observability": {
       "hash": "09e6e6363a9c1755fcb0c5b6ef2b0039495aa038ea891e7c6f39dced8414a7e3"

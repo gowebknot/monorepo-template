@@ -13,4 +13,4 @@ Create or restructure repo packages to match the minimal library pattern used by
 4. Make library packages expose `src/index.ts` through package `exports` and `types`; do not rely on consumers importing source files.
 5. Use absolute `@/...` imports in implementation files, but use relative exports in barrel files such as `src/index.ts` and nested `index.ts` files so emitted `.d.ts` files stay portable.
 6. Remove app scaffold boilerplate from library packages (`index.html`, demo CSS/assets, counters, and public demo files) unless the package is intentionally an app.
-7. Validate with the focused package commands: `pnpm --filter <package> build`, `pnpm --filter <package> typecheck`, and `pnpm --filter <package> lint` when those scripts exist.
+7. Validate with the focused package commands: `pnpm --filter <package> build`, `pnpm --filter <package> typecheck`, and `pnpm --filter <package> lint` when those scripts exist, followed by the repository formatting check `pnpm format:check`.

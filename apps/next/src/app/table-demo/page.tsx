@@ -59,6 +59,7 @@ export default function TableDemoPage() {
     <div className="w-full p-4">
       <div className="flex items-center py-4">
         <Input
+          data-testid="next-table-filter"
           placeholder="Filter emails..."
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
@@ -67,17 +68,25 @@ export default function TableDemoPage() {
           className="max-w-sm"
         />
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="outline" className="ml-auto">
+          <DropdownMenuTrigger data-testid="next-table-columns-trigger">
+            <Button
+              data-testid="next-table-columns-button"
+              variant="outline"
+              className="ml-auto"
+            >
               Columns <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent
+            data-testid="next-table-columns-content"
+            align="end"
+          >
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
               .map((column) => (
                 <DropdownMenuCheckboxItem
+                  data-testid={`next-table-column-${column.id}`}
                   key={column.id}
                   className="capitalize"
                   checked={column.getIsVisible()}
@@ -90,12 +99,18 @@ export default function TableDemoPage() {
         </DropdownMenu>
       </div>
       <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
+        <Table data-testid="next-payments-table">
+          <TableHeader data-testid="next-payments-table-header">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                data-testid={`next-payments-header-row-${headerGroup.id}`}
+                key={headerGroup.id}
+              >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    data-testid={`next-payments-head-${header.id}`}
+                    key={header.id}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -107,15 +122,19 @@ export default function TableDemoPage() {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid="next-payments-table-body">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  data-testid={`next-payments-row-${row.id}`}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      data-testid={`next-payments-cell-${cell.id}`}
+                      key={cell.id}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -125,8 +144,9 @@ export default function TableDemoPage() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow data-testid="next-payments-empty-row">
                 <TableCell
+                  data-testid="next-payments-empty-cell"
                   colSpan={paymentColumns.length}
                   className="h-24 text-center"
                 >
@@ -144,6 +164,7 @@ export default function TableDemoPage() {
         </div>
         <div className="space-x-2">
           <Button
+            data-testid="next-table-previous"
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
@@ -152,6 +173,7 @@ export default function TableDemoPage() {
             Previous
           </Button>
           <Button
+            data-testid="next-table-next"
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}

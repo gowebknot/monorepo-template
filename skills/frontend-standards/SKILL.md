@@ -36,6 +36,8 @@ predictable loading and error behavior.
 - Preserve responsive behavior across supported viewport sizes and avoid hiding essential actions.
 - Keep JSX readable; use `jsx-component-extraction` for complex render trees.
 - Follow `react-19` for effects, actions, transitions, optimistic UI, and memoization decisions.
+- Require a meaningful consumer-provided `data-testid` on every rendered `@repo/ui` component and
+  preserve it through wrappers; do not generate or hardcode IDs inside shared components.
 
 ## Verification
 

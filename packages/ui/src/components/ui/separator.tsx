@@ -3,12 +3,13 @@
 import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
 
 import { cn } from "@/lib/utils";
+import type { TestIdProps } from "@/lib/test-id";
 
 function Separator({
   className,
   orientation = "horizontal",
   ...props
-}: SeparatorPrimitive.Props) {
+}: SeparatorPrimitive.Props & TestIdProps) {
   return (
     <SeparatorPrimitive
       data-slot="separator"

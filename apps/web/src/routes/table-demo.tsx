@@ -84,6 +84,7 @@ const columns: ColumnDef<Payment>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
+        data-testid="web-payments-select-all"
         checked={table.getIsAllPageRowsSelected()}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -91,6 +92,7 @@ const columns: ColumnDef<Payment>[] = [
     ),
     cell: ({ row }) => (
       <Checkbox
+        data-testid="web-payments-select-row"
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
@@ -111,6 +113,7 @@ const columns: ColumnDef<Payment>[] = [
     header: ({ column }) => {
       return (
         <Button
+          data-testid="web-payments-sort-email"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -140,22 +143,36 @@ const columns: ColumnDef<Payment>[] = [
       const payment = row.original;
       return (
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+          <DropdownMenuTrigger data-testid="web-payment-actions-trigger">
+            <Button
+              data-testid="web-payment-actions-button"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+            >
               <span className="sr-only">Open menu</span>
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent
+            data-testid="web-payment-actions-content"
+            align="end"
+          >
+            <DropdownMenuLabel data-testid="web-payment-actions-label">
+              Actions
+            </DropdownMenuLabel>
             <DropdownMenuItem
+              data-testid="web-payment-copy-id"
               onClick={() => navigator.clipboard.writeText(payment.id)}
             >
               Copy payment ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuSeparator data-testid="web-payment-actions-separator" />
+            <DropdownMenuItem data-testid="web-payment-view-customer">
+              View customer
+            </DropdownMenuItem>
+            <DropdownMenuItem data-testid="web-payment-view-details">
+              View payment details
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -195,6 +212,7 @@ function TableDemo() {
     <div className="w-full p-4">
       <div className="flex items-center py-4">
         <Input
+          data-testid="web-table-filter"
           placeholder="Filter emails..."
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
@@ -203,17 +221,25 @@ function TableDemo() {
           className="max-w-sm"
         />
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="outline" className="ml-auto">
+          <DropdownMenuTrigger data-testid="web-table-columns-trigger">
+            <Button
+              data-testid="web-table-columns-button"
+              variant="outline"
+              className="ml-auto"
+            >
               Columns <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent
+            data-testid="web-table-columns-content"
+            align="end"
+          >
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
               .map((column) => (
                 <DropdownMenuCheckboxItem
+                  data-testid={`web-table-column-${column.id}`}
                   key={column.id}
                   className="capitalize"
                   checked={column.getIsVisible()}
@@ -226,12 +252,18 @@ function TableDemo() {
         </DropdownMenu>
       </div>
       <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
+        <Table data-testid="web-payments-table">
+          <TableHeader data-testid="web-payments-table-header">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                data-testid={`web-payments-header-row-${headerGroup.id}`}
+                key={headerGroup.id}
+              >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    data-testid={`web-payments-head-${header.id}`}
+                    key={header.id}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -243,15 +275,19 @@ function TableDemo() {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid="web-payments-table-body">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  data-testid={`web-payments-row-${row.id}`}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      data-testid={`web-payments-cell-${cell.id}`}
+                      key={cell.id}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -261,8 +297,9 @@ function TableDemo() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow data-testid="web-payments-empty-row">
                 <TableCell
+                  data-testid="web-payments-empty-cell"
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
@@ -280,6 +317,7 @@ function TableDemo() {
         </div>
         <div className="space-x-2">
           <Button
+            data-testid="web-table-previous"
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
@@ -288,6 +326,7 @@ function TableDemo() {
             Previous
           </Button>
           <Button
+            data-testid="web-table-next"
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}

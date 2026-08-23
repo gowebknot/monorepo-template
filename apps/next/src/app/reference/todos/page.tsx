@@ -65,8 +65,12 @@ export default function TodosPage() {
             <createForm.AppField name="userId">
               {(field) => (
                 <field.FormInput
+                  data-testid="next-create-todo-user-id"
                   placeholder="User ID"
-                  labelProps={{ children: "User ID" }}
+                  labelProps={{
+                    children: "User ID",
+                    "data-testid": "next-create-todo-user-id-label"
+                  }}
                   autoComplete="off"
                 />
               )}
@@ -74,13 +78,20 @@ export default function TodosPage() {
             <createForm.AppField name="title">
               {(field) => (
                 <field.FormInput
+                  data-testid="next-create-todo-title"
                   placeholder="Todo title"
-                  labelProps={{ children: "Title" }}
+                  labelProps={{
+                    children: "Title",
+                    "data-testid": "next-create-todo-title-label"
+                  }}
                   autoComplete="off"
                 />
               )}
             </createForm.AppField>
-            <createForm.SubmitButton className="w-full">
+            <createForm.SubmitButton
+              data-testid="next-create-todo-submit"
+              className="w-full"
+            >
               Create Todo
             </createForm.SubmitButton>
           </form>
@@ -90,6 +101,7 @@ export default function TodosPage() {
       <section className="mb-8">
         <h2 className="mb-2 text-xl font-semibold">Filter by User</h2>
         <Input
+          data-testid="next-todo-user-filter"
           placeholder="Enter a User ID to load todos"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
@@ -100,17 +112,22 @@ export default function TodosPage() {
         {isLoading && <p>Loading todos...</p>}
         {todos && todos.length === 0 && <p>No todos found for this user.</p>}
         {todos && todos.length > 0 && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Actions</TableHead>
+          <Table data-testid="next-todos-table">
+            <TableHeader data-testid="next-todos-table-header">
+              <TableRow data-testid="next-todos-table-header-row">
+                <TableHead data-testid="next-todos-title-head">Title</TableHead>
+                <TableHead data-testid="next-todos-actions-head">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody data-testid="next-todos-table-body">
               {todos.map((todo) => (
-                <TableRow key={todo.id}>
-                  <TableCell>
+                <TableRow
+                  data-testid={`next-todo-row-${todo.id}`}
+                  key={todo.id}
+                >
+                  <TableCell data-testid={`next-todo-title-cell-${todo.id}`}>
                     <Link
                       href={`/reference/todos/${todo.id}`}
                       className="hover:underline"
@@ -118,8 +135,9 @@ export default function TodosPage() {
                       {todo.title}
                     </Link>
                   </TableCell>
-                  <TableCell>
+                  <TableCell data-testid={`next-todo-actions-cell-${todo.id}`}>
                     <Button
+                      data-testid={`next-todo-delete-${todo.id}`}
                       variant="destructive"
                       size="sm"
                       onClick={() => removeTodo.mutate(todo.id)}

@@ -15,6 +15,7 @@ export function SubmitButton(props: SubmitButtonProps) {
           disabled={isSubmitting}
           {...props}
           variant={props.variant ?? "default"}
+          data-testid="next-submit-button"
         />
       )}
     </form.Subscribe>

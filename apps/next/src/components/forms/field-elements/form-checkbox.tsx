@@ -23,13 +23,18 @@ export const FormCheckbox = (props: FormCheckboxProps) => {
     >
       <Checkbox
         {...checkboxProps}
+        data-testid="next-form-checkbox"
         id={inputId}
         checked={field.state.value}
         onCheckedChange={(checked) => field.handleChange(!!checked)}
         aria-invalid={isInvalid}
       />
       {labelProps && (
-        <FieldLabel {...labelProps} htmlFor={inputId}>
+        <FieldLabel
+          {...labelProps}
+          data-testid="next-form-checkbox-label"
+          htmlFor={inputId}
+        >
           <span>{labelProps.children}</span>
         </FieldLabel>
       )}

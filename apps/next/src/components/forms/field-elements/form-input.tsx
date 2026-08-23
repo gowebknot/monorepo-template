@@ -35,7 +35,11 @@ export const FormInput = (props: FormInputProps) => {
       errors={field.state.meta.errors}
       hidden={props.hidden}
     >
-      <FieldLabel {...labelProps} htmlFor={inputId}>
+      <FieldLabel
+        data-testid="next-form-input-label"
+        {...labelProps}
+        htmlFor={inputId}
+      >
         <span>{labelProps?.children}</span>
       </FieldLabel>
 
@@ -48,6 +52,7 @@ export const FormInput = (props: FormInputProps) => {
 
         <Input
           {...inputProps}
+          data-testid="next-form-input"
           id={inputId}
           type={showPassword ? "password" : inputProps.type}
           name={field.name}
@@ -68,6 +73,7 @@ export const FormInput = (props: FormInputProps) => {
               variant="ghost"
               size="icon"
               onClick={() => setShowPassword(!showPassword)}
+              data-testid="next-form-input-reset"
             >
               {showPassword ? (
                 <EyeOff className="size-3 text-muted-foreground" />

@@ -18,13 +18,18 @@ export const FormCheckbox = (props: FormCheckboxProps) => {
     >
       <Checkbox
         {...checkboxProps}
+        data-testid="web-form-checkbox"
         id={inputId}
         checked={field.state.value}
         onCheckedChange={(checked) => field.handleChange(!!checked)}
         aria-invalid={isInvalid}
       />
       {labelProps && (
-        <FieldLabel {...labelProps} htmlFor={inputId}>
+        <FieldLabel
+          {...labelProps}
+          data-testid="web-form-checkbox-label"
+          htmlFor={inputId}
+        >
           <span>{labelProps.children}</span>
         </FieldLabel>
       )}

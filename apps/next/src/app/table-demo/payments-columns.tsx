@@ -59,6 +59,7 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
+        data-testid="next-payments-select-all"
         checked={table.getIsAllPageRowsSelected()}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
@@ -66,6 +67,7 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     ),
     cell: ({ row }) => (
       <Checkbox
+        data-testid="next-payments-select-row"
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
@@ -85,6 +87,7 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     accessorKey: "email",
     header: ({ column }) => (
       <Button
+        data-testid="next-payments-sort-email"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -113,22 +116,36 @@ export const paymentColumns: ColumnDef<Payment>[] = [
       const payment = row.original;
       return (
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+          <DropdownMenuTrigger data-testid="next-payment-actions-trigger">
+            <Button
+              data-testid="next-payment-actions-button"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+            >
               <span className="sr-only">Open menu</span>
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent
+            data-testid="next-payment-actions-content"
+            align="end"
+          >
+            <DropdownMenuLabel data-testid="next-payment-actions-label">
+              Actions
+            </DropdownMenuLabel>
             <DropdownMenuItem
+              data-testid="next-payment-copy-id"
               onClick={() => navigator.clipboard.writeText(payment.id)}
             >
               Copy payment ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuSeparator data-testid="next-payment-actions-separator" />
+            <DropdownMenuItem data-testid="next-payment-view-customer">
+              View customer
+            </DropdownMenuItem>
+            <DropdownMenuItem data-testid="next-payment-view-details">
+              View payment details
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

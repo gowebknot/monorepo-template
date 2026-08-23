@@ -16,3 +16,4 @@ export * from "./lib/utils";
 export * from "./lib/button-variants";
 export * from "./lib/field-variants";
 export * from "./lib/input-group-variants";
+export * from "./lib/test-id";

@@ -11,13 +11,15 @@ function Index() {
       <h1 className="text-4xl font-bold">TanStack Demo</h1>
       <div className="flex gap-4">
         <Link to="/reference">
-          <Button>Reference</Button>
+          <Button data-testid="web-home-reference">Reference</Button>
         </Link>
         <Link to="/form-demo">
-          <Button>Form Demo</Button>
+          <Button data-testid="web-home-form-demo">Form Demo</Button>
         </Link>
         <Link to="/table-demo">
-          <Button variant="secondary">Table Demo</Button>
+          <Button data-testid="web-home-table-demo" variant="secondary">
+            Table Demo
+          </Button>
         </Link>
       </div>
     </div>

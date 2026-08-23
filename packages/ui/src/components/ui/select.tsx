@@ -4,6 +4,7 @@ import * as React from "react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 
 import { cn } from "@/lib/utils";
+import type { TestIdProps } from "@/lib/test-id";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   UnfoldMoreIcon,
@@ -14,7 +15,10 @@ import {
 
 const Select = SelectPrimitive.Root;
 
-function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
+function SelectGroup({
+  className,
+  ...props
+}: SelectPrimitive.Group.Props & TestIdProps) {
   return (
     <SelectPrimitive.Group
       data-slot="select-group"
@@ -24,7 +28,10 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   );
 }
 
-function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
+function SelectValue({
+  className,
+  ...props
+}: SelectPrimitive.Value.Props & TestIdProps) {
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
@@ -41,7 +48,7 @@ function SelectTrigger({
   ...props
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default";
-}) {
+} & TestIdProps) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
@@ -79,7 +86,8 @@ function SelectContent({
   Pick<
     SelectPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset" | "alignItemWithTrigger"
-  >) {
+  > &
+  TestIdProps) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Positioner
@@ -99,9 +107,13 @@ function SelectContent({
           )}
           {...props}
         >
-          <SelectScrollUpButton />
+          <SelectScrollUpButton
+            data-testid={`${props["data-testid"]}-scroll-up`}
+          />
           <SelectPrimitive.List>{children}</SelectPrimitive.List>
-          <SelectScrollDownButton />
+          <SelectScrollDownButton
+            data-testid={`${props["data-testid"]}-scroll-down`}
+          />
         </SelectPrimitive.Popup>
       </SelectPrimitive.Positioner>
     </SelectPrimitive.Portal>
@@ -111,7 +123,7 @@ function SelectContent({
 function SelectLabel({
   className,
   ...props
-}: SelectPrimitive.GroupLabel.Props) {
+}: SelectPrimitive.GroupLabel.Props & TestIdProps) {
   return (
     <SelectPrimitive.GroupLabel
       data-slot="select-label"
@@ -125,7 +137,7 @@ function SelectItem({
   className,
   children,
   ...props
-}: SelectPrimitive.Item.Props) {
+}: SelectPrimitive.Item.Props & TestIdProps) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
@@ -156,7 +168,7 @@ function SelectItem({
 function SelectSeparator({
   className,
   ...props
-}: SelectPrimitive.Separator.Props) {
+}: SelectPrimitive.Separator.Props & TestIdProps) {
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
@@ -172,7 +184,7 @@ function SelectSeparator({
 function SelectScrollUpButton({
   className,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow>) {
+}: React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow> & TestIdProps) {
   return (
     <SelectPrimitive.ScrollUpArrow
       data-slot="select-scroll-up-button"
@@ -190,7 +202,7 @@ function SelectScrollUpButton({
 function SelectScrollDownButton({
   className,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow>) {
+}: React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow> & TestIdProps) {
   return (
     <SelectPrimitive.ScrollDownArrow
       data-slot="select-scroll-down-button"
