@@ -35,6 +35,34 @@ side effects.
 - Avoid logging secrets, tokens, credentials, raw sensitive payloads, or unbounded user input.
 - Return stable structured errors and map internal failures without exposing implementation details.
 
+## Database Seeding
+
+- Inspect the project's existing schema, migrations, database scripts, seeders, dependencies, and
+  environment configuration before creating or changing seed data.
+- Keep seeders separate from migrations and application startup; expose explicit commands for running,
+  resetting, and, when appropriate, generating seed data.
+- Reuse an existing project-supported data generator first. If a generated project needs generated
+  data and has no suitable generator, strongly prefer adding and using `@faker-js/faker`; do not add
+  Faker to the template repository solely to support this guidance.
+- Seed with a fixed seed or otherwise deterministic generator so failures can be reproduced. Keep
+  stable explicit fixtures for records referenced by tests, permissions, business rules, or other
+  known relationships.
+- Keep a small, useful sample of generated data as JSON in a documented, git-ignored project-local
+  path such as `data/generated/` after the seeder successfully writes records to the database, so
+  users and agents can inspect the created data or reuse it as a reference. Include stable record IDs
+  in the exported JSON and use those IDs for references between related records. Only export records
+  confirmed as written, treat this local JSON as generated reference/output data rather than committed
+  authoritative data, and document how to regenerate it after schema changes.
+- Create parent records before dependent records, preserve foreign-key relationships, and use stable
+  identifiers or upserts so rerunning a seeder does not create accidental duplicates.
+- Use transactions for seed operations that must succeed or fail together, and make record counts and
+  destructive/reset behavior explicit and bounded.
+- Separate development, test, and production datasets. Never implicitly seed production, run a
+  destructive reset, include real personal data, or generate secrets and credentials without explicit
+  authorization and a documented safety boundary.
+- Close database resources, report actionable failures, and verify repeatability, relationships, and
+  safety behavior with focused tests or validation.
+
 ## Verification
 
 - Add focused unit tests for domain and application behavior.
