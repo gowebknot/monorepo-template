@@ -34,12 +34,17 @@ screenshot-diff regression testing.
    data setup, and matching `test.describe` blocks. Extend or update existing coverage instead of
    creating a parallel duplicate.
 3. Reconstruct the actual entry points, actions, branches, success criteria, and failure modes.
-4. Design independently runnable tests around one user intent per test. Cover applicable happy,
-   alternate, validation, empty, edge, permission, and regression-specific paths.
-5. Write tests with accessible user-facing locators, Playwright auto-waiting, isolated data, and
+4. Inventory every reachable branch before writing tests. Design independently runnable tests around
+   one user intent per test and cover every applicable happy, alternate, validation, empty, loading,
+   edge, permission, retry, timeout, dependency-error, conflict, recovery, and regression path. If a
+   branch cannot be executed or the product does not support it, record that limitation explicitly.
+5. Seed deterministic records specifically for testing when a path needs pre-existing data. Keep test
+   seeds isolated from development or demo data, repeatable and safe to rerun, and use generated
+   per-run values only for records created or mutated by the test.
+6. Write tests with accessible user-facing locators, Playwright auto-waiting, isolated data, and
    web-first assertions. Never add arbitrary time delays or assert private implementation details.
-6. Review the completed tests against `references/journey-checklist.md`.
-7. Summarize the covered journeys, edge cases, and any paths blocked by missing data, external
+7. Review the completed tests against `references/journey-checklist.md`.
+8. Summarize the covered journeys, edge cases, and any paths blocked by missing data, external
    dependencies, unstable behavior, or manual-only verification.
 
 Read `references/journey-checklist.md` before authoring tests. Use

@@ -198,3 +198,17 @@ check` passed lint and typecheck but stopped at the pre-existing formatting fail
 
 - User-directed deferral: device-backed Maestro assertions are intentionally not a completion
   requirement for this template-repository change.
+
+## Updates
+
+### 2026-08-23: Add dedicated Maestro authoring guidance
+
+- Reason: The mobile command and flows were added without a dedicated writing skill, and the existing
+  web skill did not explicitly require complete reachable non-happy-path accounting or test-specific
+  seeded preconditions.
+- Evidence: `pnpm e2e:mobile` exists, but no `maestro-mobile-e2e-test-writer` skill was present.
+- Impact: Agents lacked portable guidance for authoring Maestro flows and deterministic seeded test
+  data.
+- Corrective action: Added the new skill and expanded the Playwright guidance in
+  `docs/checklists/2026-08-23-expand-e2e-negative-path-and-maestro-skill.md`.
+- Validation: Tracked in the linked checklist.

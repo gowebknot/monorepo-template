@@ -18,7 +18,23 @@ Record the behavior from the implementation rather than guessing:
 If the behavior is unclear, inspect the implementation, route, API contract, fixtures, or existing
 test before asserting it. Do not invent a user-visible result.
 
-## 2. Inspect Existing Coverage First
+## 2. Prepare Dedicated Test Data
+
+Before exercising the journey, identify the data each branch needs:
+
+- Seed stable, synthetic records specifically for testing. Do not rely on development, demo, or
+  leftover records.
+- Include dedicated fixtures for populated, ownership, permission, duplicate, boundary, empty, and
+  dependency-error states when the implementation exposes them.
+- Make seed setup deterministic, isolated, repeatable, and safe to rerun; document the seed command,
+  fixture identifiers, reset behavior, and cleanup ownership.
+- Generate unique per-run values only for records the test creates or mutates. Do not use randomness
+  to replace a required precondition fixture.
+
+If a required fixture or seed path is unavailable, report the limitation rather than weakening the
+assertion or inventing a dependency.
+
+## 3. Inspect Existing Coverage First
 
 Before creating a file:
 
@@ -32,7 +48,7 @@ Before creating a file:
 Keep setup explicit and minimal. Use fixtures, API setup, or a test database to isolate each test;
 never depend on another test’s mutations or execution order.
 
-## 3. Design Separate User Stories
+## 4. Design Separate User Stories
 
 Give each test one clear user intent and a descriptive name, for example:
 
@@ -47,19 +63,21 @@ test("user can reset a password with a valid email and sees confirmation", async
 Use `test.describe()` for one feature or journey and `test.beforeEach` only for shared setup that is
 still explicit. Use `test.step()` for meaningful sub-actions so failures explain the user path.
 
-Create separate tests when a branch could fail independently. Cover the following when relevant:
+Create separate tests when a reachable branch could fail independently. First account for every
+applicable branch in the implementation; then cover the following when relevant:
 
 - Primary successful journey.
 - Alternate valid input or interaction path.
 - Required-field, malformed-input, and boundary validation.
 - Empty, first-use, maximum-data, loading, retry, timeout, and dependency-error states.
 - Signed-out, wrong-role, expired-session, wrong-owner, or other permission states.
+- Duplicate, conflicting, stale, rejected, and recovery interactions.
 - A regression case that reproduces the original bug scenario.
 
 Do not combine unrelated branches into a single mega-test. Do not add speculative cases for behavior
 the product does not expose.
 
-## 4. Write Reliable Playwright Tests
+## 5. Write Reliable Playwright Tests
 
 Prefer locators in this order:
 
@@ -80,12 +98,15 @@ Assert what the user observes and verify the meaningful effect where applicable:
 redirect, updated content, changed status, persisted item, or prevented side effect after rejection.
 Every test needs at least one assertion that would fail if the feature regressed.
 
-## 5. Review Before Handoff
+## 6. Review Before Handoff
 
-- Every major journey touched by the change has coverage or an explicit limitation.
+- Every reachable branch touched by the change has coverage or an explicit limitation; happy-path-only
+  coverage is incomplete.
 - Test names read as user stories and failures are understandable in CI.
 - Tests can run independently, in parallel, and in any order.
 - Setup does not rely on leftover state, live third-party services, or uncontrolled requests.
+- Preconditions come from dedicated deterministic test seeds, not development or demo data; generated
+  values are limited to records created or mutated by the test.
 - Selectors survive minor styling and markup changes.
 - There are no arbitrary waits or timing assumptions.
 - Success, validation, error, empty, and permission behavior is covered where applicable.

@@ -23,7 +23,7 @@
       "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"
     },
     "e2e-regression-test-writer": {
-      "hash": "164db444cbb534c6a6133dce1e1ef098d3522e46c63e5deed8161aceed14a4e5"
+      "hash": "d5337fa2517c8098c2acb78febc80c5f93765177f1ada76d059942e5af575dc2"
     },
     "end-to-end-api-flow": {
       "hash": "8bd73611368abeaf9382b313788be6d6bfdca505d8cc7c37927f9faec8df04d4"
@@ -33,6 +33,9 @@
     },
     "jsx-component-extraction": {
       "hash": "61cce7e03e7db57cb8e2bdbffa1b7683841896a13f6af2bbad245e4415c23813"
+    },
+    "maestro-mobile-e2e-test-writer": {
+      "hash": "e18bd57f93f85ff3386e4bda5a01de3fa744be7641270e6e59f481f61cdae078"
     },
     "observability": {
       "hash": "09e6e6363a9c1755fcb0c5b6ef2b0039495aa038ea891e7c6f39dced8414a7e3"

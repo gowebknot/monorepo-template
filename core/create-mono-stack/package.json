@@ -1,6 +1,6 @@
 {
   "name": "create-mono-stack",
-  "version": "0.1.33",
+  "version": "0.1.34",
   "license": "MIT",
   "description": "Create a project from the Go Webknot monorepo template",
   "type": "module",
