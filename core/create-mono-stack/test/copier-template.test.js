@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
+import { selectChecks } from "../../../scripts/pre-commit-checks.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const templateAdapters = new Map([
@@ -124,6 +125,37 @@ test("uses Copier-native project identity rendering", async () => {
   await assert.rejects(
     access(join(root, "scripts/configure-template-project.mjs"))
   );
+});
+
+test("TEST-HOOK-001 selects generated-project checks without the launcher", () => {
+  const commands = selectChecks({
+    hasCoreLauncher: false,
+    hasServer: true
+  });
+
+  assert.deepEqual(
+    commands.map(({ label }) => label),
+    [
+      "build",
+      "skill tests",
+      "server unit tests",
+      "shared component checker tests"
+    ]
+  );
+  assert.doesNotMatch(JSON.stringify(commands), /create-mono-stack/);
+});
+
+test("TEST-HOOK-002 omits checks for unselected generated apps", () => {
+  const commands = selectChecks({
+    hasCoreLauncher: false,
+    hasServer: false
+  });
+
+  assert.deepEqual(
+    commands.map(({ label }) => label),
+    ["build", "skill tests", "shared component checker tests"]
+  );
+  assert.doesNotMatch(JSON.stringify(commands), /create-mono-stack|server/);
 });
 
 test("TEST-MANIFEST-036 keeps stack metadata launcher-owned", async () => {

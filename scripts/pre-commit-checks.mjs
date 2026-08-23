@@ -1,4 +1,7 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const root = new URL("..", import.meta.url);
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
@@ -61,33 +64,73 @@ async function runParallel(commands) {
   if (failure) throw failure;
 }
 
-await run("staged formatting", ["lint-staged"]);
-await run("staged skill validation", ["skills:check", "--", "--staged"]);
-await run("staged shared component validation", [
-  "exec",
-  "node",
-  "scripts/shared-component-testids.mjs"
-]);
+export function selectChecks({ hasCoreLauncher, hasServer }) {
+  const checks = [
+    { label: "build", args: ["build"] },
+    { label: "skill tests", args: ["skills:test"] },
+    {
+      label: "shared component checker tests",
+      args: [
+        "exec",
+        "node",
+        "--test",
+        "scripts/shared-component-testids.test.mjs"
+      ]
+    }
+  ];
 
-await runParallel([
-  { label: "build", args: ["build"] },
-  { label: "skill tests", args: ["skills:test"] },
-  { label: "server unit tests", args: ["--filter", "server", "test"] },
-  {
-    label: "shared component checker tests",
-    args: [
-      "exec",
-      "node",
-      "--test",
-      "scripts/shared-component-testids.test.mjs"
-    ]
+  if (hasServer) {
+    checks.splice(2, 0, {
+      label: "server unit tests",
+      args: ["--filter", "server", "test"]
+    });
   }
-]);
 
-// The Ink launcher suite is interactive and timing-sensitive; isolate it from concurrent builds.
-await run("core unit tests", ["--filter", "create-mono-stack", "test"]);
+  if (hasCoreLauncher) {
+    checks.push({
+      isolated: true,
+      label: "core unit tests",
+      args: ["--filter", "create-mono-stack", "test"]
+    });
+  }
 
-await runParallel([
-  { label: "lint", args: ["lint"] },
-  { label: "typecheck", args: ["typecheck"] }
-]);
+  return checks;
+}
+
+async function main() {
+  await run("staged formatting", ["lint-staged"]);
+  await run("staged skill validation", ["skills:check", "--", "--staged"]);
+  await run("staged shared component validation", [
+    "exec",
+    "node",
+    "scripts/shared-component-testids.mjs"
+  ]);
+
+  const checks = selectChecks({
+    hasCoreLauncher: existsSync(
+      new URL("../core/create-mono-stack/package.json", import.meta.url)
+    ),
+    hasServer: existsSync(
+      new URL("../apps/server/package.json", import.meta.url)
+    )
+  });
+
+  await runParallel(checks.filter(({ isolated }) => !isolated));
+
+  // The Ink launcher suite is interactive and timing-sensitive; isolate it from concurrent builds.
+  for (const { label, args, isolated } of checks) {
+    if (isolated) await run(label, args);
+  }
+
+  await runParallel([
+    { label: "lint", args: ["lint"] },
+    { label: "typecheck", args: ["typecheck"] }
+  ]);
+}
+
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  await main();
+}
