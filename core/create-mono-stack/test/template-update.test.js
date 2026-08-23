@@ -15,6 +15,16 @@ import {
 
 const projectRoot = "/workspace/project";
 
+const skillTriggers = JSON.stringify({
+  always: ["test-first-workflow"],
+  rules: [
+    { when: ["apps/web/**"], require: ["frontend-standards"] },
+    { when: ["apps/server/**"], require: ["backend-standards"] },
+    { when: ["**/*.tsx"], require: ["react-19"] }
+  ],
+  exempt: [".claude/**"]
+});
+
 function copierCall(calls) {
   return calls.find(({ args }) => args[0] === "-m" && args[1] === "copier");
 }
@@ -57,6 +67,77 @@ test("passes generated stack features to Copier during updates", () => {
     ...expectedStackArguments,
     "--defaults"
   ]);
+});
+
+test("synchronizes skill triggers after a template update", () => {
+  const calls = [];
+  const writes = [];
+  const execute = (command, args, options) => {
+    calls.push({ args, command, options });
+    return command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+  };
+  const readFile = (path) =>
+    path.endsWith(".claude/skill-triggers.json") ? skillTriggers : stackConfig;
+
+  assert.equal(
+    updateTemplate(["--defaults"], {
+      cwd: projectRoot,
+      environment: { PATH: "/usr/bin" },
+      execute,
+      exists: () => true,
+      platform: "darwin",
+      readFile,
+      readFileSync: readFile,
+      writeFileSync: (path, contents) => writes.push({ contents, path })
+    }),
+    0
+  );
+
+  assert.equal(writes.length, 1);
+  const rules = JSON.parse(writes[0].contents).rules;
+  assert.ok(
+    rules.some(
+      (rule) =>
+        rule.when[0] === "apps/dashboard/**" &&
+        rule.require[0] === "frontend-standards"
+    )
+  );
+  assert.ok(
+    rules.some(
+      (rule) =>
+        rule.when[0] === "apps/expo/**" &&
+        rule.require[0] === "frontend-standards"
+    )
+  );
+  assert.ok(!rules.some((rule) => rule.when[0] === "apps/web/**"));
+  assert.ok(rules.some((rule) => rule.when[0][0] === "*"));
+  assert.equal(calls.filter(({ command }) => command !== "git").length, 1);
+});
+
+test("failed template update leaves triggers unchanged", () => {
+  const writes = [];
+  const execute = (command) =>
+    command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 1, stderr: "update failed", stdout: "" };
+
+  assert.equal(
+    updateTemplate(["--defaults"], {
+      cwd: projectRoot,
+      environment: { PATH: "/usr/bin" },
+      execute,
+      exists: () => true,
+      platform: "darwin",
+      readFile: () => stackConfig,
+      readFileSync: () => skillTriggers,
+      writeFileSync: (path, contents) => writes.push({ contents, path })
+    }),
+    1
+  );
+
+  assert.equal(writes.length, 0);
 });
 
 test("TEST-UPDATE-010 reuses recorded answers for a bare update", () => {

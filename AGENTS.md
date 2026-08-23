@@ -160,15 +160,23 @@ Valid types: `feat fix docs style refactor perf test build ci chore revert`
 
 ## Pre-commit hooks
 
-Every commit runs two checks automatically (via Husky):
+Every commit starts with two staged checks automatically (via Husky):
 
 1. `lint-staged` — Prettier on staged `*.{js,jsx,ts,tsx,json,md,yml,yaml}`.
 2. `skills:check --staged` — validates all skill roots are in sync. **Hard-rejects the commit if any root is out of sync.** No auto-fix; run `pnpm skills:sync` and re-stage.
+
+The hook then runs staged shared-component validation, the workspace build, applicable server/core
+unit tests, lint, and typecheck. Independent checks run in parallel where their build dependencies
+allow it. Browser and device E2E suites remain explicit commands and are not pre-commit checks.
 
 ## Skills system
 
 Four roots must always be byte-for-byte identical:
 `skills/`, `.agents/skills/`, `.claude/skills/`, `.opencode/skills/`
+
+The locked native `shadcn` skill is an exception to the portable metadata rules. It is synchronized
+for discovery but may retain upstream provider-specific syntax because `skills-lock.json` excludes it
+from portable-skill validation. Do not use that syntax in repository-authored portable skills.
 
 After creating or editing a skill:
 

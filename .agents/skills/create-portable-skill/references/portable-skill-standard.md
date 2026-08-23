@@ -35,7 +35,9 @@ root-level directories are not.
 - `examples/`: representative inputs, outputs, or completed samples.
 
 Reference resources from `SKILL.md` with relative paths and explain when to
-read or use them. Avoid duplicating the same guidance in multiple files.
+read or use them. Avoid duplicating the same guidance in multiple files. A skill that must remain
+independently actionable may repeat a concise policy requirement; keep those copies textually aligned
+and update them together when the policy changes.
 
 ## Portability
 
@@ -46,3 +48,10 @@ portable scripts.
 
 Run `pnpm skills:sync` after every change. Run `pnpm skills:check` before
 committing.
+
+## Locked native skills
+
+Skills listed in the repository-root `skills-lock.json` are native upstream skills rather than
+portable repository-authored skills. They are synchronized into the four discovery roots but are
+excluded from portable metadata validation. A locked native skill may retain its upstream
+provider-specific frontmatter or syntax; do not copy those conventions into portable skills.

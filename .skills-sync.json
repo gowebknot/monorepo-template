@@ -17,13 +17,13 @@
       "hash": "bc3cb2b0da52bb31878c2a92aa039496015f30f68c3008b640f4e97eedf821b5"
     },
     "create-minimal-package": {
-      "hash": "313c322789b61b8dd64d0df7808ab0360fb68225b64feefbc12f5b4b52f5bb14"
+      "hash": "193600b7324caff018ad24660fbb537afbf753e9c9655347e38ad850ba0f893b"
     },
     "create-portable-skill": {
-      "hash": "8c6b0a47fc36c1fded152ac452243d16b082f80ebbde598aa66c8fbbea84cc93"
+      "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"
     },
     "e2e-regression-test-writer": {
-      "hash": "f2dbbd2cd18fa00c163a984429d41befa67f9ad6a317b8e4dace52d524487286"
+      "hash": "164db444cbb534c6a6133dce1e1ef098d3522e46c63e5deed8161aceed14a4e5"
     },
     "end-to-end-api-flow": {
       "hash": "8bd73611368abeaf9382b313788be6d6bfdca505d8cc7c37927f9faec8df04d4"
@@ -50,7 +50,7 @@
       "hash": "be1313e13397b11f5b461af96bed1d2d639bcb23aa9b90674b15032b8ceb4525"
     },
     "testing-policy": {
-      "hash": "9bfa6cc56c49c4438e8e35bb80e0081598963cca8ca48199eed1d47d2209c61d"
+      "hash": "feb253b37baef75ad083a5adbd1a3b00db82d478043054912a9d0c7c171f56e9"
     }
   }
 }

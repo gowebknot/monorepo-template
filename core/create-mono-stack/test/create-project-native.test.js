@@ -5,6 +5,16 @@ import { createProject, main } from "../src/create-project.js";
 
 const destination = "/workspace/acme-platform";
 
+const skillTriggers = JSON.stringify({
+  always: ["test-first-workflow"],
+  rules: [
+    { when: ["apps/web/**"], require: ["frontend-standards"] },
+    { when: ["apps/server/**"], require: ["backend-standards"] },
+    { when: ["**/*.tsx"], require: ["react-19"] }
+  ],
+  exempt: [".claude/**"]
+});
+
 function missingPath() {
   const error = new Error("missing");
   error.code = "ENOENT";
@@ -17,6 +27,10 @@ function projectDependencies({ apps = [], events = [], scaffold } = {}) {
     mkdtemp: async () => "/tmp/create-mono-stack-native-test",
     platform: "darwin",
     readdir: async () => missingPath(),
+    readFile: async (path) => {
+      if (path.endsWith(".claude/skill-triggers.json")) return skillTriggers;
+      throw Object.assign(new Error("missing"), { code: "ENOENT" });
+    },
     rm: async () => {},
     copyFile: async (source, target) => {
       events.push({ source, target, type: "copyFile" });
@@ -120,6 +134,58 @@ test("TEST-MANIFEST-001 writes the current stack manifest", async () => {
       { ...apps[1], ports: { dev: 3000, reference: 3001 } }
     ]
   });
+});
+
+test("TEST-TRIGGER-002 writes rules for custom generated app names", async () => {
+  const events = [];
+  const apps = [
+    {
+      feature: "web-vite",
+      generator: "vite",
+      name: "admin-react",
+      path: "apps/admin-react",
+      referenceProfile: "vite/react-ts"
+    },
+    {
+      feature: "mobile-expo",
+      generator: "expo",
+      name: "student-expo",
+      path: "apps/student-expo",
+      referenceProfile: "expo/default"
+    }
+  ];
+
+  await createProject(
+    {
+      destination,
+      features: ["web-vite", "mobile-expo"],
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    projectDependencies({ apps, events })
+  );
+
+  const triggerWrite = events.find(
+    ({ path, type }) => type === "write" && path.endsWith("skill-triggers.json")
+  );
+  assert.ok(triggerWrite);
+  const rules = JSON.parse(triggerWrite.contents).rules;
+  assert.ok(
+    rules.some(
+      (rule) =>
+        rule.when[0] === "apps/admin-react/**" &&
+        rule.require[0] === "frontend-standards"
+    )
+  );
+  assert.ok(
+    rules.some(
+      (rule) =>
+        rule.when[0] === "apps/student-expo/**" &&
+        rule.require[0] === "frontend-standards"
+    )
+  );
+  assert.ok(!rules.some((rule) => rule.when[0] === "apps/web/**"));
 });
 
 test("TEST-ENV-002 copies the environment example to the local environment", async () => {

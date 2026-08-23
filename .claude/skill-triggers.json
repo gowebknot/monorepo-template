@@ -1,5 +1,5 @@
 {
-  "$comment": "Path-detectable skill triggers enforced by scripts/skill-gate.mjs (a PreToolUse hook). 'always' skills are required for every non-exempt edit; each rule adds skills when an edited path matches any 'when' glob. Edit this table to tighten or extend coverage. Intent-only skills that a hook cannot detect (code-review, release-flow, end-to-end-api-flow, observability, security-testing-policy, jsx-component-extraction) stay governed by AGENTS.md. Opt out with SKILL_GATE_DISABLE=1.",
+  "$comment": "Path-detectable skill triggers enforced by scripts/skill-gate.mjs (a PreToolUse hook). 'always' skills are required for every non-exempt edit; each rule adds skills when an edited path matches any 'when' glob. Edit this table to tighten or extend coverage. Skills that remain intent-only because a path cannot identify their scope (code-review, release-flow, observability, security-testing-policy, jsx-component-extraction) stay governed by AGENTS.md. Opt out with SKILL_GATE_DISABLE=1.",
   "always": ["test-first-workflow"],
   "rules": [
     {
@@ -10,8 +10,19 @@
       "when": ["packages/entities/**", "**/*.dto.*", "**/*.schema.*"],
       "require": ["contract-validation"]
     },
+    {
+      "when": ["packages/api-client/**"],
+      "require": ["end-to-end-api-flow", "contract-validation"]
+    },
+    {
+      "when": ["packages/query-client/**"],
+      "require": ["end-to-end-api-flow"]
+    },
     { "when": ["apps/server/**"], "require": ["backend-standards"] },
-    { "when": ["apps/web/**"], "require": ["frontend-standards"] },
+    {
+      "when": ["apps/web/**", "apps/next/**", "apps/expo/**", "apps/mobile/**"],
+      "require": ["frontend-standards"]
+    },
     { "when": ["**/*.tsx", "**/*.jsx"], "require": ["react-19"] }
   ],
   "exempt": [

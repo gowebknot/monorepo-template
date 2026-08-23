@@ -117,6 +117,11 @@ changes.
 
 - `apps/web`: example frontend-style app
 - `apps/server`: example API-style app (NestJS)
+- `apps/next`: Next.js reference app
+- `apps/expo`: Expo React Native reference app
+- `apps/mobile`: bare React Native reference app
+- `apps/playwright`: Playwright browser regression tests
+- `apps/maestro`: Maestro mobile regression flows
 - `core/create-mono-stack`: source-only npm launcher and Copier tests
 - `packages/api-client`: shared Axios API client helpers
 - `packages/config`: shared config
@@ -124,6 +129,7 @@ changes.
 - `packages/db`: shared Drizzle database connection helpers
 - `packages/entities`: shared API contracts
 - `packages/query-client`: shared TanStack Query hooks
+- `packages/ui`: shared web UI components and styles
 
 ## Commands
 

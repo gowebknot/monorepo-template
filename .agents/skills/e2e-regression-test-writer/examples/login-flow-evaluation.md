@@ -26,6 +26,6 @@ The generated plan or test files pass only when they:
 
 ## Evaluation Boundary
 
-This repository does not currently provide a Playwright app, config, fixtures, or E2E runner. Treat
-this file as a rubric for a later app-specific evaluation, not as evidence that the generated tests
-have executed successfully.
+This repository provides `apps/playwright` and the `pnpm e2e:web` runner. This file remains a
+synthetic rubric for an app-specific login evaluation, not evidence that the generated tests or a
+login flow have executed successfully.

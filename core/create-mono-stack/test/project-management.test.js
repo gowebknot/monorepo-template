@@ -30,8 +30,24 @@ const defaultApps = [
   }
 ];
 
+const skillTriggers = {
+  always: ["test-first-workflow"],
+  rules: [
+    { when: ["**/*.test.*"], require: ["testing-policy"] },
+    { when: ["apps/web/**"], require: ["frontend-standards"] },
+    { when: ["apps/server/**"], require: ["backend-standards"] },
+    { when: ["**/*.tsx"], require: ["react-19"] }
+  ],
+  exempt: [".claude/**"]
+};
+
 async function project() {
   const cwd = await mkdtemp(join(tmpdir(), "project-management-"));
+  await mkdir(join(cwd, ".claude"), { recursive: true });
+  await writeFile(
+    join(cwd, ".claude/skill-triggers.json"),
+    `${JSON.stringify(skillTriggers, null, 2)}\n`
+  );
   await mkdir(join(cwd, "apps", "web"), { recursive: true });
   await mkdir(join(cwd, "apps", "server"), { recursive: true });
   await writeFile(join(cwd, "apps", "web", "sentinel.txt"), "keep");
@@ -113,6 +129,16 @@ test("TEST-MANAGE-002 adds an app without replacing existing apps", async () => 
       "keep"
     );
     assert.equal(manifest.apps.length, 3);
+    const triggers = JSON.parse(
+      await readFile(join(cwd, ".claude/skill-triggers.json"), "utf8")
+    );
+    assert.ok(
+      triggers.rules.some(
+        (rule) =>
+          rule.when[0] === "apps/admin-next/**" &&
+          rule.require[0] === "frontend-standards"
+      )
+    );
     assert.deepEqual(recorder.calls.at(-1), {
       command: "pnpm",
       args: ["install"]
@@ -188,6 +214,13 @@ test("TEST-MANAGE-003 removes an app and updates its feature", async () => {
     );
     assert.deepEqual(manifest.features, ["web-vite"]);
     assert.equal(manifest.apps[0].name, "web");
+    const triggers = JSON.parse(
+      await readFile(join(cwd, ".claude/skill-triggers.json"), "utf8")
+    );
+    assert.ok(
+      !triggers.rules.some((rule) => rule.when[0] === "apps/server/**")
+    );
+    assert.ok(triggers.rules.some((rule) => rule.when[0] === "apps/web/**"));
   } finally {
     await cleanup(cwd);
   }

@@ -38,6 +38,7 @@ import {
   validateAppName
 } from "./native-scaffold.js";
 import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
+import { syncSkillTriggers } from "./skill-triggers.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
@@ -398,6 +399,10 @@ export async function createProject(
     });
     const allocatedApps = await allocateAppPorts(nativeApps);
     await configureAppScripts(options.destination, allocatedApps, {
+      read: dependencies.readFile ?? readFile,
+      write: dependencies.writeFile
+    });
+    await syncSkillTriggers(options.destination, allocatedApps, {
       read: dependencies.readFile ?? readFile,
       write: dependencies.writeFile
     });

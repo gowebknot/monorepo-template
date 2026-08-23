@@ -19,13 +19,13 @@ to run the existing user-flow regression suite.
   - linting
   - typechecking
   - builds
-- Run Playwright E2E tests in CI through `pnpm e2e`.
+- Run Playwright E2E tests in CI through `pnpm e2e:web`.
 - Do not add Playwright execution to pre-push hooks.
 - Do not implement the CI workflow as part of this plan capture; implementation starts in a later task.
 
 ## Scope
 
-- Add a CI job that installs dependencies, prepares the required browser, and runs `pnpm e2e`.
+- Add a CI job that installs dependencies, prepares the required browser, and runs `pnpm e2e:web`.
 - Preserve the existing `apps/playwright` web-server configuration and accessible user-flow tests.
 - Keep E2E failures visible as a separate CI status from local pre-commit validation.
 
@@ -38,7 +38,7 @@ to run the existing user-flow regression suite.
 
 ## Success Criteria
 
-- A CI job executes `pnpm e2e` against the existing Playwright suite.
+- A CI job executes `pnpm e2e:web` against the existing Playwright suite.
 - The CI job installs or uses the required Chromium browser deterministically.
 - A failing E2E test fails CI without affecting the local pre-commit command design.
 - The existing local pre-commit pipeline remains limited to formatting, unit tests, lint, typecheck,
@@ -49,6 +49,6 @@ to run the existing user-flow regression suite.
 - [ ] Confirm the repository's CI provider and workflow conventions when CI is introduced.
 - [ ] Add dependency installation and lockfile validation to the CI job.
 - [ ] Install Playwright Chromium in the CI environment.
-- [ ] Run `pnpm e2e` and publish its failure status.
+- [ ] Run `pnpm e2e:web` and publish its failure status.
 - [ ] Validate the CI workflow with a successful run and a controlled failing-test run.
 - [ ] Link the implementation checklist back to this plan.

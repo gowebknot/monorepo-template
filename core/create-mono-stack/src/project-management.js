@@ -14,6 +14,7 @@ import {
   validateName
 } from "./project-management-runtime.js";
 import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
+import { syncSkillTriggers } from "./skill-triggers.js";
 import {
   applyReferenceProfile,
   nativeScaffoldDependencies
@@ -194,6 +195,7 @@ export async function addApp(
   };
   await configureAppScripts(cwd, [app], { read, write });
   await writeManifest(cwd, nextManifest, write);
+  await syncSkillTriggers(cwd, nextManifest.apps, { read, write });
   await runCommand("pnpm", ["install"], { cwd });
   return app;
 }
@@ -229,6 +231,7 @@ export async function removeApp(
     { ...manifest, features: remainingFeatures, apps: remainingApps },
     write
   );
+  await syncSkillTriggers(cwd, remainingApps, { read, write });
   await runCommand("pnpm", ["install"], { cwd });
   return true;
 }

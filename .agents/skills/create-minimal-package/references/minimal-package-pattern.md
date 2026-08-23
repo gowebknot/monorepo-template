@@ -148,7 +148,9 @@ Use bundler resolution and mirror the Vite alias:
 }
 ```
 
-Do not add `baseUrl` unless a compiler version requires it; TypeScript 6 accepts `paths` without it and avoids the `ignoreDeprecations` workaround.
+Do not add `baseUrl` unless a compiler version requires it; the repository's TypeScript 7 compiler
+accepts `paths` without it and avoids the `ignoreDeprecations` workaround. The
+`@typescript/typescript6` dependency exists only for declaration-tooling compatibility.
 
 ## Import Rules
 

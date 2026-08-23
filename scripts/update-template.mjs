@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { readStackConfig } from "./stack-config.mjs";
+import { synchronizeSkillTriggers } from "./skill-triggers.mjs";
 
 export { STACK_CONFIG_FILENAME, readStackConfig } from "./stack-config.mjs";
 
@@ -187,6 +188,12 @@ export function updateTemplate(args, dependencies = {}) {
     throw missingEnvironmentError(python, platform);
   }
   if (result.error) throw commandError(python, result);
+  if ((result.status ?? 1) === 0) {
+    synchronizeSkillTriggers(cwd, stackConfig.apps, {
+      read: dependencies.readFileSync ?? readFileSync,
+      write: dependencies.writeFileSync ?? writeFileSync
+    });
+  }
   return result.status ?? 1;
 }
 
