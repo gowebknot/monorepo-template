@@ -148,6 +148,12 @@ Conventional Commits enforced by commitlint (`commit-msg` hook):
 
 Valid types: `feat fix docs style refactor perf test build ci chore revert`
 
+Commit subjects may be up to 120 characters. Every intentional commit must include a blank line and
+a detailed body. Body lines may be up to 700 characters, and the total body length is not limited.
+Explain what changed, why it changed, relevant user-visible, compatibility, migration, security, or
+operational impact, and the validation or tests performed. Keep the subject specific and concise even
+when the wider limit is available; do not use secrets, unverifiable claims, or filler.
+
 ## Non-Negotiable Git Safety
 
 - **NEVER use `--no-verify`, `--no-hooks`, `HUSKY=0`, skipped hooks, disabled checks, or any equivalent

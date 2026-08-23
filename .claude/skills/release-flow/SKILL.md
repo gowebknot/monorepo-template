@@ -25,6 +25,16 @@ Prepare releases as verified, explainable changes rather than as version-only ed
   dependency requirements, known limitations, and required follow-up actions.
 - Do not include secrets, private URLs, customer data, or unverifiable claims.
 
+## Commit Messages
+
+- Use a valid Conventional Commit subject in the form `<type>(<scope>): <subject>` with an allowed
+  repository type. Subjects may be up to 120 characters, but keep them specific and concise.
+- Add a blank line followed by a detailed body to every intentional commit. Body lines may be up to
+  700 characters; this is a per-line limit, not a total body limit.
+- Explain what changed and why, then include relevant user-visible, compatibility, migration, security,
+  operational, or release impact and the validation or tests performed.
+- Keep the body factual and useful. Do not include secrets, unverifiable claims, or filler.
+
 ## Verification
 
 - Run the repository's required build, typecheck, lint, test, format, package, and artifact checks.
