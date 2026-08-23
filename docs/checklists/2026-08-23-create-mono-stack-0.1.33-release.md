@@ -62,8 +62,9 @@
 - **Must not happen:** No skipped hooks or disabled checks.
 - **Planned command:** `just check && pnpm --filter create-mono-stack exec npm pack --dry-run && git diff --check`
 - **Expected result before the code change:** The release candidate is not yet versioned `0.1.33`.
-- **First observed run:** Pending implementation.
-- **Passing rerun:** Pending validation.
+- **First observed run:** `just check` was run after the version and fixture updates.
+- **Passing rerun:** `just check`, package tests, npm pack dry-run, and `git diff --check` passed; the
+  commit hook also passed the full validation sequence.
 
 ### TEST-RELEASE-015: Commit, push, and tag
 
@@ -79,8 +80,9 @@
 - **Must not happen:** No amend, force-push, skipped hooks, or unrelated staged files.
 - **Planned command:** `git push origin master && git tag -a v0.1.33 -m "Release v0.1.33" && git push origin v0.1.33`
 - **Expected result before the code change:** No release commit or `v0.1.33` tag exists remotely.
-- **First observed run:** Pending implementation.
-- **Passing rerun:** Pending validation.
+- **First observed run:** `master` and `v0.1.33` were absent from the remote before release execution.
+- **Passing rerun:** Commit `41037de` was pushed to `origin/master`; annotated tag `v0.1.33` was pushed
+  and resolves to the same release commit.
 
 ### TEST-RELEASE-016: Publish npm package
 
@@ -96,19 +98,20 @@
 - **Must not happen:** No direct npm publish or credentials in Git.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package && npm view create-mono-stack@0.1.33 version dist-tags --json`
 - **Expected result before the code change:** `0.1.33` is not published.
-- **First observed run:** Pending implementation.
-- **Passing rerun:** Pending validation.
+- **First observed run:** npm reported no published `0.1.33` version.
+- **Passing rerun:** `pnpm --filter create-mono-stack publish:package` published successfully, and npm
+  reports version `0.1.33` with the `latest` dist-tag.
 
 ## Release Steps
 
-- [ ] Bump package version and current-template fixture.
-- [ ] Run and record release validation.
-- [ ] Inspect final diff and stage only intended files.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push annotated `v0.1.33`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact, and final status.
+- [x] Bump package version and current-template fixture.
+- [x] Run and record release validation.
+- [x] Inspect final diff and stage only intended files.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push annotated `v0.1.33`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact, and final status.
 
 ## Risks And Follow-Up
 
