@@ -78,8 +78,9 @@
 - Must not happen: No amend, force-push, skipped hooks, or unrelated staged files.
 - Planned command: `git push origin master`, `git tag -a v0.1.34 -m "Release v0.1.34"`, and `git push origin v0.1.34`
 - Expected result before the code change: No release commit or `v0.1.34` tag exists remotely.
-- First observed run:
-- Passing rerun:
+- First observed run: The release commit had not yet been pushed and `v0.1.34` did not exist.
+- Passing rerun: Commit `bc25c15` was pushed to `origin/master`; annotated tag `v0.1.34` was pushed
+  and dereferences to the same commit.
 
 ### TEST-RELEASE-004: Publish npm package
 
@@ -95,19 +96,28 @@
 - Must not happen: No direct npm publish or credentials in Git.
 - Planned command: `pnpm --filter create-mono-stack publish:package` and `npm view create-mono-stack@0.1.34 version dist-tags --json`
 - Expected result before the code change: `0.1.34` is not published.
-- First observed run:
-- Passing rerun:
+- First observed run: npm reported no published `0.1.34` version.
+- Passing rerun: The package-local wrapper published successfully, and npm reports version `0.1.34`
+  with the `latest` dist-tag.
 
 ## Release Steps
 
 - [x] Bump package version and current-template fixture.
 - [x] Run and record release validation.
-- [ ] Inspect final diff and stage only intended files.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push annotated `v0.1.34`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact, and final status.
+- [x] Inspect final diff and stage only intended files.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push annotated `v0.1.34`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact, and final status.
+
+## Verification
+
+- Release commit: `bc25c151c21ab191c0bd0a0b593b877925c907f6`.
+- `origin/master` and annotated `v0.1.34` dereference to the release commit.
+- npm reports `create-mono-stack@0.1.34` with `latest` pointing to `0.1.34`.
+- The package-local publish wrapper emitted npm configuration deprecation warnings for existing
+  unsupported config keys, but publication succeeded; no credentials were added to Git.
 
 ## Risks And Follow-Up
 
