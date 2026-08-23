@@ -114,7 +114,8 @@
 ## Verification
 
 - Release commit: `bc25c151c21ab191c0bd0a0b593b877925c907f6`.
-- `origin/master` and annotated `v0.1.34` dereference to the release commit.
+- Annotated `v0.1.34` dereferences to the release commit; `origin/master` contains that release plus
+  the post-release checklist completion commit.
 - npm reports `create-mono-stack@0.1.34` with `latest` pointing to `0.1.34`.
 - The package-local publish wrapper emitted npm configuration deprecation warnings for existing
   unsupported config keys, but publication succeeded; no credentials were added to Git.
