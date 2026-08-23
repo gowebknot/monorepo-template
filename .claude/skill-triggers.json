@@ -12,7 +12,7 @@
     },
     {
       "when": ["packages/api-client/**"],
-      "require": ["end-to-end-api-flow", "contract-validation"]
+      "require": ["end-to-end-api-flow"]
     },
     {
       "when": ["packages/query-client/**"],

@@ -57,6 +57,16 @@ pnpm --filter server build
 pnpm --filter server build:reference
 pnpm --filter server typecheck
 pnpm --filter server lint
+pnpm --filter server test:unit
+pnpm --filter server test:api:e2e
+pnpm --filter server build && pnpm --filter server test:api:smoke
 pnpm --filter server dev
 pnpm --filter server dev:reference
 ```
+
+## Test boundaries
+
+- `test:unit` runs isolated source tests under `src/**/*.spec.ts`.
+- `test:api:e2e` runs exhaustive in-process Nest HTTP tests under `test/**/*.e2e-spec.ts`; it does not bind a network port.
+- `test:api:smoke` starts the built real server as a separate process and verifies representative localhost behavior, startup, environment wiring, and teardown.
+- The reference CRUD server is an example application and is not part of the real-server smoke suite.

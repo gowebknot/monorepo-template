@@ -25,7 +25,7 @@ const triggers = {
     },
     {
       when: ["packages/api-client/**"],
-      require: ["end-to-end-api-flow", "contract-validation"]
+      require: ["end-to-end-api-flow"]
     },
     {
       when: ["packages/query-client/**"],
@@ -119,14 +119,14 @@ test("TEST-GATE-007 denies a packages/entities edit missing contract-validation"
   assert.ok(result.missing.includes("contract-validation"));
 });
 
-test("TEST-GATE-020 denies an API-client edit missing boundary skills", () => {
+test("TEST-GATE-020 denies an API-client edit missing API-flow skill", () => {
   const result = decide({
     filePath: "packages/api-client/src/users.ts",
     invokedSkills: ["test-first-workflow"]
   });
   assert.equal(result.allow, false);
   assert.ok(result.missing.includes("end-to-end-api-flow"));
-  assert.ok(result.missing.includes("contract-validation"));
+  assert.ok(!result.missing.includes("contract-validation"));
 });
 
 test("TEST-GATE-021 denies a query-client edit missing API-flow skill", () => {
@@ -265,10 +265,9 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
       (skill) => skill !== "test-first-workflow"
     );
 
-  assert.deepEqual(
-    requiredFor("packages/api-client/src/users.ts").sort(),
-    ["contract-validation", "end-to-end-api-flow"].sort()
-  );
+  assert.deepEqual(requiredFor("packages/api-client/src/users.ts").sort(), [
+    "end-to-end-api-flow"
+  ]);
   assert.deepEqual(requiredFor("packages/query-client/src/users.ts"), [
     "end-to-end-api-flow"
   ]);

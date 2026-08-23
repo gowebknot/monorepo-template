@@ -133,3 +133,14 @@
 
 - Package rules may require explicit end-to-end workflow invocation for package maintenance that does not cross an API boundary; this is intentional until the repository establishes narrower file-level conventions.
 - Generated projects with missing trigger files remain a safe no-op as documented by the related checklist.
+
+## Updates
+
+### 2026-08-23: API-client contract-validation scope correction
+
+- Reason: The committed acceptance criteria required `contract-validation` for every `packages/api-client/**` edit, but the later scope decision rejected broadening that rule because `contract-validation/SKILL.md` does not identify the API-client package boundary.
+- Evidence: `scripts/skill-gate.test.mjs` and `.claude/skill-triggers.json` both encoded the extra requirement.
+- Impact: API-client maintenance edits were gated by an unrelated contract skill in addition to the intended `end-to-end-api-flow` skill.
+- Corrective action: Removed only `contract-validation` from the API-client package rule and updated the focused assertions. Query-client and entity/schema rules were left unchanged.
+- Validation: `node --test scripts/skill-gate.test.mjs --test-name-pattern='API-client|API chain'` passed all 24 tests.
+- Related checklist: `docs/checklists/2026-08-23-api-chain-skill-gate-contract-scope.md`

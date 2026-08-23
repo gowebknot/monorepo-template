@@ -24,10 +24,19 @@ typecheck:
 format:
     pnpm format
 
-check: lint typecheck format-check skills-check skills-test template-test
+check: lint typecheck format-check skills-check skills-test template-test test-unit test-api-e2e
 
 format-check:
     pnpm format:check
+
+test-unit:
+    pnpm test:unit
+
+test-api-e2e:
+    pnpm test:api:e2e
+
+test-api-smoke:
+    pnpm test:api:smoke
 
 package-create name:
     pnpm package:create {{name}}
