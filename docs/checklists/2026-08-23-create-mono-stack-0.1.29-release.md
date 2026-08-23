@@ -118,3 +118,21 @@
 - npm publication is irreversible for this version; corrections require a new patch version.
 - Device-backed Maestro assertions remain outside the release gate.
 - Do not publish if authentication is missing or package validation fails.
+
+## Updates
+
+### 2026-08-23: Release completed
+
+The original release-step checkboxes remain unchanged as historical planning records. The remaining
+steps were completed after the checklist was committed:
+
+- Final diff was reviewed, only intended files were staged, and `git diff --cached --check` passed.
+- Commit `9f185ad` was created with passing hooks using
+  `chore(release): prepare create-mono-stack 0.1.29`.
+- `master` was pushed to `origin`.
+- Annotated tag `v0.1.29` was created and pushed.
+- `create-mono-stack@0.1.29` was published through `pnpm --filter create-mono-stack publish:package`.
+- Remote `master` and the peeled `v0.1.29` tag both resolve to `9f185ad0e9904439ff2f326f0764142f4757273f`.
+- npm reports `0.1.29` as the `latest` version; the final package dry-run reports 287 files and no
+  credentials.
+- Final worktree verification passed with no uncommitted changes.
