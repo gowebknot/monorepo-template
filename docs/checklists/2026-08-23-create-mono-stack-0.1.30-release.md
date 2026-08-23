@@ -103,11 +103,23 @@
 - [ ] Commit with a Conventional Commit message and passing hooks.
 - [ ] Push `master`.
 - [ ] Create and push annotated `v0.1.30`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact, and final status.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact, and final status.
 
 ## Risks And Follow-Up
 
 - npm publication is irreversible for this version; corrections require a new patch version.
 - Device-backed Maestro assertions remain outside the release gate.
 - Do not publish if authentication is missing or package validation fails.
+
+## Updates
+
+### 2026-08-23: Release completed
+
+- Release commit `bebe03c` was created with passing commit hooks.
+- `master` was pushed to `origin`.
+- Annotated tag `v0.1.30` was created and pushed.
+- `create-mono-stack@0.1.30` was published through `pnpm --filter create-mono-stack publish:package`.
+- npm reports `0.1.30` as the `latest` version.
+- Remote `master` and the peeled `v0.1.30` tag both resolve to `bebe03cbe78c9b089fdb96cc2fc861e90fa960f0`.
+- The package dry-run reported 288 files and no credentials; final worktree verification was clean before this checklist update.
