@@ -72,7 +72,6 @@ await run("staged shared component validation", [
 await runParallel([
   { label: "build", args: ["build"] },
   { label: "skill tests", args: ["skills:test"] },
-  { label: "core unit tests", args: ["--filter", "create-mono-stack", "test"] },
   { label: "server unit tests", args: ["--filter", "server", "test"] },
   {
     label: "shared component checker tests",
@@ -84,6 +83,9 @@ await runParallel([
     ]
   }
 ]);
+
+// The Ink launcher suite is interactive and timing-sensitive; isolate it from concurrent builds.
+await run("core unit tests", ["--filter", "create-mono-stack", "test"]);
 
 await runParallel([
   { label: "lint", args: ["lint"] },
