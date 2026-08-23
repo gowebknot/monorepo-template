@@ -57,6 +57,7 @@ export default function TodosPage() {
               {(field) => (
                 <field.FormInput
                   placeholder="User ID"
+                  testID="todos-create-user-id"
                   labelProps={{ children: "User ID" }}
                   autoCapitalize="none"
                 />
@@ -66,11 +67,12 @@ export default function TodosPage() {
               {(field) => (
                 <field.FormInput
                   placeholder="Todo title"
+                  testID="todos-create-title"
                   labelProps={{ children: "Title" }}
                 />
               )}
             </createForm.AppField>
-            <createForm.SubmitButton>
+            <createForm.SubmitButton testID="todos-create-submit">
               <ButtonText>Create Todo</ButtonText>
             </createForm.SubmitButton>
           </View>
@@ -83,6 +85,7 @@ export default function TodosPage() {
         </Text>
         <Input
           placeholder="Enter a User ID to load todos"
+          testID="todos-filter-user-id"
           autoCapitalize="none"
           value={userId}
           onChangeText={setUserId}

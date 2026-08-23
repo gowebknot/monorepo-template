@@ -367,6 +367,12 @@ importers:
         specifier: ^10.6.0
         version: 10.8.0(jiti@2.7.0)
 
+  apps/maestro:
+    devDependencies:
+      eslint:
+        specifier: ^10.6.0
+        version: 10.8.0(jiti@2.7.0)
+
   apps/server:
     dependencies:
       "@nestjs/common":

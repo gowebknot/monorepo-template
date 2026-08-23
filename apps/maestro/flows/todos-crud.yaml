@@ -1,0 +1,23 @@
+appId: ${MAESTRO_APP_ID}
+---
+# A unique ID avoids collisions with data left by an interrupted flow.
+- stopApp
+- evalScript: ${output.testUserId = 'maestro-e2e-' + Date.now()}
+- openLink: "exp://${MAESTRO_HOST}:8082/--/reference/todos"
+- assertVisible: "Todos"
+# Mount the filtered query before the optimistic create mutation runs.
+- tapOn:
+    id: "todos-filter-user-id"
+- inputText: "${output.testUserId}"
+- tapOn:
+    id: "todos-create-user-id"
+- inputText: "${output.testUserId}"
+- tapOn:
+    id: "todos-create-title"
+- inputText: "Buy oat milk"
+- tapOn:
+    id: "todos-create-submit"
+- hideKeyboard
+- assertVisible: "Buy oat milk"
+- tapOn: "Delete"
+- assertNotVisible: "Buy oat milk"

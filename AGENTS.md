@@ -34,10 +34,15 @@ pnpm package:create <name>  # scaffold packages/<name> as @repo/<name>
 pnpm typecheck      # turbo typecheck (requires upstream build first)
 pnpm format         # prettier --write . (root-level only, not per-package)
 pnpm format:check   # CI-safe format check
+pnpm e2e:web        # Playwright browser e2e tests
+pnpm e2e:mobile     # Maestro mobile e2e flows (requires local devices and Maestro CLI)
 
 just check          # lint + typecheck + format-check + skills-check + skills-test + template-test
 just package-create <name>  # Just wrapper for pnpm package:create
 ```
+
+The former root `pnpm e2e` command was renamed to `pnpm e2e:web`; use `pnpm e2e:mobile` for the
+Maestro suite.
 
 `pnpm dev` and `pnpm dev:reference` run through Turborepo's interactive terminal UI (`--ui tui`):
 each app's dev server gets its own pane. Use the arrow keys (or a pane's shown number) to focus a

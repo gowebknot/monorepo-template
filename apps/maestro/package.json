@@ -1,0 +1,15 @@
+{
+  "name": "maestro-tests",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/run-flows.mjs",
+    "test:ios": "node scripts/run-flows.mjs --platform ios",
+    "test:android": "node scripts/run-flows.mjs --platform android",
+    "lint": "eslint scripts"
+  },
+  "devDependencies": {
+    "eslint": "^10.6.0"
+  }
+}

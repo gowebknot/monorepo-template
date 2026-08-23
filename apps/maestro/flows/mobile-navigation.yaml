@@ -1,0 +1,9 @@
+appId: ${MAESTRO_APP_ID}
+---
+- stopApp
+- openLink: "exp://${MAESTRO_HOST}:8082"
+- assertVisible: "Expo reference app"
+- tapOn: "Open Reference"
+- assertVisible: "Reference"
+- tapOn: "Open Todos"
+- assertVisible: "Todos"
