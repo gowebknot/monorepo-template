@@ -278,6 +278,10 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
     "apps/mobile/App.tsx"
   ]) {
     assert.ok(requiredFor(filePath).includes("frontend-standards"), filePath);
+    assert.ok(
+      requiredFor(filePath).includes("aspiron-source-architecture"),
+      filePath
+    );
   }
 });
 

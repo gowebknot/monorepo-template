@@ -12,10 +12,14 @@ const frontendFeatures = new Set([
 
 const backendFeatures = new Set(["api-nest", "api-express"]);
 
-function appSkill(feature) {
-  if (frontendFeatures.has(feature)) return "frontend-standards";
-  if (backendFeatures.has(feature)) return "backend-standards";
-  return undefined;
+function appSkills(feature) {
+  if (frontendFeatures.has(feature)) {
+    return ["frontend-standards", "aspiron-source-architecture"];
+  }
+  if (backendFeatures.has(feature)) {
+    return ["backend-standards", "aspiron-source-architecture"];
+  }
+  return [];
 }
 
 export function buildAppTriggerRules(apps) {
@@ -23,10 +27,10 @@ export function buildAppTriggerRules(apps) {
   const paths = new Set();
 
   for (const app of apps) {
-    const skill = appSkill(app.feature);
-    if (!skill || paths.has(app.path)) continue;
+    const skills = appSkills(app.feature);
+    if (skills.length === 0 || paths.has(app.path)) continue;
     paths.add(app.path);
-    rules.push({ when: [`${app.path}/**`], require: [skill] });
+    rules.push({ when: [`${app.path}/**`], require: skills });
   }
 
   return rules;
@@ -46,7 +50,8 @@ export function synchronizeSkillTriggers(projectRoot, apps, dependencies = {}) {
   const rules = (triggers.rules ?? []).filter(
     (rule) =>
       !rule.require?.includes("frontend-standards") &&
-      !rule.require?.includes("backend-standards")
+      !rule.require?.includes("backend-standards") &&
+      !rule.require?.includes("aspiron-source-architecture")
   );
 
   write(

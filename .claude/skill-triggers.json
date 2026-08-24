@@ -18,10 +18,13 @@
       "when": ["packages/query-client/**"],
       "require": ["end-to-end-api-flow"]
     },
-    { "when": ["apps/server/**"], "require": ["backend-standards"] },
+    {
+      "when": ["apps/server/**"],
+      "require": ["backend-standards", "aspiron-source-architecture"]
+    },
     {
       "when": ["apps/web/**", "apps/next/**", "apps/expo/**", "apps/mobile/**"],
-      "require": ["frontend-standards"]
+      "require": ["frontend-standards", "aspiron-source-architecture"]
     },
     { "when": ["**/*.tsx", "**/*.jsx"], "require": ["react-19"] }
   ],
