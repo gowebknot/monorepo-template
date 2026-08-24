@@ -119,3 +119,11 @@
 - `just check` passed all configured checks; existing React Compiler compatibility warnings were non-fatal.
 - `git diff --check` passed.
 - The TanStack Form example now references the shared `createTodoInputSchema` for submit validation; all four skill roots and `.skills-sync.json` were synchronized and validated.
+
+## Updates
+
+### 2026-08-24 Release Completion
+
+- `TEST-RELEASE-003` passing rerun: Commit `036715a` was pushed to `origin/master`; annotated tag `v0.1.38` was pushed and peels to the release commit. No force-push or hook bypass was used.
+- `TEST-RELEASE-004` passing rerun: `pnpm --filter create-mono-stack publish:package` published successfully; npm metadata reports version `0.1.38` and `latest: 0.1.38`.
+- Release steps completed: version and fixture bump, validation, intended-file staging, commit, push, tag push, npm publication, remote verification, and final metadata verification.
