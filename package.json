@@ -8,6 +8,8 @@
   "scripts": {
     "build": "turbo build",
     "core:test": "node --test core/test/core-packages.test.js",
+    "db:up": "docker compose up -d postgres pgadmin",
+    "db:down": "docker compose stop postgres pgadmin",
     "dev": "node scripts/dev-ports.mjs && turbo dev --ui tui",
     "dev:reference": "node scripts/dev-ports.mjs && turbo dev:reference --ui tui",
     "e2e:web": "pnpm --filter playwright-tests test",

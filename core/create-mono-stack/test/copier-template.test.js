@@ -379,6 +379,21 @@ test("builds workspace dependencies before starting development", async () => {
   assert.match(gitignore, /^\.npmrc$/m);
 });
 
+test("TEST-DB-001 starts and stops only Postgres and pgAdmin", async () => {
+  const rootPackage = JSON.parse(
+    await readFile(join(root, "package.json"), "utf8")
+  );
+
+  assert.equal(
+    rootPackage.scripts["db:up"],
+    "docker compose up -d postgres pgadmin"
+  );
+  assert.equal(
+    rootPackage.scripts["db:down"],
+    "docker compose stop postgres pgadmin"
+  );
+});
+
 test("declares the latest Python runtime through mise", async () => {
   assert.equal(
     await readFile(join(root, "mise.toml"), "utf8"),
