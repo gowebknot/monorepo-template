@@ -1,11 +1,29 @@
 ---
 name: release-flow
-description: "Use when preparing a release, version change, changelog, release notes, migration, deprecation, package publication, or deployment handoff. Determine the complete code, contract, dependency, environment, database, security, and operational impact; preserve semantic versioning and repository release conventions; document user-visible effects and required actions; and verify the release artifact before publishing or handing it to deployment."
+description: "Use only in this template repository when preparing a release, version change, changelog, release notes, migration, deprecation, package publication, or deployment handoff. Determine the complete code, contract, dependency, environment, database, security, and operational impact; preserve semantic versioning and repository release conventions; document user-visible effects and required actions; and verify the release artifact before publishing or handing it to deployment. Do not use for generated application projects or unrelated repositories."
 ---
 
 # Release Flow
 
 Prepare releases as verified, explainable changes rather than as version-only edits.
+
+## Scope
+
+- Apply this skill only while working in this template repository.
+- Do not apply it to generated application projects or unrelated repositories.
+
+## Release Execution Order
+
+For an explicitly authorized release, follow this order:
+
+1. Bump the package or artifact version and update matching release metadata.
+2. Run the required validation, inspect the artifact, and commit the intended changes with hooks.
+3. Push the release commit to the tracked remote branch.
+4. Create a new annotated version tag at the release commit and push the tag.
+5. Publish the artifact through the repository-approved package or release wrapper.
+
+Do not publish before the release commit and its new tag have been pushed. Never bypass hooks or use
+force-pushes during this sequence.
 
 ## Impact Review
 
