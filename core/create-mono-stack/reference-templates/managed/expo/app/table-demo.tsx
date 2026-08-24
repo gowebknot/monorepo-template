@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
+import { useStore } from "@tanstack/react-form";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -15,7 +16,7 @@ import {
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { useAppForm } from "@/components/forms/form-core";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table";
 import { copyText } from "@/lib/clipboard";
@@ -92,6 +93,17 @@ export default function TableDemo() {
     initialState: { pagination: { pageSize: 2 } },
     state: { sorting, columnFilters, columnVisibility, rowSelection }
   });
+  const filterForm = useAppForm({
+    defaultValues: { email: "" },
+    onSubmit: async () => undefined
+  });
+  const emailFilter = useStore(
+    filterForm.store,
+    (state) => state.values.email
+  );
+  useEffect(() => {
+    table.getColumn("email")?.setFilterValue(emailFilter);
+  }, [emailFilter, table]);
 
   const visibleColumns = table.getVisibleLeafColumns();
 
@@ -101,13 +113,16 @@ export default function TableDemo() {
       contentContainerClassName="gap-4 p-4"
     >
       <View className="gap-3">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChangeText={(value) =>
-            table.getColumn("email")?.setFilterValue(value)
-          }
-        />
+        <filterForm.AppForm>
+          <filterForm.AppField name="email">
+            {(field) => (
+              <field.FormInput
+                placeholder="Filter emails..."
+                labelProps={{ children: "Filter emails" }}
+              />
+            )}
+          </filterForm.AppField>
+        </filterForm.AppForm>
         <View className="flex-row flex-wrap gap-3">
           {table
             .getAllColumns()

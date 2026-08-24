@@ -1,7 +1,6 @@
-import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useStore } from "@tanstack/react-form";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import {
   Table,
   TableBody,
@@ -39,7 +38,11 @@ function TodosPage() {
     }
   });
 
-  const [userId, setUserId] = React.useState("");
+  const filterForm = useAppForm({
+    defaultValues: { userId: "" },
+    onSubmit: async () => undefined
+  });
+  const userId = useStore(filterForm.store, (state) => state.values.userId);
 
   const { data: todos, isLoading } = useTodoListByUser(userId, apiOptions, {
     enabled: !!userId
@@ -90,11 +93,17 @@ function TodosPage() {
 
       <section className="mb-8">
         <h2 className="mb-2 text-xl font-semibold">Filter by User</h2>
-        <Input
-          placeholder="Enter a User ID to load todos"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-        />
+        <filterForm.AppForm>
+          <filterForm.AppField name="userId">
+            {(field) => (
+              <field.FormInput
+                placeholder="Enter a User ID to load todos"
+                labelProps={{ children: "User ID" }}
+                autoComplete="off"
+              />
+            )}
+          </filterForm.AppField>
+        </filterForm.AppForm>
       </section>
 
       <section>

@@ -1,7 +1,6 @@
-import React from "react";
+import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { Checkbox } from "../../components/ui/checkbox";
 import {
   Table,
@@ -44,8 +43,7 @@ function TodoDetailPage() {
   const updateItem = useUpdateTodoItemOptimistic(apiOptions);
   const removeItem = useRemoveTodoItemOptimistic(apiOptions);
 
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [editTitle, setEditTitle] = React.useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const itemForm = useAppForm({
     defaultValues: {
@@ -59,16 +57,19 @@ function TodoDetailPage() {
     }
   });
 
-  const startEditing = () => {
-    setEditTitle(todo?.title ?? "");
-    setIsEditing(true);
-  };
-
-  const saveTitle = () => {
-    if (editTitle.trim() && editTitle !== todo?.title) {
-      updateTodo.mutate({ id: todoId, input: { title: editTitle } });
+  const editForm = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async ({ value }) => {
+      if (value.title.trim() && value.title !== todo?.title) {
+        updateTodo.mutate({ id: todoId, input: { title: value.title } });
+      }
+      setIsEditing(false);
     }
-    setIsEditing(false);
+  });
+
+  const startEditing = () => {
+    editForm.reset({ title: todo?.title ?? "" });
+    setIsEditing(true);
   };
 
   const handleItemSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -98,28 +99,50 @@ function TodoDetailPage() {
         <h1 className="mb-2 text-3xl font-bold">
           {isEditing ? (
             <div className="flex items-center gap-2">
-              <Input
-                data-testid="web-todo-edit-input"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="max-w-md"
-                autoFocus
-              />
-              <Button
-                data-testid="web-todo-save-title"
-                size="sm"
-                onClick={saveTitle}
-              >
-                Save
-              </Button>
-              <Button
-                data-testid="web-todo-cancel-edit"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </Button>
+              <editForm.AppForm>
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    editForm.handleSubmit();
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <editForm.AppField name="title">
+                    {(field) => (
+                      <field.FormInput
+                        data-testid="web-todo-edit-input"
+                        className="max-w-md"
+                        autoFocus
+                        labelProps={{
+                          className: "sr-only",
+                          children: "Title",
+                          "data-testid": "web-todo-edit-label"
+                        }}
+                      />
+                    )}
+                  </editForm.AppField>
+                  <Button
+                    data-testid="web-todo-save-title"
+                    size="sm"
+                    type="submit"
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    data-testid="web-todo-cancel-edit"
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={() => {
+                      editForm.reset();
+                      setIsEditing(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </form>
+              </editForm.AppForm>
             </div>
           ) : (
             <span>

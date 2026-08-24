@@ -14,10 +14,10 @@ const backendFeatures = new Set(["api-nest", "api-express"]);
 
 function appSkills(feature) {
   if (frontendFeatures.has(feature)) {
-    return ["frontend-standards", "aspiron-source-architecture"];
+    return ["frontend-standards", "domain-driven-app-structure"];
   }
   if (backendFeatures.has(feature)) {
-    return ["backend-standards", "aspiron-source-architecture"];
+    return ["backend-standards", "domain-driven-app-structure"];
   }
   return [];
 }
@@ -51,7 +51,7 @@ export function synchronizeSkillTriggers(projectRoot, apps, dependencies = {}) {
     (rule) =>
       !rule.require?.includes("frontend-standards") &&
       !rule.require?.includes("backend-standards") &&
-      !rule.require?.includes("aspiron-source-architecture")
+      !rule.require?.includes("domain-driven-app-structure")
   );
 
   write(

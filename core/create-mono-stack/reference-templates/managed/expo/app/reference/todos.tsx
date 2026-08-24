@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useStore } from "@tanstack/react-form";
 import {
   useCreateTodoOptimistic,
   useRemoveTodoOptimistic,
@@ -10,7 +11,6 @@ import type { CreateTodoInput } from "@repo/entities/example";
 
 import { useAppForm } from "@/components/forms/form-core";
 import { Button, ButtonText } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Card } from "@/components/ui/card";
 import { clientEnv } from "@/lib/env";
@@ -21,7 +21,11 @@ export default function TodosPage() {
   const router = useRouter();
   const createTodo = useCreateTodoOptimistic(apiOptions);
   const removeTodo = useRemoveTodoOptimistic(apiOptions);
-  const [userId, setUserId] = useState("");
+  const filterForm = useAppForm({
+    defaultValues: { userId: "" },
+    onSubmit: async () => undefined
+  });
+  const userId = useStore(filterForm.store, (state) => state.values.userId);
   const {
     data: todos,
     isError,
@@ -81,12 +85,17 @@ export default function TodosPage() {
         <Text className="text-xl font-semibold text-foreground">
           Filter by User
         </Text>
-        <Input
-          placeholder="Enter a User ID to load todos"
-          autoCapitalize="none"
-          value={userId}
-          onChangeText={setUserId}
-        />
+        <filterForm.AppForm>
+          <filterForm.AppField name="userId">
+            {(field) => (
+              <field.FormInput
+                placeholder="Enter a User ID to load todos"
+                labelProps={{ children: "User ID" }}
+                autoCapitalize="none"
+              />
+            )}
+          </filterForm.AppField>
+        </filterForm.AppForm>
       </View>
 
       {isLoading && <Spinner />}

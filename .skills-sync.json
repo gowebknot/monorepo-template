@@ -1,9 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "aspiron-source-architecture": {
-      "hash": "47317ae12d074d38ffa35e2b204e4461a9cab8368c768c5a0958de34e35885c1"
-    },
     "backend-standards": {
       "hash": "48f65ed66e32be52811a0d5dab201e16b7d6f3889d8c06efda775dbc3a2a760c"
     },
@@ -11,7 +8,7 @@
       "hash": "4ab9f6f9e8763411b7c591a62f9d025a8a88aea54f9ec8049d2a6165b18974a1"
     },
     "code-quality": {
-      "hash": "2724b92b8242cf03a9356b9af2a1dacb699d0438bf30454bbf6afb759fe92bcb"
+      "hash": "c4de8abc95c97c2ca7bbbb20b86fbc13e19a609de65129b7d99493737876e7de"
     },
     "code-review": {
       "hash": "6d6b61887c5515964359afaef6a19c9a89817f001a97d61db241f4b6b753ca01"
@@ -24,6 +21,9 @@
     },
     "create-portable-skill": {
       "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"
+    },
+    "domain-driven-app-structure": {
+      "hash": "7db7a0b9be96d9bf147594f02c90a35595e9177d5deac012205e5cbb46a92098"
     },
     "e2e-regression-test-writer": {
       "hash": "d5337fa2517c8098c2acb78febc80c5f93765177f1ada76d059942e5af575dc2"

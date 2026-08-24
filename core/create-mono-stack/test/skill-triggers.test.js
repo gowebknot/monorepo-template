@@ -31,19 +31,19 @@ test("TEST-TRIGGER-001 builds rules for custom frontend and backend apps", () =>
   assert.deepEqual(rules, [
     {
       when: ["apps/admin-react/**"],
-      require: ["frontend-standards", "aspiron-source-architecture"]
+      require: ["frontend-standards", "domain-driven-app-structure"]
     },
     {
       when: ["apps/student-react/**"],
-      require: ["frontend-standards", "aspiron-source-architecture"]
+      require: ["frontend-standards", "domain-driven-app-structure"]
     },
     {
       when: ["apps/student-expo/**"],
-      require: ["frontend-standards", "aspiron-source-architecture"]
+      require: ["frontend-standards", "domain-driven-app-structure"]
     },
     {
       when: ["apps/api/**"],
-      require: ["backend-standards", "aspiron-source-architecture"]
+      require: ["backend-standards", "domain-driven-app-structure"]
     }
   ]);
 });
@@ -70,11 +70,11 @@ test("TEST-TRIGGER-002 updates app rules and preserves generic rules", async () 
     { when: ["**/*.tsx"], require: ["react-19"] },
     {
       when: ["apps/admin-react/**"],
-      require: ["frontend-standards", "aspiron-source-architecture"]
+      require: ["frontend-standards", "domain-driven-app-structure"]
     },
     {
       when: ["apps/student-expo/**"],
-      require: ["frontend-standards", "aspiron-source-architecture"]
+      require: ["frontend-standards", "domain-driven-app-structure"]
     }
   ]);
 
@@ -100,6 +100,6 @@ test("TEST-TRIGGER-002 updates app rules and preserves generic rules", async () 
     collectRequired(
       "apps/student-expo/app/index.tsx",
       customFrontendRules
-    ).includes("aspiron-source-architecture")
+    ).includes("domain-driven-app-structure")
   );
 });

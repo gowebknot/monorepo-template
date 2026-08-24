@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
+import { useStore } from "@tanstack/react-form";
 import {
   useCreateTodoOptimistic,
   useRemoveTodoOptimistic,
@@ -10,7 +10,6 @@ import {
 import type { CreateTodoInput } from "@repo/entities/example";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -38,7 +37,11 @@ export default function TodosPage() {
     }
   });
 
-  const [userId, setUserId] = React.useState("");
+  const filterForm = useAppForm({
+    defaultValues: { userId: "" },
+    onSubmit: async () => undefined
+  });
+  const userId = useStore(filterForm.store, (state) => state.values.userId);
 
   const { data: todos, isLoading } = useTodoListByUser(userId, apiOptions, {
     enabled: !!userId
@@ -100,12 +103,21 @@ export default function TodosPage() {
 
       <section className="mb-8">
         <h2 className="mb-2 text-xl font-semibold">Filter by User</h2>
-        <Input
-          data-testid="next-todo-user-filter"
-          placeholder="Enter a User ID to load todos"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-        />
+        <filterForm.AppForm>
+          <filterForm.AppField name="userId">
+            {(field) => (
+              <field.FormInput
+                data-testid="next-todo-user-filter"
+                placeholder="Enter a User ID to load todos"
+                labelProps={{
+                  children: "User ID",
+                  "data-testid": "next-todo-user-filter-label"
+                }}
+                autoComplete="off"
+              />
+            )}
+          </filterForm.AppField>
+        </filterForm.AppForm>
       </section>
 
       <section>

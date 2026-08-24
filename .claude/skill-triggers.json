@@ -20,11 +20,11 @@
     },
     {
       "when": ["apps/server/**"],
-      "require": ["backend-standards", "aspiron-source-architecture"]
+      "require": ["backend-standards", "domain-driven-app-structure"]
     },
     {
       "when": ["apps/web/**", "apps/next/**", "apps/expo/**", "apps/mobile/**"],
-      "require": ["frontend-standards", "aspiron-source-architecture"]
+      "require": ["frontend-standards", "domain-driven-app-structure"]
     },
     { "when": ["**/*.tsx", "**/*.jsx"], "require": ["react-19"] }
   ],

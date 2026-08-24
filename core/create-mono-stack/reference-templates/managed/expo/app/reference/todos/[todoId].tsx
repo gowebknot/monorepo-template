@@ -15,7 +15,6 @@ import { useAppForm } from "@/components/forms/form-core";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { clientEnv } from "@/lib/env";
@@ -45,7 +44,6 @@ export default function TodoDetailPage() {
   const updateItem = useUpdateTodoItemOptimistic(apiOptions);
   const removeItem = useRemoveTodoItemOptimistic(apiOptions);
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
   const itemForm = useAppForm({
     defaultValues: {
       todoId,
@@ -55,6 +53,15 @@ export default function TodoDetailPage() {
     onSubmit: async ({ value }) => {
       createItem.mutate(value);
       itemForm.reset({ todoId, title: "", completed: false });
+    }
+  });
+  const editForm = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async ({ value }) => {
+      if (value.title.trim() && value.title !== todo?.title) {
+        updateTodo.mutate({ id: todoId, input: { title: value.title } });
+      }
+      setIsEditing(false);
     }
   });
 
@@ -73,13 +80,6 @@ export default function TodoDetailPage() {
     );
   }
 
-  const saveTitle = () => {
-    if (editTitle.trim() && editTitle !== todo.title) {
-      updateTodo.mutate({ id: todoId, input: { title: editTitle } });
-    }
-    setIsEditing(false);
-  };
-
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -96,23 +96,35 @@ export default function TodoDetailPage() {
 
       <View className="gap-2">
         {isEditing ? (
-          <View className="gap-3">
-            <Input value={editTitle} onChangeText={setEditTitle} autoFocus />
-            <View className="flex-row gap-2">
-              <Button size="sm" onPress={saveTitle}>
-                <ButtonText>Save</ButtonText>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={() => setIsEditing(false)}
-              >
-                <ButtonText className="text-muted-foreground">
-                  Cancel
-                </ButtonText>
-              </Button>
+          <editForm.AppForm>
+            <View className="gap-3">
+              <editForm.AppField name="title">
+                {(field) => (
+                  <field.FormInput
+                    autoFocus
+                    labelProps={{ children: "Title" }}
+                  />
+                )}
+              </editForm.AppField>
+              <View className="flex-row gap-2">
+                <Button size="sm" onPress={() => editForm.handleSubmit()}>
+                  <ButtonText>Save</ButtonText>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onPress={() => {
+                    editForm.reset();
+                    setIsEditing(false);
+                  }}
+                >
+                  <ButtonText className="text-muted-foreground">
+                    Cancel
+                  </ButtonText>
+                </Button>
+              </View>
             </View>
-          </View>
+          </editForm.AppForm>
         ) : (
           <View className="flex-row items-center gap-2">
             <Text className="flex-1 text-3xl font-bold text-foreground">
@@ -122,7 +134,7 @@ export default function TodoDetailPage() {
               variant="ghost"
               size="sm"
               onPress={() => {
-                setEditTitle(todo.title);
+                editForm.reset({ title: todo.title });
                 setIsEditing(true);
               }}
             >

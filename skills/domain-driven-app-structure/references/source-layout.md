@@ -44,9 +44,20 @@ packages/
 ```
 
 - Put shared request/response contracts, inferred types, and shared domain types in `packages/entities`.
-- Put reusable UI primitives and form controls in `packages/ui`.
+- Put reusable UI primitives, form controls, icons, and icon wrappers in `packages/ui`.
 - Do not create `components/ui` or `components/forms` inside web or mobile apps.
 - Keep transport clients in `packages/api-client` and query hooks in `packages/tanstack-client`.
+
+Component placement follows ownership, not visual similarity:
+
+- Put a reusable component with no product-feature behavior, such as an icon, button, input, or
+  avatar, in `packages/ui`.
+- Put app-wide composition, such as an app shell, navigation, sidebar, or branded icon set that is
+  not intended for package reuse, in the app's top-level `components/` folder.
+- Put a component in `features/<feature>/components` only when its behavior or composition belongs
+  to that feature. Do not put global icons or generic UI primitives there.
+- When a feature-specific component wraps a shared primitive, keep the primitive in `packages/ui`
+  and the feature wrapper in the feature folder.
 
 ## Server Structure
 
@@ -200,8 +211,8 @@ apps/web/src/
     └── __tests__/
 ```
 
-`apps/web/src/components/` contains app-specific composition only. Shared UI and forms come from
-`packages/ui`.
+`apps/web/src/components/` contains app-wide composition only. Shared UI, forms, icons, and icon
+wrappers come from `packages/ui`; feature-specific composition belongs under `features/<feature>`.
 
 ## Mobile Structure
 
@@ -239,7 +250,8 @@ apps/mobile/
 
 - Keep router files focused on route composition and loading.
 - Keep feature components, schemas, and feature hooks inside `features/<feature>`.
-- Keep app-level components limited to composition such as layouts, navigation, and shells.
+- Keep app-level components limited to app-wide composition such as layouts, navigation, shells, and
+  app-specific branding.
 - Use platform-specific code only where web and native behavior genuinely differ.
 - Import shared UI and forms from `packages/ui`.
 

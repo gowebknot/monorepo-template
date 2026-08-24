@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
+import { useStore } from "@tanstack/react-form";
 import {
   flexRender,
   getCoreRowModel,
@@ -25,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "../components/ui/dropdown-menu";
-import { Input } from "../components/ui/input";
+import { useAppForm } from "../components/forms/form-core";
 import {
   Table,
   TableBody,
@@ -207,19 +208,34 @@ function TableDemo() {
       rowSelection
     }
   });
+  const filterForm = useAppForm({
+    defaultValues: { email: "" },
+    onSubmit: async () => undefined
+  });
+  const emailFilter = useStore(filterForm.store, (state) => state.values.email);
+  React.useEffect(() => {
+    table.getColumn("email")?.setFilterValue(emailFilter);
+  }, [emailFilter, table]);
 
   return (
     <div className="w-full p-4">
       <div className="flex items-center py-4">
-        <Input
-          data-testid="web-table-filter"
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+        <filterForm.AppForm>
+          <filterForm.AppField name="email">
+            {(field) => (
+              <field.FormInput
+                data-testid="web-table-filter"
+                placeholder="Filter emails..."
+                labelProps={{
+                  className: "sr-only",
+                  children: "Filter emails",
+                  "data-testid": "web-table-filter-label"
+                }}
+                className="max-w-sm"
+              />
+            )}
+          </filterForm.AppField>
+        </filterForm.AppForm>
         <DropdownMenu>
           <DropdownMenuTrigger data-testid="web-table-columns-trigger">
             <Button

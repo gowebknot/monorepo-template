@@ -112,3 +112,13 @@ Create a portable `aspiron-source-architecture` skill with concise triggering in
 - Initial broad Prettier check failed because the glob included required empty `.gitkeep` files with no parser.
 - Corrected Prettier check passed for all changed Markdown, JSON, and JavaScript files.
 - `pnpm --filter create-mono-stack test` passed all 264 launcher and generation tests.
+
+## Updates
+
+### 2026-08-24
+
+- **Reason:** The original guidance did not explicitly distinguish reusable/global icons from feature-specific components, and its Aspiron-specific name was not generic enough.
+- **Evidence:** The skill instructed agents to identify a feature before placing UI code and only generally referred to shared UI primitives.
+- **Impact:** Reusable icons could be incorrectly colocated under `features/<feature>/components`.
+- **Corrective action:** Rename the skill to `domain-driven-app-structure`, clarify component placement rules, and link the corrective checklist [here](./2026-08-24-domain-driven-app-structure-skill-correction.md).
+- **Validation:** The linked corrective checklist completed synchronization, placement scans, focused trigger tests, the full skills test suite, and formatting validation.
