@@ -13,14 +13,10 @@ import { useAppForm } from "@/components/forms/form-core";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Card } from "@/components/ui/card";
-import { clientEnv } from "@/lib/env";
-
-const apiOptions = { baseURL: clientEnv.EXPO_PUBLIC_API_BASE_URL };
-
 export default function TodosPage() {
   const router = useRouter();
-  const createTodo = useCreateTodoOptimistic(apiOptions);
-  const removeTodo = useRemoveTodoOptimistic(apiOptions);
+  const createTodo = useCreateTodoOptimistic();
+  const removeTodo = useRemoveTodoOptimistic();
   const filterForm = useAppForm({
     defaultValues: { userId: "" },
     onSubmit: async () => undefined
@@ -30,7 +26,7 @@ export default function TodosPage() {
     data: todos,
     isError,
     isLoading
-  } = useTodoListByUser(userId, apiOptions, { enabled: Boolean(userId) });
+  } = useTodoListByUser(userId, undefined, { enabled: Boolean(userId) });
   const createForm = useAppForm({
     defaultValues: { userId: "", title: "" } satisfies CreateTodoInput,
     onSubmit: async ({ value }) => {

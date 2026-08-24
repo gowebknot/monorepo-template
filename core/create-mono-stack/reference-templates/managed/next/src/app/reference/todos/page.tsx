@@ -19,12 +19,10 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { useAppForm } from "@/components/forms/form-core";
-import { clientEnv } from "@/lib/env";
 
 export default function TodosPage() {
-  const apiOptions = { baseURL: clientEnv.NEXT_PUBLIC_API_BASE_URL };
-  const createTodo = useCreateTodoOptimistic(apiOptions);
-  const removeTodo = useRemoveTodoOptimistic(apiOptions);
+  const createTodo = useCreateTodoOptimistic();
+  const removeTodo = useRemoveTodoOptimistic();
 
   const createForm = useAppForm({
     defaultValues: {
@@ -43,9 +41,11 @@ export default function TodosPage() {
   });
   const userId = useStore(filterForm.store, (state) => state.values.userId);
 
-  const { data: todos, isLoading } = useTodoListByUser(userId, apiOptions, {
-    enabled: !!userId
-  });
+  const { data: todos, isLoading } = useTodoListByUser(
+    userId,
+    undefined,
+    { enabled: !!userId }
+  );
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

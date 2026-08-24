@@ -17,10 +17,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { clientEnv } from "@/lib/env";
-
-const apiOptions = { baseURL: clientEnv.EXPO_PUBLIC_API_BASE_URL };
-
 export default function TodoDetailPage() {
   const router = useRouter();
   const params = useLocalSearchParams<{ todoId?: string | string[] }>();
@@ -29,20 +25,20 @@ export default function TodoDetailPage() {
     : (params.todoId ?? "");
   const { data: todo, isLoading: todoLoading } = useTodoDetail(
     todoId,
-    apiOptions,
+    undefined,
     {
       enabled: Boolean(todoId)
     }
   );
   const { data: items, isLoading: itemsLoading } = useTodoItemListByTodo(
     todoId,
-    apiOptions,
+    undefined,
     { enabled: Boolean(todoId) }
   );
-  const updateTodo = useUpdateTodoOptimistic(apiOptions);
-  const createItem = useCreateTodoItemOptimistic(apiOptions);
-  const updateItem = useUpdateTodoItemOptimistic(apiOptions);
-  const removeItem = useRemoveTodoItemOptimistic(apiOptions);
+  const updateTodo = useUpdateTodoOptimistic();
+  const createItem = useCreateTodoItemOptimistic();
+  const updateItem = useUpdateTodoItemOptimistic();
+  const removeItem = useRemoveTodoItemOptimistic();
   const [isEditing, setIsEditing] = useState(false);
   const itemForm = useAppForm({
     defaultValues: {

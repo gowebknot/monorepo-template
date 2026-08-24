@@ -1,6 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  ApiClientConfigProvider,
+  QueryClient,
+  QueryClientProvider
+} from "@repo/query-client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { createWebEnv } from "@repo/env/web";
 import { routeTree } from "./routeTree.gen";
@@ -26,7 +30,9 @@ export const runtimeEnv = createWebEnv(import.meta.env);
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ApiClientConfigProvider options={{ baseURL: runtimeEnv.WEB_PUBLIC_API_BASE_URL }}>
+        <RouterProvider router={router} />
+      </ApiClientConfigProvider>
     </QueryClientProvider>
   </StrictMode>
 );

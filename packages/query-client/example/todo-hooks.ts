@@ -9,6 +9,7 @@ import type { ServiceOptions } from "@repo/api-client";
 
 import { createCrudQueryHooks } from "@/create-crud-query-hooks";
 import { queryKeys } from "@/query-keys";
+import { useApiClientOptions } from "@/api-client-context";
 
 export const todoHooks = createCrudQueryHooks<
   Todo,
@@ -29,19 +30,22 @@ export function useTodoListByUser(
   serviceOptions?: ServiceOptions,
   options?: { enabled?: boolean }
 ) {
+  const resolvedOptions = useApiClientOptions(serviceOptions);
+
   return useQuery({
-    queryKey: queryKeys.todos.lists.byUser(userId, serviceOptions),
-    queryFn: () => todoApi.list(userId, serviceOptions),
+    queryKey: queryKeys.todos.lists.byUser(userId, resolvedOptions),
+    queryFn: () => todoApi.list(userId, resolvedOptions),
     enabled: !!userId && (options?.enabled ?? true)
   });
 }
 
 export function useCreateTodoOptimistic(serviceOptions?: ServiceOptions) {
   const queryClient = useQueryClient();
+  const resolvedOptions = useApiClientOptions(serviceOptions);
 
   return useMutation({
     mutationFn: (input: CreateTodoInput) =>
-      todoCrudApi.create(input, serviceOptions),
+      todoCrudApi.create(input, resolvedOptions),
     onMutate: async (newTodo) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.todos.lists.all()
@@ -79,22 +83,23 @@ export function useCreateTodoOptimistic(serviceOptions?: ServiceOptions) {
 
 export function useUpdateTodoOptimistic(serviceOptions?: ServiceOptions) {
   const queryClient = useQueryClient();
+  const resolvedOptions = useApiClientOptions(serviceOptions);
 
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateTodoInput }) =>
-      todoCrudApi.update(id, input, serviceOptions),
+      todoCrudApi.update(id, input, resolvedOptions),
     onMutate: async ({ id, input }) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.todos.all
       });
       const previousDetail = queryClient.getQueryData<Todo>(
-        queryKeys.todos.details.byId(id, serviceOptions)
+        queryKeys.todos.details.byId(id, resolvedOptions)
       );
       const previousLists = queryClient.getQueriesData<Todo[]>({
         queryKey: queryKeys.todos.lists.all()
       });
       queryClient.setQueryData(
-        queryKeys.todos.details.byId(id, serviceOptions),
+        queryKeys.todos.details.byId(id, resolvedOptions),
         (old: Todo | undefined) =>
           old ? { ...old, ...input, updatedAt: new Date().toISOString() } : old
       );
@@ -112,7 +117,7 @@ export function useUpdateTodoOptimistic(serviceOptions?: ServiceOptions) {
     onError: (_err, _vars, context) => {
       if (context?.previousDetail) {
         queryClient.setQueryData(
-          queryKeys.todos.details.byId(_vars.id, serviceOptions),
+          queryKeys.todos.details.byId(_vars.id, resolvedOptions),
           context.previousDetail
         );
       }
@@ -132,15 +137,16 @@ export function useUpdateTodoOptimistic(serviceOptions?: ServiceOptions) {
 
 export function useRemoveTodoOptimistic(serviceOptions?: ServiceOptions) {
   const queryClient = useQueryClient();
+  const resolvedOptions = useApiClientOptions(serviceOptions);
 
   return useMutation({
-    mutationFn: (id: string) => todoCrudApi.remove(id, serviceOptions),
+    mutationFn: (id: string) => todoCrudApi.remove(id, resolvedOptions),
     onMutate: async (id) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.todos.all
       });
       const previousDetail = queryClient.getQueryData<Todo>(
-        queryKeys.todos.details.byId(id, serviceOptions)
+        queryKeys.todos.details.byId(id, resolvedOptions)
       );
       const previousLists = queryClient.getQueriesData<Todo[]>({
         queryKey: queryKeys.todos.lists.all()
@@ -157,7 +163,7 @@ export function useRemoveTodoOptimistic(serviceOptions?: ServiceOptions) {
     onError: (_err, _vars, context) => {
       if (context?.previousDetail) {
         queryClient.setQueryData(
-          queryKeys.todos.details.byId(_vars, serviceOptions),
+          queryKeys.todos.details.byId(_vars, resolvedOptions),
           context.previousDetail
         );
       }

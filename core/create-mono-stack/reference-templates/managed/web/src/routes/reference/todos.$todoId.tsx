@@ -20,7 +20,6 @@ import {
   useRemoveTodoItemOptimistic
 } from "@repo/query-client/example";
 import type { CreateTodoItemInput } from "@repo/entities/example";
-import { clientEnv } from "../../lib/env";
 
 export const Route = createFileRoute("/reference/todos/$todoId")({
   component: TodoDetailPage
@@ -28,20 +27,14 @@ export const Route = createFileRoute("/reference/todos/$todoId")({
 
 function TodoDetailPage() {
   const { todoId } = useParams({ from: "/reference/todos/$todoId" });
-  const apiOptions = { baseURL: clientEnv.WEB_PUBLIC_API_BASE_URL };
-
-  const { data: todo, isLoading: todoLoading } = useTodoDetail(
-    todoId,
-    apiOptions
-  );
-  const updateTodo = useUpdateTodoOptimistic(apiOptions);
+  const { data: todo, isLoading: todoLoading } = useTodoDetail(todoId);
+  const updateTodo = useUpdateTodoOptimistic();
   const { data: items, isLoading: itemsLoading } = useTodoItemListByTodo(
-    todoId,
-    apiOptions
+    todoId
   );
-  const createItem = useCreateTodoItemOptimistic(apiOptions);
-  const updateItem = useUpdateTodoItemOptimistic(apiOptions);
-  const removeItem = useRemoveTodoItemOptimistic(apiOptions);
+  const createItem = useCreateTodoItemOptimistic();
+  const updateItem = useUpdateTodoItemOptimistic();
+  const removeItem = useRemoveTodoItemOptimistic();
 
   const [isEditing, setIsEditing] = useState(false);
 

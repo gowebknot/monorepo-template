@@ -12,6 +12,7 @@
 - Always import API types from `@repo/entities`; create them in `@repo/entities` if they do not exist. Reference/example code imports from `@repo/entities/example`. Do not make this package depend on `zod` directly.
 - Keep peer dependencies external in `vite.config.ts` so they are not bundled into this package output.
 - Do not read `process.env` directly in this package. Pass runtime configuration, such as `baseURL`, into `createApiClient` from the consuming app.
+- In TanStack Query applications, configure the generic `ServiceOptions` at the query-client provider boundary; keep inline options for intentional alternate API targets.
 - Keep domain-specific routes and Zod contracts outside this package unless intentionally adapting the template into a real project.
 - Product-level API services (e.g., `healthApi`, `rootApi`) live in `src/` and are exported from `src/index.ts`.
 - Domain-specific reference code (concrete resource paths, per-resource API call functions) lives under `example/` and is exposed via the `@repo/api-client/example` subpath. It exists purely to show how `src/`'s generic helpers (`getClient`, `buildPath`, `createResourcePaths`, `createCrudService`) are meant to be used for a concrete resource.

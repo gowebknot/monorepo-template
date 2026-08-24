@@ -18,4 +18,11 @@ Apply the API flow as a required dependency chain:
 7. Use the API client directly from a consumer only when TanStack Query cannot represent the behavior. First verify that an appropriate query, mutation, infinite query, or mutation lifecycle cannot model it; then document the exact limitation and rationale in the change summary.
 8. Verify that no layer was skipped, package dependencies point only down the chain, public barrels expose the new operation, and the consumer uses the intended hook. Run focused checks for each changed package in dependency order, followed by the relevant application checks.
 
+## Shared API Configuration
+
+- Configure the generic API target once at the application provider boundary with the query client's `ApiClientConfigProvider` and an `options: ServiceOptions` prop.
+- Let TanStack query hooks inherit the provider's `ServiceOptions`; consumers must not repeat the generic `baseURL` on every hook call.
+- Pass inline `ServiceOptions` only when an operation intentionally targets a different API or needs a local transport override. Inline values take precedence over provider values, and inline headers merge over provider headers.
+- Keep the provider and option-resolution logic in `@repo/query-client`; keep Axios setup and HTTP transport in `@repo/api-client`.
+
 For review, debugging, or tracing work, walk the same chain in both directions: start at the observed consumer behavior, locate the first broken contract or boundary, and report the concrete layer and file that must change.

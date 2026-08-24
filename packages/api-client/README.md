@@ -12,6 +12,21 @@ pnpm add axios
 
 ## Usage
 
+TanStack Query applications should configure the shared API target once at their provider boundary:
+
+```tsx
+<ApiClientConfigProvider options={{ baseURL: clientEnv.PUBLIC_API_BASE_URL }}>
+  {children}
+</ApiClientConfigProvider>
+```
+
+Query hooks inherit these `ServiceOptions`. Pass inline options only when a specific operation must
+use another API target:
+
+```ts
+useTodoDetail(todoId, { baseURL: "https://alternate-api.example.com" });
+```
+
 ```ts
 import { createCrudService } from "@repo/api-client";
 import type { User, UserCreate, UserUpdate } from "@repo/entities";

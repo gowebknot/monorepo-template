@@ -42,6 +42,9 @@ Location: `packages/query-client/src/`
 
 The query client must not construct API URLs or duplicate API-client service logic.
 
+- Configure the app-wide API target at the consumer's provider boundary with `ApiClientConfigProvider`, passing the existing `ServiceOptions` object.
+- Resolve provider options by default in hooks. A hook may receive inline `ServiceOptions` when it intentionally targets another API; inline values override the provider for that operation.
+
 ## 5. Consumer
 
 Location: a frontend app or another package consuming the feature

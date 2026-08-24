@@ -11,6 +11,7 @@
 - Concrete hooks must consume services exported from `@repo/api-client` (or its `/example` subpath); do not build API services inside `query-client`.
 - Keep domain-specific illustrative hooks in `example/` and expose them via the `@repo/query-client/example` subpath.
 - Do not read `process.env` directly in this package. Runtime configuration such as `baseURL` is passed via `ServiceOptions`.
+- Expose `ApiClientConfigProvider` for app-wide `ServiceOptions`; hooks inherit its options and accept inline options only for intentional per-operation overrides.
 - Keep runtime-only peer dependencies (`react`, `@tanstack/react-query`) external in `vite.config.ts`.
 - Import API types from `@repo/entities`; do not define contract types here.
 

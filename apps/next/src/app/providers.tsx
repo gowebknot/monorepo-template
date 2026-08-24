@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { QueryClient, QueryClientProvider } from "@repo/query-client/example";
+import {
+  ApiClientConfigProvider,
+  QueryClient,
+  QueryClientProvider
+} from "@repo/query-client/example";
+
+import { clientEnv } from "@/lib/env";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(
@@ -15,6 +21,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <ApiClientConfigProvider
+        options={{ baseURL: clientEnv.NEXT_PUBLIC_API_BASE_URL }}
+      >
+        {children}
+      </ApiClientConfigProvider>
+    </QueryClientProvider>
   );
 }

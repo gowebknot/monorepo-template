@@ -5,6 +5,8 @@ import {
   type UseQueryOptions
 } from "@tanstack/react-query";
 
+import { useApiClientOptions } from "@/api-client-context";
+
 export interface QueryHookOptions<TData> {
   queryKey: QueryKey;
   queryFn: (options?: ServiceOptions) => Promise<TData>;
@@ -18,9 +20,11 @@ export function createQueryHook<TData>(
     serviceOptions?: ServiceOptions,
     options?: Omit<UseQueryOptions<TData, Error, TData>, "queryKey" | "queryFn">
   ) {
+    const resolvedOptions = useApiClientOptions(serviceOptions);
+
     return useQuery({
-      queryKey: [resourceKey, serviceOptions],
-      queryFn: () => queryFn(serviceOptions),
+      queryKey: [resourceKey, resolvedOptions],
+      queryFn: () => queryFn(resolvedOptions),
       ...options
     });
   };

@@ -24,24 +24,16 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { useAppForm } from "@/components/forms/form-core";
-import { clientEnv } from "@/lib/env";
 
 export default function TodoDetailPage() {
   const { todoId } = useParams<{ todoId: string }>();
-  const apiOptions = { baseURL: clientEnv.NEXT_PUBLIC_API_BASE_URL };
-
-  const { data: todo, isLoading: todoLoading } = useTodoDetail(
-    todoId,
-    apiOptions
-  );
-  const updateTodo = useUpdateTodoOptimistic(apiOptions);
-  const { data: items, isLoading: itemsLoading } = useTodoItemListByTodo(
-    todoId,
-    apiOptions
-  );
-  const createItem = useCreateTodoItemOptimistic(apiOptions);
-  const updateItem = useUpdateTodoItemOptimistic(apiOptions);
-  const removeItem = useRemoveTodoItemOptimistic(apiOptions);
+  const { data: todo, isLoading: todoLoading } = useTodoDetail(todoId);
+  const updateTodo = useUpdateTodoOptimistic();
+  const { data: items, isLoading: itemsLoading } =
+    useTodoItemListByTodo(todoId);
+  const createItem = useCreateTodoItemOptimistic();
+  const updateItem = useUpdateTodoItemOptimistic();
+  const removeItem = useRemoveTodoItemOptimistic();
 
   const [isEditing, setIsEditing] = useState(false);
 

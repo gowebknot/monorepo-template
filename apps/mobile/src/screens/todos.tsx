@@ -13,15 +13,12 @@ import { useAppForm } from "@/components/forms/form-core";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { clientEnv } from "@/lib/env";
 import type { RootStackParamList } from "@/navigation";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Todos">;
-const apiOptions = { baseURL: clientEnv.RN_PUBLIC_API_BASE_URL };
-
 export function TodosScreen({ navigation }: Props) {
-  const createTodo = useCreateTodoOptimistic(apiOptions);
-  const removeTodo = useRemoveTodoOptimistic(apiOptions);
+  const createTodo = useCreateTodoOptimistic();
+  const removeTodo = useRemoveTodoOptimistic();
   const filterForm = useAppForm({
     defaultValues: { userId: "" },
     onSubmit: async () => undefined
@@ -31,7 +28,7 @@ export function TodosScreen({ navigation }: Props) {
     data: todos,
     isError,
     isLoading
-  } = useTodoListByUser(userId, apiOptions, {
+  } = useTodoListByUser(userId, undefined, {
     enabled: Boolean(userId)
   });
   const createForm = useAppForm({

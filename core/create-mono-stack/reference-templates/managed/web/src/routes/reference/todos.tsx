@@ -16,16 +16,14 @@ import {
   useRemoveTodoOptimistic
 } from "@repo/query-client/example";
 import type { CreateTodoInput } from "@repo/entities/example";
-import { clientEnv } from "../../lib/env";
 
 export const Route = createFileRoute("/reference/todos")({
   component: TodosPage
 });
 
 function TodosPage() {
-  const apiOptions = { baseURL: clientEnv.WEB_PUBLIC_API_BASE_URL };
-  const createTodo = useCreateTodoOptimistic(apiOptions);
-  const removeTodo = useRemoveTodoOptimistic(apiOptions);
+  const createTodo = useCreateTodoOptimistic();
+  const removeTodo = useRemoveTodoOptimistic();
 
   const createForm = useAppForm({
     defaultValues: {
@@ -44,9 +42,11 @@ function TodosPage() {
   });
   const userId = useStore(filterForm.store, (state) => state.values.userId);
 
-  const { data: todos, isLoading } = useTodoListByUser(userId, apiOptions, {
-    enabled: !!userId
-  });
+  const { data: todos, isLoading } = useTodoListByUser(
+    userId,
+    undefined,
+    { enabled: !!userId }
+  );
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
