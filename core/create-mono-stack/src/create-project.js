@@ -39,6 +39,7 @@ import {
 } from "./native-scaffold.js";
 import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
 import { syncSkillTriggers } from "./skill-triggers.js";
+import { promptForSetup } from "./setup-prompt.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
@@ -532,6 +533,24 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
   }
   const setupProject = dependencies.createProject ?? createProject;
   const generatedStack = await setupProject(options);
+  const canPromptForSetup = input.isTTY && output.isTTY;
+  let setupCompleted = false;
+  if (canPromptForSetup) {
+    const prompt = dependencies.promptForSetup ?? promptForSetup;
+    const approved = await prompt({ input, output });
+    if (approved) {
+      try {
+        await (dependencies.runCommand ?? runCommand)("just", ["setup"], {
+          cwd: options.destination
+        });
+        setupCompleted = true;
+      } catch (error) {
+        log(
+          `Automated setup failed: ${error.message}\n\nRun it again after fixing the issue:\n  cd ${options.destination}\n  just setup`
+        );
+      }
+    }
+  }
   const unsupportedViteApps = generatedStack?.apps?.filter(
     (app) => app.generator === "vite" && app.referenceProfile === null
   );
@@ -543,6 +562,7 @@ export async function main(args = process.argv.slice(2), dependencies = {}) {
         )
         .join("\n")}`
     : "";
+  const nextStep = setupCompleted ? "pnpm dev" : "just setup";
   log(
     `Project setup complete. Native app scaffolding, dependencies, and Git initialization finished.${referenceNotice}
 
@@ -551,7 +571,7 @@ What's next:
   pnpm install
   git add .
   git commit -m "chore: initialize project"
-  pnpm dev
+  ${nextStep}
 
 Git is initialized on main; create the initial commit before template updates.`
   );

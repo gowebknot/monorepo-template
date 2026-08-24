@@ -39,8 +39,9 @@ example/crud/
 
 - Implementation files may use absolute `@/...` imports.
 - Barrel files (`src/index.ts`, `example/index.ts`, `example/schema/index.ts`, `example/crud/index.ts`) use relative exports **with explicit `.js` extensions** (e.g. `export * from "./db.js"`), even though the source files are `.ts`. This is required: the package is built with `vite.config.ts`'s multi-entry lib mode (`index` + `example`), and NodeNext-mode consumers (e.g. `apps/server`, which uses `moduleResolution: "nodenext"`) cannot resolve extensionless relative specifiers inside a consumed `.d.ts` — they silently drop the exports instead of erroring. Any new barrel file added here must follow the same `.js`-extension convention.
-- Keep runtime-only packages external in `vite.config.ts` (`better-sqlite3`, `drizzle-orm`, `drizzle-orm/better-sqlite3`, `drizzle-orm/sqlite-core`, `@monorepo-template/env/server`).
+- Keep runtime-only packages external in `vite.config.ts` (`better-sqlite3`, `drizzle-orm`, `drizzle-orm/better-sqlite3`, `drizzle-orm/node-postgres`, `drizzle-orm/sqlite-core`, `pg`, `@monorepo-template/env/server`).
 - Read database configuration from `@monorepo-template/env/server`; never read `process.env` directly in this package.
+- `src/postgres.ts` is the production Postgres helper. The `example/` entry point remains SQLite-only for reference applications.
 - Use the global `crypto.randomUUID()` (no import needed) instead of `import { randomUUID } from "node:crypto"` in example code — Vite's library build externalizes `node:crypto` with a browser-compat interop shim that breaks `randomUUID` at runtime when required from a CommonJS consumer.
 
 ## Exports

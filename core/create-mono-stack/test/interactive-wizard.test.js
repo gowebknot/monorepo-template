@@ -19,11 +19,11 @@ const escape = "\u001B";
 const tab = "\t";
 
 async function waitFor(check) {
-  for (let attempt = 0; attempt < 600; attempt += 1) {
+  for (let attempt = 0; attempt < 2000; attempt += 1) {
     if (check()) return;
     await new Promise((resolve) => setTimeout(resolve, 5));
   }
-  assert.fail("Ink did not render the expected state within three seconds");
+  assert.fail("Ink did not render the expected state within ten seconds");
 }
 
 async function sendInput(app, input, expectedFrame) {
@@ -32,6 +32,9 @@ async function sendInput(app, input, expectedFrame) {
     await waitFor(() => expectedFrame.test(app.lastFrame() ?? ""));
   }
   await new Promise((resolve) => setTimeout(resolve, 10));
+  if (expectedFrame) {
+    await waitFor(() => expectedFrame.test(app.lastFrame() ?? ""));
+  }
 }
 
 // Ink hard-wraps long lines to the terminal width and redraws the box

@@ -20,7 +20,9 @@ export default defineConfig({
         "better-sqlite3",
         "drizzle-orm",
         "drizzle-orm/better-sqlite3",
-        "drizzle-orm/sqlite-core"
+        "drizzle-orm/node-postgres",
+        "drizzle-orm/sqlite-core",
+        "pg"
       ]
     }
   },

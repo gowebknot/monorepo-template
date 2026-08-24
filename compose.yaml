@@ -1,0 +1,255 @@
+name: ${COMPOSE_PROJECT_NAME:-monorepo-template}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.test}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "127.0.0.1:${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  act:
+    image: golang:1.24-alpine
+    restart: unless-stopped
+    working_dir: /workspace
+    command:
+      - sh
+      - -c
+      - apk add --no-cache git && go install github.com/nektos/act@${ACT_VERSION:-v0.2.89} && tail -f /dev/null
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  qemu:
+    image: qemux/qemu
+    restart: unless-stopped
+    environment:
+      BOOT: ${QEMU_BOOT:-mint}
+    devices:
+      - /dev/kvm:/dev/kvm
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "127.0.0.1:${QEMU_PORT:-8006}:8006"
+    volumes:
+      - qemu-data:/storage
+
+  open-design:
+    image: ${OPEN_DESIGN_IMAGE:-ghcr.io/nexu-io/od:latest}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      OD_BIND_HOST: 0.0.0.0
+      OD_PORT: 7456
+      OD_WEB_PORT: 7456
+      OD_ALLOWED_ORIGINS: ${OPEN_DESIGN_ALLOWED_ORIGINS:-http://127.0.0.1:7456}
+      OD_API_TOKEN: ${OD_API_TOKEN:-change-me}
+    ports:
+      - "127.0.0.1:${OPEN_DESIGN_PORT:-7456}:7456"
+    volumes:
+      - open-design-data:/app/.od
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:7456/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  op-db:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openpanel
+      POSTGRES_USER: ${OPENPANEL_POSTGRES_USER:-openpanel}
+      POSTGRES_PASSWORD: ${OPENPANEL_POSTGRES_PASSWORD:-openpanel}
+    volumes:
+      - openpanel-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  op-kv:
+    image: redis:7.2.5-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - openpanel-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  op-ch:
+    image: clickhouse/clickhouse-server:25.10.2.65
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: openpanel
+      CLICKHOUSE_SKIP_USER_SETUP: "1"
+    volumes:
+      - openpanel-clickhouse-data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  op-rp:
+    image: redpandadata/redpanda:v25.1.4
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://op-rp:9092,external://localhost:19092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=op-rp:33145
+      - --smp=1
+      - --memory=1G
+      - --mode=dev-container
+      - --default-log-level=info
+    volumes:
+      - openpanel-redpanda-data:/var/lib/redpanda/data
+    ports:
+      - "127.0.0.1:${OPENPANEL_REDPANDA_PORT:-19092}:19092"
+      - "127.0.0.1:${OPENPANEL_REDPANDA_ADMIN_PORT:-9644}:9644"
+
+  op-rp-console:
+    image: redpandadata/console:v3.7.2
+    restart: unless-stopped
+    depends_on:
+      - op-rp
+    environment:
+      KAFKA_BROKERS: op-rp:9092
+      REDPANDA_ADMINAPI_ENABLED: "true"
+      REDPANDA_ADMINAPI_URLS: http://op-rp:9644
+    ports:
+      - "127.0.0.1:${OPENPANEL_REDPANDA_CONSOLE_PORT:-8091}:8080"
+
+  op-api:
+    image: lindesvard/openpanel-api:2
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      op-db:
+        condition: service_healthy
+      op-ch:
+        condition: service_healthy
+      op-kv:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${OPENPANEL_POSTGRES_USER:-openpanel}:${OPENPANEL_POSTGRES_PASSWORD:-openpanel}@op-db:5432/openpanel?schema=public
+      DATABASE_URL_DIRECT: postgresql://${OPENPANEL_POSTGRES_USER:-openpanel}:${OPENPANEL_POSTGRES_PASSWORD:-openpanel}@op-db:5432/openpanel?schema=public
+      REDIS_URL: redis://op-kv:6379
+      CLICKHOUSE_URL: http://op-ch:8123/openpanel
+      ENCRYPTION_KEY: ${OPENPANEL_ENCRYPTION_KEY:-change-me}
+      API_PORT: 3000
+      REDPANDA_BROKERS: ${OPENPANEL_REDPANDA_BROKERS:-op-rp:9092}
+    ports:
+      - "127.0.0.1:${OPENPANEL_API_PORT:-3333}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/healthcheck || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  op-dashboard:
+    image: lindesvard/openpanel-dashboard:2
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      op-api:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: ${OPENPANEL_PUBLIC_API_URL:-http://127.0.0.1:3333}
+    ports:
+      - "127.0.0.1:${OPENPANEL_DASHBOARD_PORT:-3002}:3000"
+
+  op-worker:
+    image: lindesvard/openpanel-worker:2
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      op-api:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${OPENPANEL_POSTGRES_USER:-openpanel}:${OPENPANEL_POSTGRES_PASSWORD:-openpanel}@op-db:5432/openpanel?schema=public
+      REDIS_URL: redis://op-kv:6379
+      CLICKHOUSE_URL: http://op-ch:8123/openpanel
+      ENCRYPTION_KEY: ${OPENPANEL_ENCRYPTION_KEY:-change-me}
+      REDPANDA_BROKERS: ${OPENPANEL_REDPANDA_BROKERS:-op-rp:9092}
+
+volumes:
+  postgres-data:
+  redis-data:
+  pgadmin-data:
+  qemu-data:
+  open-design-data:
+  openpanel-postgres-data:
+  openpanel-redis-data:
+  openpanel-clickhouse-data:
+  openpanel-redpanda-data:

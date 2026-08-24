@@ -158,9 +158,14 @@ Or with Just:
 
 ```sh
 just install
+just setup
 just check
 just package-create billing
 ```
+
+`just setup` installs the frozen workspace lockfile, starts the Docker Compose services, and builds
+the workspace. The project creator asks whether to run this recipe automatically after generation;
+declining leaves the same command as the next step.
 
 ## Creating packages
 
@@ -224,6 +229,25 @@ The package root exports `globalEnv`, picked validators (`webEnvSchema`, `webSer
 `packages/db/example/schema/`; exported `src/` code stays connection-only.
 
 Database configuration is read through `@monorepo-template/env/server`, not directly from `process.env`.
+
+## Container services
+
+Generated projects include `compose.yaml` for local infrastructure. Start the containerized services
+with:
+
+```sh
+cp .env.example .env
+docker compose up -d
+```
+
+The generated application uses the `postgres` and `redis` Compose services. pgAdmin is available at
+`http://127.0.0.1:5050`. OpenDesign is available at `http://127.0.0.1:7456`, and OpenPanel's
+dashboard is available at `http://127.0.0.1:3002`.
+
+Service data is stored in Docker-managed named volumes. Act mounts the Docker socket because it
+launches workflow containers. QEMU requires `/dev/kvm` and `/dev/net/tun`, so it requires a Linux
+Docker host with KVM support; Docker Desktop on macOS may not expose those devices. The generated
+application itself is not containerized yet; the project Dockerfile is planned separately.
 
 ## Portable agent skills
 

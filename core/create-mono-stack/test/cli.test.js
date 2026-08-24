@@ -112,7 +112,7 @@ test("TEST-MANAGE-001 routes manage to the project management prompt", async () 
     );
     await writeFile(
       join(projectRoot, ".copier-answers.yml"),
-      "_commit: v0.1.39\n"
+      "_commit: v0.1.40\n"
     );
     const input = { isTTY: true };
     const output = { isTTY: true };
@@ -191,6 +191,7 @@ test("opens the project wizard when no arguments are passed in a TTY", async () 
     input,
     log: (message) => messages.push(message),
     output,
+    promptForSetup: async () => false,
     promptForProjectArguments: async (streams) => {
       assert.deepEqual(streams, { input, output });
       return ["--name=Acme Platform", "--", "acme-platform"];
@@ -213,7 +214,7 @@ What's next:
   pnpm install
   git add .
   git commit -m "chore: initialize project"
-  pnpm dev
+  just setup
 
 Git is initialized on main; create the initial commit before template updates.`
   ]);
@@ -270,12 +271,80 @@ test("keeps explicit CLI arguments non-interactive", async () => {
     input: { isTTY: true },
     log: () => {},
     output: { isTTY: true },
+    promptForSetup: async () => false,
     promptForProjectArguments: async () =>
       assert.fail("Explicit arguments must bypass the wizard")
   });
 
   assert.equal(createdOptions.destination, "/workspace/acme-platform");
   assert.equal(createdOptions.projectName, "Acme Platform");
+});
+
+test("TEST-SETUP-002 runs approved automated setup in the generated project", async () => {
+  const commands = [];
+  const messages = [];
+
+  await main(["acme-platform"], {
+    createProject: async () => ({ apps: [] }),
+    cwd: "/workspace",
+    input: { isTTY: true },
+    log: (message) => messages.push(message),
+    output: { isTTY: true },
+    promptForSetup: async () => true,
+    runCommand: async (command, args, options) =>
+      commands.push({ args, command, options })
+  });
+
+  assert.deepEqual(commands, [
+    {
+      args: ["setup"],
+      command: "just",
+      options: { cwd: "/workspace/acme-platform" }
+    }
+  ]);
+  assert.match(messages.at(-1), / {2}pnpm dev/);
+});
+
+test("TEST-SETUP-003 prints the manual setup step when declined", async () => {
+  const commands = [];
+  const messages = [];
+
+  await main(["acme-platform"], {
+    createProject: async () => ({ apps: [] }),
+    cwd: "/workspace",
+    input: { isTTY: true },
+    log: (message) => messages.push(message),
+    output: { isTTY: true },
+    promptForSetup: async () => false,
+    runCommand: async (...args) => commands.push(args)
+  });
+
+  assert.deepEqual(commands, []);
+  assert.match(
+    messages.at(-1),
+    /cd \/workspace\/acme-platform[\s\S]*just setup/
+  );
+});
+
+test("TEST-SETUP-004 keeps non-interactive creation manual", async () => {
+  const commands = [];
+  const messages = [];
+
+  await main(["acme-platform"], {
+    createProject: async () => ({ apps: [] }),
+    cwd: "/workspace",
+    input: { isTTY: false },
+    log: (message) => messages.push(message),
+    output: { isTTY: false },
+    promptForSetup: async () => assert.fail("must not prompt without a TTY"),
+    runCommand: async (...args) => commands.push(args)
+  });
+
+  assert.deepEqual(commands, []);
+  assert.match(
+    messages.at(-1),
+    /cd \/workspace\/acme-platform[\s\S]*just setup/
+  );
 });
 
 test("creates a project through isolated pinned Copier environments", async () => {

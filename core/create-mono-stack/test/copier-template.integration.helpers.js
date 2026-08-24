@@ -69,11 +69,11 @@ export async function assertGeneratedProject({
     "workspace:^"
   );
   assert.equal(serverPackage.version, "1.0.0");
-  assert.equal(serverPackage.scripts.test, "vitest run");
   assert.equal(
-    serverPackage.scripts["test:e2e"],
-    "vitest run --config ./vitest.e2e.config.ts"
+    serverPackage.scripts.test,
+    "pnpm test:unit && pnpm test:api:e2e"
   );
+  assert.equal(serverPackage.scripts["test:e2e"], "pnpm test:api:e2e");
   assert.equal(serverPackage.devDependencies.jest, undefined);
   assert.equal(serverPackage.devDependencies["ts-jest"], undefined);
   assert.equal(serverPackage.jest, undefined);
@@ -118,6 +118,15 @@ export async function assertGeneratedProject({
   assert.equal(
     await readFile(join(projectRoot, "mise.toml"), "utf8"),
     await readFile(join(templateRoot, "mise.toml"), "utf8")
+  );
+  await access(join(projectRoot, "compose.yaml"));
+  assert.match(
+    await readFile(join(projectRoot, "compose.yaml"), "utf8"),
+    /postgres:\n[\s\S]*redis:\n[\s\S]*open-design:/
+  );
+  assert.match(
+    await readFile(join(projectRoot, "Justfile"), "utf8"),
+    /setup:\n {4}pnpm install --frozen-lockfile\n {4}docker compose up -d\n {4}pnpm build/
   );
 
   const generatedReadme = await readFile(

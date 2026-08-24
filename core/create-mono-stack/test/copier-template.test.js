@@ -19,7 +19,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const templateAdapters = new Map([
   [
     ".env.example",
-    "# Local development environment. Copying this file to .env is handled by create-mono-stack.\nNODE_ENV=development\nWEB_PUBLIC_APP_URL=http://localhost:5173\nWEB_PUBLIC_API_BASE_URL=http://localhost:3001\nNEXT_PUBLIC_APP_URL=http://localhost:3000\nNEXT_PUBLIC_API_BASE_URL=http://localhost:3001\nEXPO_PUBLIC_APP_URL=http://localhost:8081\nEXPO_PUBLIC_API_BASE_URL=http://localhost:3001\nRN_PUBLIC_APP_URL=http://localhost:8081\nRN_PUBLIC_API_BASE_URL=http://localhost:3001\nDATABASE_URL=./local.db\nPORT=3000\nALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000\nREFERENCE_PORT=3001\nREFERENCE_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000\n"
+    "# Local development environment. Copying this file to .env is handled by create-mono-stack.\nNODE_ENV=development\nWEB_PUBLIC_APP_URL=http://localhost:5173\nWEB_PUBLIC_API_BASE_URL=http://localhost:3001\nNEXT_PUBLIC_APP_URL=http://localhost:3000\nNEXT_PUBLIC_API_BASE_URL=http://localhost:3001\nEXPO_PUBLIC_APP_URL=http://localhost:8081\nEXPO_PUBLIC_API_BASE_URL=http://localhost:3001\nRN_PUBLIC_APP_URL=http://localhost:8081\nRN_PUBLIC_API_BASE_URL=http://localhost:3001\nDATABASE_URL=postgresql://app:app@localhost:5432/app\nREDIS_URL=redis://localhost:6379\nPOSTGRES_DB=app\nPOSTGRES_USER=app\nPOSTGRES_PASSWORD=app\nPOSTGRES_PORT=5432\nREDIS_PORT=6379\nPGADMIN_DEFAULT_EMAIL=admin@example.test\nPGADMIN_DEFAULT_PASSWORD=admin\nPGADMIN_PORT=5050\nOPEN_DESIGN_PORT=7456\nOD_API_TOKEN=change-me\nOPENPANEL_DATABASE_URL=postgresql://openpanel:openpanel@localhost:5433/openpanel\nOPENPANEL_REDIS_URL=redis://localhost:6380\nOPENPANEL_CLICKHOUSE_URL=http://localhost:8123/openpanel\nOPENPANEL_ENCRYPTION_KEY=change-me\nOPENPANEL_API_PORT=3333\nOPENPANEL_DASHBOARD_PORT=3002\nPORT=3000\nALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000\nREFERENCE_PORT=3001\nREFERENCE_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000\n"
   ],
   [
     ".copier-answers.yml.jinja",
@@ -86,6 +86,13 @@ templateAdapters.set(
       "Omit that setting when generic GitHub SSH works.",
       "Omit the setting when generic GitHub SSH works."
     )
+);
+
+templateAdapters.set(
+  ".env.example",
+  templateAdapters
+    .get(".env.example")
+    .replace("PGADMIN_PORT=5050\n", "PGADMIN_PORT=5050\nACT_VERSION=v0.2.89\n")
 );
 
 test("uses Copier-native project identity rendering", async () => {
@@ -178,7 +185,25 @@ EXPO_PUBLIC_APP_URL=http://localhost:8081
 EXPO_PUBLIC_API_BASE_URL=http://localhost:3001
 RN_PUBLIC_APP_URL=http://localhost:8081
 RN_PUBLIC_API_BASE_URL=http://localhost:3001
-DATABASE_URL=./local.db
+DATABASE_URL=postgresql://app:app@localhost:5432/app
+REDIS_URL=redis://localhost:6379
+POSTGRES_DB=app
+POSTGRES_USER=app
+POSTGRES_PASSWORD=app
+POSTGRES_PORT=5432
+REDIS_PORT=6379
+PGADMIN_DEFAULT_EMAIL=admin@example.test
+PGADMIN_DEFAULT_PASSWORD=admin
+PGADMIN_PORT=5050
+ACT_VERSION=v0.2.89
+OPEN_DESIGN_PORT=7456
+OD_API_TOKEN=change-me
+OPENPANEL_DATABASE_URL=postgresql://openpanel:openpanel@localhost:5433/openpanel
+OPENPANEL_REDIS_URL=redis://localhost:6380
+OPENPANEL_CLICKHOUSE_URL=http://localhost:8123/openpanel
+OPENPANEL_ENCRYPTION_KEY=change-me
+OPENPANEL_API_PORT=3333
+OPENPANEL_DASHBOARD_PORT=3002
 PORT=3000
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 REFERENCE_PORT=3001
@@ -186,7 +211,56 @@ REFERENCE_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 `;
 
   assert.equal(await readFile(join(root, ".env.example"), "utf8"), expected);
-  assert.doesNotMatch(expected, /token|secret|password|api[_-]?key/i);
+  assert.equal(expected.includes("OD_API_TOKEN=change-me"), true);
+  assert.equal(expected.includes("POSTGRES_PASSWORD=app"), true);
+});
+
+test("TEST-DOCKER-001 declares the complete containerized service set", async () => {
+  const compose = parse(await readFile(join(root, "compose.yaml"), "utf8"));
+  assert.deepEqual(Object.keys(compose.services), [
+    "postgres",
+    "redis",
+    "pgadmin",
+    "act",
+    "qemu",
+    "open-design",
+    "op-db",
+    "op-kv",
+    "op-ch",
+    "op-rp",
+    "op-rp-console",
+    "op-api",
+    "op-dashboard",
+    "op-worker"
+  ]);
+  assert.ok("postgres-data" in compose.volumes);
+  assert.ok("openpanel-clickhouse-data" in compose.volumes);
+});
+
+test("TEST-DOCKER-002 limits Act and QEMU host integrations", async () => {
+  const compose = parse(await readFile(join(root, "compose.yaml"), "utf8"));
+  assert.deepEqual(compose.services.act.volumes, [
+    ".:/workspace",
+    "/var/run/docker.sock:/var/run/docker.sock"
+  ]);
+  assert.match(
+    compose.services.act.command.at(-1),
+    /github\.com\/nektos\/act@/
+  );
+  assert.deepEqual(compose.services.qemu.devices, [
+    "/dev/kvm:/dev/kvm",
+    "/dev/net/tun:/dev/net/tun"
+  ]);
+  assert.deepEqual(compose.services.qemu.cap_add, ["NET_ADMIN"]);
+  assert.equal(compose.services.postgres.privileged, undefined);
+});
+
+test("TEST-SETUP-001 declares the complete automated setup sequence", async () => {
+  const justfile = await readFile(join(root, "Justfile"), "utf8");
+  assert.match(
+    justfile,
+    /setup:\n {4}pnpm install --frozen-lockfile\n {4}docker compose up -d\n {4}pnpm build/
+  );
 });
 
 test("TEST-DOCS-001 documents hybrid reference profiles", async () => {

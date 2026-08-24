@@ -6,6 +6,11 @@ default:
 install:
     pnpm install
 
+setup:
+    pnpm install --frozen-lockfile
+    docker compose up -d
+    pnpm build
+
 dev:
     pnpm dev
 
