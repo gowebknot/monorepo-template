@@ -14,4 +14,6 @@ Use this skill whenever writing, modifying, refactoring, or generating code.
 5. Keep code scalable: design changes so new features can be added with localized edits, predictable naming, clear data flow, and minimal cross-module coupling.
 6. Use relative imports only in barrel files such as `src/index.ts` and nested `index.ts` files; all other source files should use package aliases or package-name imports.
 7. Prefer the smallest correct implementation that satisfies the current requirement; do not add speculative frameworks, generic layers, or backward compatibility without a concrete need.
-8. Validate code changes with the most focused available build, typecheck, lint, or test commands, and address failures before completing the task.
+8. Prefer hash maps or lookup objects for finite keyed dispatch instead of `switch` statements or long `if/else` ladders; keep direct conditionals when they are clearer for compound predicates or control flow.
+9. For CSS styling variants, create and use `cva` variants instead of local hash maps that select class names.
+10. Validate code changes with the most focused available build, typecheck, lint, or test commands, and address failures before completing the task.
