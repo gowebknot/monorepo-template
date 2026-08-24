@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { buttonVariants, cn } from "@repo/ui";
+import { buttonVariants, cn } from "@monorepo-template/ui";
 
 export default function HomePage() {
   return (

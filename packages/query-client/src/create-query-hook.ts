@@ -1,4 +1,4 @@
-import type { ServiceOptions } from "@repo/api-client";
+import type { ServiceOptions } from "@monorepo-template/api-client";
 import {
   useQuery,
   type QueryKey,

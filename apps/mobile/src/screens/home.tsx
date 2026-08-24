@@ -16,8 +16,8 @@ export function HomeScreen({ navigation }: Props) {
             Mobile reference app
           </Text>
           <Text className="text-muted-foreground">
-            A bare React Native app wired to the shared @repo/* contracts, API
-            client, and query hooks.
+            A bare React Native app wired to the shared @monorepo-template/*
+            contracts, API client, and query hooks.
           </Text>
         </CardHeader>
         <CardContent>

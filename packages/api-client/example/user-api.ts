@@ -3,7 +3,7 @@ import type {
   CreateUserInput,
   UpdateUserInput,
   User
-} from "@repo/entities/example";
+} from "@monorepo-template/entities/example";
 
 import { referenceApiPaths } from "./api-paths";
 

@@ -1,4 +1,4 @@
-# @repo/ui
+# @monorepo-template/ui
 
 Shared shadcn-based web components and Tailwind theme styling.
 
@@ -7,7 +7,7 @@ Shared shadcn-based web components and Tailwind theme styling.
 Import components from the single package entrypoint:
 
 ```tsx
-import { Button, Card } from "@repo/ui";
+import { Button, Card } from "@monorepo-template/ui";
 
 export function Example() {
   return (
@@ -28,7 +28,7 @@ Import the shared stylesheet from each web application's global CSS file:
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@repo/ui/styles.css";
+@import "@monorepo-template/ui/styles.css";
 
 @source "../../../packages/ui/src";
 ```
@@ -40,7 +40,7 @@ used by the package.
 ## Development
 
 ```sh
-pnpm --filter @repo/ui build
-pnpm --filter @repo/ui typecheck
-pnpm --filter @repo/ui lint
+pnpm --filter @monorepo-template/ui build
+pnpm --filter @monorepo-template/ui typecheck
+pnpm --filter @monorepo-template/ui lint
 ```

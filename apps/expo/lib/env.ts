@@ -1,4 +1,4 @@
-import { createExpoEnv } from "@repo/env/expo";
+import { createExpoEnv } from "@monorepo-template/env/expo";
 
 // Expo inlines EXPO_PUBLIC_* variables into the bundle via process.env.
 export const clientEnv = createExpoEnv({

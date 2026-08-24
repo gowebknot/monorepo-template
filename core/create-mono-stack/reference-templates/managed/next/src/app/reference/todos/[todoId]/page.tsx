@@ -10,8 +10,8 @@ import {
   useTodoItemListByTodo,
   useUpdateTodoItemOptimistic,
   useUpdateTodoOptimistic
-} from "@repo/query-client/example";
-import type { CreateTodoItemInput } from "@repo/entities/example";
+} from "@monorepo-template/query-client/example";
+import type { CreateTodoItemInput } from "@monorepo-template/entities/example";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

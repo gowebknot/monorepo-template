@@ -17,25 +17,25 @@
       "hash": "bc3cb2b0da52bb31878c2a92aa039496015f30f68c3008b640f4e97eedf821b5"
     },
     "create-minimal-package": {
-      "hash": "193600b7324caff018ad24660fbb537afbf753e9c9655347e38ad850ba0f893b"
+      "hash": "2116239d2e77b2c5ecff96789d60bd08b5d27fd470a11263d8c59ca00b6ee4e8"
     },
     "create-portable-skill": {
       "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"
     },
     "domain-driven-app-structure": {
-      "hash": "06f6f45285efdfce1a6a47c790a264f8f5484aeab95691fee7ce50dd8b8d531f"
+      "hash": "bf3fa1a8a4f74243deeb8aa5909c96f6493849f2c885c7a3a49f4d637199e3d1"
     },
     "e2e-regression-test-writer": {
       "hash": "d5337fa2517c8098c2acb78febc80c5f93765177f1ada76d059942e5af575dc2"
     },
     "end-to-end-api-flow": {
-      "hash": "d7e141f31a8b681246467a4e81ea9a6903944bb02b77e4ebb23ec58ba3db41e6"
+      "hash": "9543f14967554afdaf3686a08796e97f1fa929342b21ab797825ed0a761dd366"
     },
     "frontend-standards": {
-      "hash": "d791eeb6fd14313ec4e280e2ba8bfd201126ea83e35bf0be4e4e86a62a8e9b7a"
+      "hash": "2d89e1bd790137a5a784ccd7954aa5e2a4b6cdb8ea498d631ba427139de89d24"
     },
     "jsx-component-extraction": {
-      "hash": "61cce7e03e7db57cb8e2bdbffa1b7683841896a13f6af2bbad245e4415c23813"
+      "hash": "0723effd57a7dd745548f7c8a6d85bc1b461c7f01de8bc1d80c17dc05fcafcc9"
     },
     "maestro-mobile-e2e-test-writer": {
       "hash": "e18bd57f93f85ff3386e4bda5a01de3fa744be7641270e6e59f481f61cdae078"

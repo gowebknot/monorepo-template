@@ -16,7 +16,7 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
-        "@repo/env/server",
+        "@monorepo-template/env/server",
         "better-sqlite3",
         "drizzle-orm",
         "drizzle-orm/better-sqlite3",

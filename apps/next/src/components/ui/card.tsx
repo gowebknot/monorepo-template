@@ -1,1 +1,1 @@
-export * from "@repo/ui";
+export * from "@monorepo-template/ui";

@@ -8,8 +8,8 @@ import {
   useTodoItemListByTodo,
   useUpdateTodoItemOptimistic,
   useUpdateTodoOptimistic
-} from "@repo/query-client/example";
-import type { CreateTodoItemInput } from "@repo/entities/example";
+} from "@monorepo-template/query-client/example";
+import type { CreateTodoItemInput } from "@monorepo-template/entities/example";
 
 import { useAppForm } from "@/components/forms/form-core";
 import { Button, ButtonText } from "@/components/ui/button";

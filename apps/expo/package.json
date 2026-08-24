@@ -14,10 +14,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/api-client": "workspace:^",
-    "@repo/entities": "workspace:^",
-    "@repo/env": "workspace:^",
-    "@repo/query-client": "workspace:^",
+    "@monorepo-template/api-client": "workspace:^",
+    "@monorepo-template/entities": "workspace:^",
+    "@monorepo-template/env": "workspace:^",
+    "@monorepo-template/query-client": "workspace:^",
     "@tanstack/react-form": "^1.33.2",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-table": "^8.21.3",

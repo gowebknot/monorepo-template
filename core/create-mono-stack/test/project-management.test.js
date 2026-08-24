@@ -104,7 +104,7 @@ function commandRecorder(cwd) {
       await mkdir(join(cwd, "packages", args[1]), { recursive: true });
       await writeFile(
         join(cwd, "packages", args[1], "package.json"),
-        JSON.stringify({ name: `@repo/${args[1]}` })
+        JSON.stringify({ name: `@monorepo-template/${args[1]}` })
       );
     }
   };
@@ -255,7 +255,7 @@ test("TEST-MANAGE-005 lists and adds user packages", async () => {
     await mkdir(join(cwd, "packages", "entities"), { recursive: true });
     await writeFile(
       join(cwd, "packages", "entities", "package.json"),
-      JSON.stringify({ name: "@repo/entities" })
+      JSON.stringify({ name: "@monorepo-template/entities" })
     );
     const recorder = commandRecorder(cwd);
     await addPackage(cwd, "billing", recorder);

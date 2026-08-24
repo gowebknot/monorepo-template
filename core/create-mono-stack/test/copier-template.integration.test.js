@@ -377,7 +377,7 @@ test("creates and updates a customized project with Copier", async (t) => {
     cwd: projectRoot,
     timeout: 300_000
   });
-  run("pnpm", ["--filter", "@repo/billing", "build"], {
+  run("pnpm", ["--filter", "@acme-platform/billing", "build"], {
     cwd: projectRoot,
     timeout: 300_000
   });

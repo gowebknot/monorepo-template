@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 process.on("uncaughtException", (error) => {
@@ -41,7 +41,15 @@ if (!/^[a-z0-9-]+$/.test(projectName)) {
   throw new Error("Project name must be lowercase kebab-case");
 }
 
-const packageName = `@repo/${projectName}`;
+const rootPackageJson = JSON.parse(
+  await readFile(path.join(root, "package.json"), "utf8")
+);
+const projectScope = rootPackageJson.name;
+if (!projectScope || !/^[a-z0-9][a-z0-9.-]*$/.test(projectScope)) {
+  throw new Error("Root package.json must contain a valid project name");
+}
+
+const packageName = `@${projectScope}/${projectName}`;
 const packageDirName = projectName;
 const packageDir = path.join(root, "packages", packageDirName);
 
@@ -138,7 +146,7 @@ const agents = `# AGENTS.md
 ## Rules
 
 - Keep this package focused on reusable library code.
-- Do not read \`process.env\` directly in this package. Runtime configuration should be passed in by consumers or imported from \`@repo/env\` when appropriate.
+- Do not read \`process.env\` directly in this package. Runtime configuration should be passed in by consumers or imported from \`@monorepo-template/env\` when appropriate.
 - Keep runtime-only peer dependencies external in \`vite.config.ts\`.
 - Add package-specific rules here when this package gains concrete responsibilities.
 

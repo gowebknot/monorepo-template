@@ -171,7 +171,7 @@ pnpm package:create <project-name>
 ```
 
 The script creates `packages/<project-name>` under the stable `@repo` workspace scope. For example,
-`pnpm package:create billing` creates `packages/billing` with package name `@repo/billing`.
+`pnpm package:create billing` creates `packages/billing` with package name `@monorepo-template/billing`.
 
 It creates `package.json`, `tsconfig.json`, `vite.config.ts`, `.gitignore`, and `src/index.ts`, then refuses to overwrite an existing package unless `--force` is passed.
 
@@ -180,14 +180,14 @@ Use absolute `@/...` imports in implementation files. Use relative exports in ba
 Validate a new package with:
 
 ```sh
-pnpm --filter @repo/<project-name> build
-pnpm --filter @repo/<project-name> typecheck
-pnpm --filter @repo/<project-name> lint
+pnpm --filter @monorepo-template/<project-name> build
+pnpm --filter @monorepo-template/<project-name> typecheck
+pnpm --filter @monorepo-template/<project-name> lint
 ```
 
 ## API contracts
 
-`packages/entities` (`@repo/entities`) owns shared API contracts. Define each contract as a Zod schema plus inferred TypeScript type there, then import both schema and type from consumer projects. Frontend and backend packages should not hand-write API contract types locally.
+`packages/entities` (`@monorepo-template/entities`) owns shared API contracts. Define each contract as a Zod schema plus inferred TypeScript type there, then import both schema and type from consumer projects. Frontend and backend packages should not hand-write API contract types locally.
 
 Concrete reference contracts live under `packages/entities/example/` rather than exported `src/`
 code. Create product contracts under `packages/entities/src/api-contracts` and export them from
@@ -207,23 +207,23 @@ export type HealthResponse = z.infer<typeof healthResponseSchema>;
 
 ## Environment config
 
-`packages/env` (`@repo/env`) owns workspace env validation. Put every env schema in the `globalEnv` Zod object, then derive app-specific envs with `globalEnv.pick(...).shape`.
+`packages/env` (`@monorepo-template/env`) owns workspace env validation. Put every env schema in the `globalEnv` Zod object, then derive app-specific envs with `globalEnv.pick(...).shape`.
 
 Import parsed app envs from subpaths so each app validates only its own required variables:
 
 ```ts
-import { webEnv } from "@repo/env/web";
-import { serverEnv } from "@repo/env/server";
+import { webEnv } from "@monorepo-template/env/web";
+import { serverEnv } from "@monorepo-template/env/server";
 ```
 
 The package root exports `globalEnv`, picked validators (`webEnvSchema`, `webServerEnvSchema`, `webClientEnvSchema`, `serverEnvSchema`), and factory functions (`createWebEnv`, `createServerEnv`) for composition/testing without eagerly validating app-specific envs.
 
 ## Database
 
-`packages/db` (`@repo/db`) owns shared Drizzle database connection helpers. Example tables live under
+`packages/db` (`@monorepo-template/db`) owns shared Drizzle database connection helpers. Example tables live under
 `packages/db/example/schema/`; exported `src/` code stays connection-only.
 
-Database configuration is read through `@repo/env/server`, not directly from `process.env`.
+Database configuration is read through `@monorepo-template/env/server`, not directly from `process.env`.
 
 ## Portable agent skills
 

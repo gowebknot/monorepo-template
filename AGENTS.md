@@ -8,11 +8,11 @@ apps/
 core/
   create-mono-stack/ # source-only npm launcher and Copier test owner; excluded from generated projects
 packages/
-  config/      # @repo/config — shared app config, plain tsc, NodeNext
-  db/          # @repo/db — Drizzle database connection helpers
-  env/         # @repo/env — T3 env + Zod workspace env validation
-  entities/    # @repo/entities — shared API Zod contracts + inferred types
-  api-client/  # @repo/api-client — shared Axios API client helpers
+  config/      # @monorepo-template/config — shared app config, plain tsc, NodeNext
+  db/          # @monorepo-template/db — Drizzle database connection helpers
+  env/         # @monorepo-template/env — T3 env + Zod workspace env validation
+  entities/    # @monorepo-template/entities — shared API Zod contracts + inferred types
+  api-client/  # @monorepo-template/api-client — shared Axios API client helpers
 skills/        # canonical source for portable agent skills (see below)
 scripts/       # portable skills tooling and generated-project template update wrapper
 ```
@@ -30,7 +30,7 @@ pnpm build          # turbo build (topological, cached)
 pnpm dev            # build upstream packages, then start persistent development tasks
 pnpm dev:reference  # same, but for the reference apps under reference/
 pnpm lint           # turbo package lint + root scripts (requires upstream build first)
-pnpm package:create <name>  # scaffold packages/<name> as @repo/<name>
+pnpm package:create <name>  # scaffold packages/<name> as @monorepo-template/<name>
 pnpm typecheck      # turbo typecheck (requires upstream build first)
 pnpm format         # prettier --write . (root-level only, not per-package)
 pnpm format:check   # CI-safe format check
@@ -56,8 +56,8 @@ Run a single package:
 
 ```sh
 pnpm --filter create-mono-stack test
-pnpm --filter @repo/entities build
-pnpm --filter @repo/config typecheck
+pnpm --filter @monorepo-template/entities build
+pnpm --filter @monorepo-template/config typecheck
 ```
 
 Release `create-mono-stack` only after explicit user authorization. Follow the package-local release
@@ -74,7 +74,7 @@ forwards publish arguments to `pnpm publish` from `core/create-mono-stack`.
 
 ## Creating packages
 
-Use `pnpm package:create <project-name>` or `just package-create <project-name>` instead of hand-writing package setup. The scaffold creates `packages/<project-name>` with package name `@repo/<project-name>`.
+Use `pnpm package:create <project-name>` or `just package-create <project-name>` instead of hand-writing package setup. The scaffold creates `packages/<project-name>` with package name `@monorepo-template/<project-name>`.
 
 The scaffold creates Vite lib-mode package files (`package.json`, `tsconfig.json`, `vite.config.ts`, `.gitignore`, `README.md`, `AGENTS.md`, `src/index.ts`) and refuses to overwrite an existing package unless `--force` is passed to the pnpm script.
 
@@ -100,11 +100,11 @@ declare `@typescript/typescript6` so the TypeScript 6 compiler API remains avail
 
 ## Environment config
 
-All env validation and environment variable access belongs in `packages/env`, exported by `@repo/env`. Read `packages/env/AGENTS.md` before changing env code.
+All env validation and environment variable access belongs in `packages/env`, exported by `@monorepo-template/env`. Read `packages/env/AGENTS.md` before changing env code.
 
-`globalEnv` is a single Zod object in `src/global-env.ts`; app envs derive and export their validators with `globalEnv.pick(...).shape`. Split client/server validators for app envs when T3 env needs separate `client` and `server` shapes. Apps must import envs or validators from `@repo/env/web`, `@repo/env/server`, or package-root exports instead of defining validation locally.
+`globalEnv` is a single Zod object in `src/global-env.ts`; app envs derive and export their validators with `globalEnv.pick(...).shape`. Split client/server validators for app envs when T3 env needs separate `client` and `server` shapes. Apps must import envs or validators from `@monorepo-template/env/web`, `@monorepo-template/env/server`, or package-root exports instead of defining validation locally.
 
-Do not read `process.env` directly outside `packages/env` internals. Add missing variables to `globalEnv`, derive the app-specific env, then import from `@repo/env/*`.
+Do not read `process.env` directly outside `packages/env` internals. Add missing variables to `globalEnv`, derive the app-specific env, then import from `@monorepo-template/env/*`.
 
 The env package Vite root entry is package-root `env.ts`, not `src/index.ts`.
 Its Vite `envDir` points to the workspace root (`../..`) so `.env` is loaded from the repo root.
@@ -113,11 +113,11 @@ Use current Zod imports, methods, and functions only; do not add deprecated pre-
 
 ## Database
 
-`packages/db` (`@repo/db`) owns shared Drizzle connection helpers. Read `packages/db/AGENTS.md` before changing database code.
+`packages/db` (`@monorepo-template/db`) owns shared Drizzle connection helpers. Read `packages/db/AGENTS.md` before changing database code.
 
 This is a template repo: keep example schema tables under `packages/db/example/schema/`; exported `packages/db/src/` code should stay connection-only unless adapting the template into a real project.
 
-Database configuration must come from `@repo/env/server`, not direct `process.env` reads.
+Database configuration must come from `@monorepo-template/env/server`, not direct `process.env` reads.
 
 ## `packages/entities` build
 
@@ -128,7 +128,7 @@ Path alias `@/*` → `./src/*`, mirrored in both `vite.config.ts` and `tsconfig.
 
 ## API contracts
 
-All shared API contracts belong in `packages/entities`, exported by `@repo/entities`. Define Zod schemas and inferred types together there; frontend/backend consumers must import them instead of writing matching contract types locally.
+All shared API contracts belong in `packages/entities`, exported by `@monorepo-template/entities`. Define Zod schemas and inferred types together there; frontend/backend consumers must import them instead of writing matching contract types locally.
 
 Read `packages/entities/AGENTS.md` before changing API contracts.
 

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { validateServerEnv } from '@repo/env/server';
+import { validateServerEnv } from '@monorepo-template/env/server';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';

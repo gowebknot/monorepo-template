@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { todoApi, todoCrudApi } from "@repo/api-client/example";
+import { todoApi, todoCrudApi } from "@monorepo-template/api-client/example";
 import type {
   CreateTodoInput,
   Todo,
   UpdateTodoInput
-} from "@repo/entities/example";
-import type { ServiceOptions } from "@repo/api-client";
+} from "@monorepo-template/entities/example";
+import type { ServiceOptions } from "@monorepo-template/api-client";
 
 import { createCrudQueryHooks } from "@/create-crud-query-hooks";
 import { queryKeys } from "@/query-keys";

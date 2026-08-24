@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
-import type { ServiceOptions } from "@repo/api-client";
+import type { ServiceOptions } from "@monorepo-template/api-client";
 
 import { resolveServiceOptions } from "@/resolve-service-options";
 

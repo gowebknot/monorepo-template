@@ -26,7 +26,7 @@ Location: commonly `apps/server/src/` or `apps/server/reference/`
 Location: `packages/api-client/src/`
 
 - Add typed path and service helpers for the endpoint.
-- Import API types from `@repo/entities`.
+- Import API types from `@monorepo-template/entities`.
 - Return `response.data` and leave response validation to the established application boundary.
 - Pass runtime configuration into the client; do not read `process.env` here.
 

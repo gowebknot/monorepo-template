@@ -347,7 +347,7 @@ function templatePackage() {
         "node --eval \"process.chdir('reference'); process.argv = ['node', 'tsr', 'generate']; import('@tanstack/router-cli');\""
     },
     dependencies: {
-      "@repo/env": "workspace:^",
+      "@monorepo-template/env": "workspace:^",
       "@tanstack/react-router": "^1.170.18",
       react: "^19.2.7"
     },
@@ -392,7 +392,7 @@ test("TEST-MERGE-002 adds template-only dependencies", () => {
     "dashboard"
   );
 
-  assert.equal(merged.dependencies["@repo/env"], "workspace:^");
+  assert.equal(merged.dependencies["@monorepo-template/env"], "workspace:^");
   assert.equal(merged.dependencies["@tanstack/react-router"], "^1.170.18");
 });
 

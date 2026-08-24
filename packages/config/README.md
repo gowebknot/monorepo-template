@@ -1,17 +1,17 @@
-# @repo/config
+# @monorepo-template/config
 
 Shared static application configuration package.
 
 ## Usage
 
 ```ts
-import { appConfig } from "@repo/config";
+import { appConfig } from "@monorepo-template/config";
 ```
 
 ## Development
 
 ```sh
-pnpm --filter @repo/config build
-pnpm --filter @repo/config typecheck
-pnpm --filter @repo/config lint
+pnpm --filter @monorepo-template/config build
+pnpm --filter @monorepo-template/config typecheck
+pnpm --filter @monorepo-template/config lint
 ```

@@ -1,5 +1,5 @@
 {
-  "name": "@repo/env",
+  "name": "@monorepo-template/env",
   "private": true,
   "version": "0.0.0",
   "type": "module",

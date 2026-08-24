@@ -1,5 +1,5 @@
-import type { CrudService } from "@repo/api-client";
-import type { ServiceOptions } from "@repo/api-client";
+import type { CrudService } from "@monorepo-template/api-client";
+import type { ServiceOptions } from "@monorepo-template/api-client";
 import {
   useMutation,
   useQuery,

@@ -1,4 +1,4 @@
-import { createNextEnv } from "@repo/env/next";
+import { createNextEnv } from "@monorepo-template/env/next";
 
 // Next.js only inlines `process.env.NEXT_PUBLIC_*` for literal member access,
 // so the runtime map is spelled out here rather than passing `process.env`.

@@ -11,7 +11,7 @@ import {
 import type {
   CreateTodoItemInput,
   UpdateTodoItemInput,
-} from '@repo/db/example';
+} from '@monorepo-template/db/example';
 
 import { TodoItemsService } from './todo-items.service';
 

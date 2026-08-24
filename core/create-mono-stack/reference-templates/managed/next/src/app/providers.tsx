@@ -5,7 +5,7 @@ import {
   ApiClientConfigProvider,
   QueryClient,
   QueryClientProvider
-} from "@repo/query-client/example";
+} from "@monorepo-template/query-client/example";
 
 import { clientEnv } from "@/lib/env";
 

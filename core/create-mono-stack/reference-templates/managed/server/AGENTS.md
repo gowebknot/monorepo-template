@@ -9,9 +9,9 @@ The main application (`src/`) is intentionally minimal and exposes only a health
 ## Rules
 
 - This app intentionally keeps Nest's default CommonJS runtime (no `"type": "module"` in `package.json`, so it runs as CommonJS at runtime despite `tsconfig.json`'s `module`/`moduleResolution: "nodenext"`; its own `eslint.config.mjs`/`.prettierrc`, Vitest) instead of the repo's ESM-everywhere convention — same kind of deliberate, self-contained exception `packages/entities` and `packages/env` make for their own build tooling.
-- Do not read `process.env` directly. Import config from `@repo/env/server` (see `serverEnv` usage in `src/main.ts`) or `@repo/env/reference-server` for the reference entry point.
+- Do not read `process.env` directly. Import config from `@monorepo-template/env/server` (see `serverEnv` usage in `src/main.ts`) or `@monorepo-template/env/reference-server` for the reference entry point.
 - Add any new required environment variables to `packages/env`'s `globalEnv` first, then pick them into `serverEnvSchema` or `referenceServerEnvSchema`, before consuming them here.
-- The reference server (`reference/main.ts`) is the only place that imports `@repo/db/example`. The real server (`src/`) must not depend on database modules or example CRUD code.
+- The reference server (`reference/main.ts`) is the only place that imports `@monorepo-template/db/example`. The real server (`src/`) must not depend on database modules or example CRUD code.
 - Controllers in the reference area skip request validation (no `class-validator`/DTO pipes) for demo simplicity — a real project should add a `ValidationPipe` and validated DTOs.
 
 ## Source Layout
@@ -36,7 +36,7 @@ test/
   app.e2e-spec.ts
 ```
 
-Each resource module in `reference/` follows the same shape: a `*.controller.ts` (HTTP routes), a `*.service.ts` (thin wrapper injecting `EXAMPLE_DB` and calling into `@repo/db/example`'s CRUD functions), and a `*.module.ts` wiring them together.
+Each resource module in `reference/` follows the same shape: a `*.controller.ts` (HTTP routes), a `*.service.ts` (thin wrapper injecting `EXAMPLE_DB` and calling into `@monorepo-template/db/example`'s CRUD functions), and a `*.module.ts` wiring them together.
 
 ## Running the reference server
 

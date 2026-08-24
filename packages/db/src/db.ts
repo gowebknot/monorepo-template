@@ -1,4 +1,4 @@
-import { serverEnv } from "@repo/env/server";
+import { serverEnv } from "@monorepo-template/env/server";
 
 export interface DatabaseConnectionOptions {
   url?: string;

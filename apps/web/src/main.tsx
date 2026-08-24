@@ -4,9 +4,9 @@ import {
   ApiClientConfigProvider,
   QueryClient,
   QueryClientProvider
-} from "@repo/query-client";
+} from "@monorepo-template/query-client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { createWebEnv } from "@repo/env/web";
+import { createWebEnv } from "@monorepo-template/env/web";
 import { routeTree } from "./routeTree.gen";
 import "./index.css";
 

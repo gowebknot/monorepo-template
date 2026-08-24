@@ -10,8 +10,8 @@ export default function HomeScreen() {
         Expo reference app
       </Text>
       <Text className="text-base text-muted-foreground">
-        A React Native app styled with NativeWind, wired to the shared @repo/*
-        contracts, API client, and query hooks.
+        A React Native app styled with NativeWind, wired to the shared
+        @monorepo-template/* contracts, API client, and query hooks.
       </Text>
       <Link href="/reference" asChild>
         <Button>

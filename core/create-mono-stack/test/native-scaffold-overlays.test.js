@@ -125,7 +125,7 @@ test("TEST-OVERLAY-004 omits web reference support for Vue TypeScript", async (t
   const packageJson = JSON.parse(await fixtureText(root, "package.json"));
 
   assert.equal(packageJson.scripts["dev:reference"], undefined);
-  assert.equal(packageJson.dependencies["@repo/env"], undefined);
+  assert.equal(packageJson.dependencies["@monorepo-template/env"], undefined);
   assert.equal(apps[0].referenceProfile, null);
 });
 
@@ -329,7 +329,10 @@ test("TEST-OVERLAY-009 keeps the generated Next app and copies the demo into ref
   assert.equal(await fixtureText(root, ".env.example"), "next-env-example");
   // Native (generated) versions win; @repo deps + reference scripts are merged.
   assert.equal(packageJson.dependencies.next, "^15.0.0");
-  assert.equal(packageJson.dependencies["@repo/env"], "workspace:^");
+  assert.equal(
+    packageJson.dependencies["@monorepo-template/env"],
+    "workspace:^"
+  );
   assert.equal(packageJson.scripts["build:reference"], "next build reference");
   assert.equal(packageJson.scripts["dev:reference"], "next dev reference");
   assert.equal(packageJson.name, "next");
@@ -375,7 +378,10 @@ test("TEST-OVERLAY-010 overlays the Expo canonical app and merges dependencies",
     packageJson.dependencies["react-native-safe-area-context"],
     "5.9.1"
   );
-  assert.equal(packageJson.dependencies["@repo/env"], "workspace:^");
+  assert.equal(
+    packageJson.dependencies["@monorepo-template/env"],
+    "workspace:^"
+  );
   assert.equal(packageJson.dependencies["expo-router"], "^3.0.0");
   assert.equal(packageJson.scripts.dev, "expo start");
   assert.equal(packageJson.scripts["dev:reference"], "expo start");
@@ -429,7 +435,10 @@ test("TEST-OVERLAY-011 overlays the bare React Native canonical app and merges d
     "5.9.1"
   );
   assert.equal(packageJson.dependencies["@react-navigation/native"], "^7.0.0");
-  assert.equal(packageJson.dependencies["@repo/env"], "workspace:^");
+  assert.equal(
+    packageJson.dependencies["@monorepo-template/env"],
+    "workspace:^"
+  );
   assert.equal(packageJson.scripts.dev, "react-native start");
   assert.equal(packageJson.scripts["dev:reference"], "react-native start");
   assert.equal(packageJson.name, "mobile");

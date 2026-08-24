@@ -1,11 +1,11 @@
-# @repo/db
+# @monorepo-template/db
 
 Shared Drizzle database connection helpers.
 
 ## Usage
 
 ```ts
-import { createDb, getDatabaseUrl } from "@repo/db";
+import { createDb, getDatabaseUrl } from "@monorepo-template/db";
 ```
 
 `src/` stays connection-only in this template. Driver-specific examples and schema tables live under `example/`.
@@ -13,8 +13,8 @@ import { createDb, getDatabaseUrl } from "@repo/db";
 ## Development
 
 ```sh
-pnpm --filter @repo/db build
-pnpm --filter @repo/db typecheck
-pnpm --filter @repo/db lint
-pnpm --filter @repo/db db:generate
+pnpm --filter @monorepo-template/db build
+pnpm --filter @monorepo-template/db typecheck
+pnpm --filter @monorepo-template/db lint
+pnpm --filter @monorepo-template/db db:generate
 ```

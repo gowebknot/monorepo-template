@@ -20,7 +20,7 @@ export const renderedWebPackage = {
     test: "vitest run"
   },
   dependencies: {
-    "@repo/env": "workspace:^",
+    "@monorepo-template/env": "workspace:^",
     "@tanstack/react-router": "^1.170.18",
     react: "^19.2.7"
   },
@@ -51,8 +51,8 @@ export const renderedServerPackage = {
   },
   dependencies: {
     "@nestjs/common": "^11.0.1",
-    "@repo/db": "workspace:^",
-    "@repo/env": "workspace:^"
+    "@monorepo-template/db": "workspace:^",
+    "@monorepo-template/env": "workspace:^"
   },
   devDependencies: {
     "@nestjs/cli": "^11.0.0",
@@ -162,10 +162,10 @@ export const renderedNextPackage = {
     test: "vitest run"
   },
   dependencies: {
-    "@repo/api-client": "workspace:^",
-    "@repo/entities": "workspace:^",
-    "@repo/env": "workspace:^",
-    "@repo/query-client": "workspace:^",
+    "@monorepo-template/api-client": "workspace:^",
+    "@monorepo-template/entities": "workspace:^",
+    "@monorepo-template/env": "workspace:^",
+    "@monorepo-template/query-client": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     next: "^14.0.0",
     react: "^18.0.0"
@@ -184,10 +184,10 @@ export const renderedExpoPackage = {
     test: "vitest run"
   },
   dependencies: {
-    "@repo/api-client": "workspace:^",
-    "@repo/entities": "workspace:^",
-    "@repo/env": "workspace:^",
-    "@repo/query-client": "workspace:^",
+    "@monorepo-template/api-client": "workspace:^",
+    "@monorepo-template/entities": "workspace:^",
+    "@monorepo-template/env": "workspace:^",
+    "@monorepo-template/query-client": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     expo: "^51.0.0",
     "expo-router": "^3.0.0",
@@ -210,10 +210,10 @@ export const renderedMobilePackage = {
   dependencies: {
     "@react-navigation/native": "^7.0.0",
     "@react-navigation/native-stack": "^7.0.0",
-    "@repo/api-client": "workspace:^",
-    "@repo/entities": "workspace:^",
-    "@repo/env": "workspace:^",
-    "@repo/query-client": "workspace:^",
+    "@monorepo-template/api-client": "workspace:^",
+    "@monorepo-template/entities": "workspace:^",
+    "@monorepo-template/env": "workspace:^",
+    "@monorepo-template/query-client": "workspace:^",
     "@tanstack/react-query": "^5.0.0",
     react: "^18.0.0",
     "react-native": "^0.75.0",
@@ -334,7 +334,7 @@ const renderedServerTree = {
   "nest-cli.reference.json": '{"marker":"nest-reference"}',
   "package.json": JSON.stringify(renderedServerPackage),
   "reference/main.ts": "reference-main",
-  "src/main.ts": "template-main @repo/env/server",
+  "src/main.ts": "template-main @monorepo-template/env/server",
   "src/template.controller.ts": "template-controller",
   "test/app.e2e-spec.ts": "template-test",
   "tsconfig.build.json": '{"marker":"build-tsconfig"}',

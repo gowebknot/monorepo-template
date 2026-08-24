@@ -32,7 +32,7 @@ export async function assertGeneratedProject({
         "utf8"
       )
     ).name,
-    "@repo/api-client"
+    "@acme-platform/api-client"
   );
   assert.deepEqual(
     JSON.parse(await readFile(join(projectRoot, ".mono-stack.json"))),
@@ -64,7 +64,10 @@ export async function assertGeneratedProject({
     "pnpm routes:generate:reference && vite build reference --config vite.config.ts"
   );
   assert.equal(webPackage.scripts.build, "tsc -b && vite build");
-  assert.equal(webPackage.dependencies["@repo/api-client"], "workspace:^");
+  assert.equal(
+    webPackage.dependencies["@acme-platform/api-client"],
+    "workspace:^"
+  );
   assert.equal(serverPackage.version, "1.0.0");
   assert.equal(serverPackage.scripts.test, "vitest run");
   assert.equal(
@@ -84,7 +87,7 @@ export async function assertGeneratedProject({
     serverPackage.scripts["build:reference"],
     "nest build --config nest-cli.reference.json"
   );
-  assert.equal(serverPackage.dependencies["@repo/db"], "workspace:^");
+  assert.equal(serverPackage.dependencies["@acme-platform/db"], "workspace:^");
   await assert.rejects(readFile(join(projectRoot, "copier.yml"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "core"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "docs/checklists"), "utf8"));
@@ -177,14 +180,17 @@ export function assertReferenceTaskGraph(graph) {
     [
       "web#dev:reference",
       [
-        "@repo/api-client#build",
-        "@repo/entities#build",
-        "@repo/env#build",
-        "@repo/query-client#build",
-        "@repo/ui#build"
+        "@acme-platform/api-client#build",
+        "@acme-platform/entities#build",
+        "@acme-platform/env#build",
+        "@acme-platform/query-client#build",
+        "@acme-platform/ui#build"
       ]
     ],
-    ["server#dev:reference", ["@repo/db#build", "@repo/env#build"]]
+    [
+      "server#dev:reference",
+      ["@acme-platform/db#build", "@acme-platform/env#build"]
+    ]
   ]);
 
   for (const [taskId, dependencies] of expectedDependencies) {

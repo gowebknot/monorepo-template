@@ -5,7 +5,7 @@ import type {
   CreateTodoInput,
   Todo,
   UpdateTodoInput
-} from "@repo/entities/example";
+} from "@monorepo-template/entities/example";
 
 import { referenceApiPaths } from "./api-paths";
 

@@ -5,8 +5,11 @@ import {
   getTodoById,
   listTodosByUser,
   updateTodo,
-} from '@repo/db/example';
-import type { CreateTodoInput, UpdateTodoInput } from '@repo/db/example';
+} from '@monorepo-template/db/example';
+import type {
+  CreateTodoInput,
+  UpdateTodoInput,
+} from '@monorepo-template/db/example';
 
 import { EXAMPLE_DB } from '../database/database.constants';
 import type { ExampleDb } from '../database/database.module';

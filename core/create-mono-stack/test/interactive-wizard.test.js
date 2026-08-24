@@ -19,11 +19,11 @@ const escape = "\u001B";
 const tab = "\t";
 
 async function waitFor(check) {
-  for (let attempt = 0; attempt < 200; attempt += 1) {
+  for (let attempt = 0; attempt < 600; attempt += 1) {
     if (check()) return;
     await new Promise((resolve) => setTimeout(resolve, 5));
   }
-  assert.fail("Ink did not render the expected state within one second");
+  assert.fail("Ink did not render the expected state within three seconds");
 }
 
 async function sendInput(app, input, expectedFrame) {

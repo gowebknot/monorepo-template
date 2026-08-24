@@ -23,10 +23,10 @@ export default defineConfig({
       external: [
         "react",
         "@tanstack/react-query",
-        "@repo/api-client",
-        "@repo/api-client/example",
-        "@repo/entities",
-        "@repo/entities/example"
+        "@monorepo-template/api-client",
+        "@monorepo-template/api-client/example",
+        "@monorepo-template/entities",
+        "@monorepo-template/entities/example"
       ]
     }
   },

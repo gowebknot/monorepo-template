@@ -116,3 +116,14 @@
 
 - Initial observations: Current package version and latest tag are `0.1.38`; the worktree contains the API provider implementation and no release metadata update.
 - First observed run: The first commit hook run rejected the commit because `test/interactive-wizard.test.js` had one timing-sensitive timeout in `selects additional stack features through the multiselect screen`; the other staged build, skill, server, and validation checks completed.
+
+## Updates
+
+### 2026-08-24: Release verification
+
+- Release commit `a1a56d5fb217502dafd96fc3a7008172d95d4d24` is on local and `origin/master`.
+- Annotated tag `v0.1.39` is pushed to `origin` and resolves to the release commit.
+- `npm view create-mono-stack dist-tags version --json` reports version `0.1.39` and `latest: 0.1.39`.
+- `pnpm --filter create-mono-stack exec npm pack --dry-run --json` reports `create-mono-stack-0.1.39.tgz` with no credentials or `.npmrc.auth` entry.
+- The release was published through `pnpm --filter create-mono-stack publish:package`; no direct publish command was used.
+- All planned repository and package validation checks passed before publication.

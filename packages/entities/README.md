@@ -1,4 +1,4 @@
-# @repo/entities
+# @monorepo-template/entities
 
 Shared API Zod contracts and inferred TypeScript types.
 
@@ -11,7 +11,7 @@ Template sample contracts live under `example/` and are not exported from the pa
 ## Development
 
 ```sh
-pnpm --filter @repo/entities build
-pnpm --filter @repo/entities typecheck
-pnpm --filter @repo/entities lint
+pnpm --filter @monorepo-template/entities build
+pnpm --filter @monorepo-template/entities typecheck
+pnpm --filter @monorepo-template/entities lint
 ```

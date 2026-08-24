@@ -1,7 +1,7 @@
 # next
 
 Next.js App Router reference app in the workspace. Shares contracts, API client, and query hooks with
-the other apps through the `@repo/*` packages.
+the other apps through the `@monorepo-template/*` packages.
 
 ```sh
 pnpm --filter next dev

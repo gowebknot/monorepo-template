@@ -6,8 +6,8 @@ import {
   useCreateTodoOptimistic,
   useRemoveTodoOptimistic,
   useTodoListByUser
-} from "@repo/query-client/example";
-import type { CreateTodoInput } from "@repo/entities/example";
+} from "@monorepo-template/query-client/example";
+import type { CreateTodoInput } from "@monorepo-template/entities/example";
 
 import { useAppForm } from "@/components/forms/form-core";
 import { Button, ButtonText } from "@/components/ui/button";

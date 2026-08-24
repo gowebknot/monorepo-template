@@ -74,6 +74,9 @@ feature_mobile_react_native:
 
 _message_after_copy: ""
 
+_tasks:
+  - node scripts/render-package-scope.mjs
+
 _message_after_update: |
   Project "<%= project_name =%>" updated successfully.
   Review any conflicts, then run `just check`.

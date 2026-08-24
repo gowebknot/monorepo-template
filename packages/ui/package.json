@@ -1,5 +1,5 @@
 {
-  "name": "@repo/ui",
+  "name": "@monorepo-template/ui",
   "private": true,
   "version": "0.0.0",
   "type": "module",

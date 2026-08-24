@@ -12,9 +12,9 @@ contracts and data layer power web and native clients.
   The entry is `index.ts` → `import "expo-router/entry"`; `package.json` `main` stays `index.ts`.
 - UI uses React Native primitives (`View`, `Text`, `TextInput`, `Pressable`, `FlatList`) with
   NativeWind v5 and Tailwind v4 — no DOM or gluestack. The `@/*` alias maps to the app root.
-- Server state comes from `@repo/query-client/example`; contracts/types from `@repo/entities/example`;
-  HTTP from `@repo/api-client/example`. Do not redefine these locally.
-- Environment access goes through `@repo/env/expo` (`createExpoEnv`). Only `EXPO_PUBLIC_*` variables
+- Server state comes from `@monorepo-template/query-client/example`; contracts/types from `@monorepo-template/entities/example`;
+  HTTP from `@monorepo-template/api-client/example`. Do not redefine these locally.
+- Environment access goes through `@monorepo-template/env/expo` (`createExpoEnv`). Only `EXPO_PUBLIC_*` variables
   reach the bundle, and `lib/env.ts` spells out the runtime map so Expo can inline them.
 
 Native styling uses the CSS-first NativeWind v5 setup in `globals.css`, `metro.config.js`, and

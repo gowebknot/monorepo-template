@@ -9,7 +9,7 @@ import { useAppForm } from "@/components/forms/form-core";
 import {
   createTodoInputSchema,
   type CreateTodoInput
-} from "@repo/entities/example";
+} from "@monorepo-template/entities/example";
 
 const form = useAppForm({
   defaultValues: {

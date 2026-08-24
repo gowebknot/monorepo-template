@@ -13,11 +13,11 @@ data layer power web and native clients.
   `AppRegistry.registerComponent`.
 - UI uses React Native primitives (`View`, `Text`, `TextInput`, `Pressable`, `FlatList`) with
   NativeWind v5 and Tailwind v4 — no DOM or shadcn. Local implementation imports use the `@/*`
-  alias mapped to `src/`; shared workspace packages use their `@repo/*` names.
-- Server state comes from `@repo/query-client/example`; contracts/types from `@repo/entities/example`;
-  HTTP from `@repo/api-client/example`. Do not redefine these locally.
+  alias mapped to `src/`; shared workspace packages use their `@monorepo-template/*` names.
+- Server state comes from `@monorepo-template/query-client/example`; contracts/types from `@monorepo-template/entities/example`;
+  HTTP from `@monorepo-template/api-client/example`. Do not redefine these locally.
 - Environment: React Native has no build-time env inlining, so `src/config.ts` holds the runtime map
-  and `src/lib/env.ts` validates it through `@repo/env/react-native` (`createReactNativeEnv`). Swap
+  and `src/lib/env.ts` validates it through `@monorepo-template/env/react-native` (`createReactNativeEnv`). Swap
   `src/config.ts` for a native env loader (e.g. react-native-config) in a real app.
 
 - Native styling uses NativeWind v5 and Tailwind v4 through `src/global.css`, the CSS-aware Metro

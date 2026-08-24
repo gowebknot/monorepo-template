@@ -1,7 +1,7 @@
 # mobile
 
 Bare React Native reference app in the workspace. Shares contracts, API client, and query hooks with
-the other apps through the `@repo/*` packages. Its UI is a duplicated native layer using NativeWind
+the other apps through the `@monorepo-template/*` packages. Its UI is a duplicated native layer using NativeWind
 v5 and Tailwind v4.
 
 ```sh

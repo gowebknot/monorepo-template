@@ -10,7 +10,7 @@ For a new package, run the helper instead of writing the setup files by hand:
 pnpm package:create <project-name>
 ```
 
-The helper sets the generated package name to `@repo/<project-name>`.
+The helper sets the generated package name to `@monorepo-template/<project-name>`.
 
 Options:
 
@@ -27,7 +27,7 @@ pnpm package:create billing
 just package-create billing
 ```
 
-The example creates `packages/billing/package.json` with `"name": "@repo/billing"`.
+The example creates `packages/billing/package.json` with `"name": "@monorepo-template/billing"`.
 
 After scaffolding, add feature files and barrel exports. The helper intentionally creates `src/index.ts` as an empty module because it cannot know the package API.
 
@@ -55,7 +55,7 @@ Expose only the built entrypoint:
 
 ```json
 {
-  "name": "@repo/<project-name>",
+  "name": "@monorepo-template/<project-name>",
   "private": true,
   "version": "0.0.0",
   "type": "module",

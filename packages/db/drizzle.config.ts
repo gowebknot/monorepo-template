@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import { serverEnv } from "@repo/env/server";
+import { serverEnv } from "@monorepo-template/env/server";
 
 export default defineConfig({
   schema: "./example/schema/index.ts",

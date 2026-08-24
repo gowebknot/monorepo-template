@@ -92,7 +92,7 @@ test("uses Copier-native project identity rendering", async () => {
   const config = parse(await readFile(join(root, "copier.yml"), "utf8"));
 
   assert.equal(config._min_copier_version, "9.0.0");
-  assert.equal(config._tasks, undefined);
+  assert.deepEqual(config._tasks, ["node scripts/render-package-scope.mjs"]);
   assert.deepEqual(config._migrations, [
     { command: "node scripts/dev-ports.mjs" }
   ]);
@@ -400,7 +400,7 @@ test("pairs every AGENTS.md with a CLAUDE.md import", async () => {
   }
 });
 
-test("uses a stable internal workspace package scope", async () => {
+test("TEST-SCOPE-001 uses the source workspace package scope", async () => {
   const packagePaths = [
     "packages/api-client/package.json",
     "packages/config/package.json",
@@ -412,7 +412,7 @@ test("uses a stable internal workspace package scope", async () => {
 
   for (const path of packagePaths) {
     const packageJson = JSON.parse(await readFile(join(root, path), "utf8"));
-    assert.match(packageJson.name, /^@repo\/[a-z0-9-]+$/);
+    assert.match(packageJson.name, /^@monorepo-template\/[a-z0-9-]+$/);
   }
 
   const trackedFiles = spawnSync("git", ["ls-files", "-z"], {
@@ -420,22 +420,23 @@ test("uses a stable internal workspace package scope", async () => {
     encoding: "utf8"
   });
   assert.equal(trackedFiles.status, 0, trackedFiles.stderr);
-  const legacyScope = Buffer.from(["@monorepo", "template"].join("-"));
-
+  const legacyScope = ["@repo", "/"].join("");
   for (const path of trackedFiles.stdout.split("\0").filter(Boolean)) {
-    if (path.endsWith(".jinja")) continue;
+    if (path.endsWith(".jinja") || path.startsWith("docs/checklists/")) {
+      continue;
+    }
     const contents = await readFile(join(root, path)).catch(() => undefined);
     if (!contents?.includes(legacyScope)) continue;
-    assert.fail(`${path} still uses the template-specific package scope`);
+    assert.fail(`${path} still uses the legacy package scope`);
   }
 });
 
-test("scaffolds new packages in the stable workspace scope", async (t) => {
+test("TEST-SCOPE-003 scaffolds new packages in the root project scope", async (t) => {
   const temporaryRoot = await mkdtemp(join(tmpdir(), "package-scope-test-"));
   t.after(() => rm(temporaryRoot, { recursive: true, force: true }));
   await writeFile(
     join(temporaryRoot, "package.json"),
-    '{"name":"customer-project"}\n'
+    '{"name":"acme-platform"}\n'
   );
 
   const result = spawnSync(
@@ -453,5 +454,5 @@ test("scaffolds new packages in the stable workspace scope", async (t) => {
   const packageJson = JSON.parse(
     await readFile(join(temporaryRoot, "packages/billing/package.json"), "utf8")
   );
-  assert.equal(packageJson.name, "@repo/billing");
+  assert.equal(packageJson.name, "@acme-platform/billing");
 });

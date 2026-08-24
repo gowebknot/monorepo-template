@@ -54,16 +54,16 @@ importers:
 
   apps/expo:
     dependencies:
-      "@repo/api-client":
+      "@monorepo-template/api-client":
         specifier: workspace:^
         version: link:../../packages/api-client
-      "@repo/entities":
+      "@monorepo-template/entities":
         specifier: workspace:^
         version: link:../../packages/entities
-      "@repo/env":
+      "@monorepo-template/env":
         specifier: workspace:^
         version: link:../../packages/env
-      "@repo/query-client":
+      "@monorepo-template/query-client":
         specifier: workspace:^
         version: link:../../packages/query-client
       "@tanstack/react-form":
@@ -163,16 +163,16 @@ importers:
       "@react-navigation/native-stack":
         specifier: ^7.0.0
         version: 7.18.8(uxytmx65vos3edikmm74kymsqi)
-      "@repo/api-client":
+      "@monorepo-template/api-client":
         specifier: workspace:^
         version: link:../../packages/api-client
-      "@repo/entities":
+      "@monorepo-template/entities":
         specifier: workspace:^
         version: link:../../packages/entities
-      "@repo/env":
+      "@monorepo-template/env":
         specifier: workspace:^
         version: link:../../packages/env
-      "@repo/query-client":
+      "@monorepo-template/query-client":
         specifier: workspace:^
         version: link:../../packages/query-client
       "@tanstack/react-form":
@@ -281,19 +281,19 @@ importers:
       "@hugeicons/react":
         specifier: ^1.1.9
         version: 1.1.9(react@19.2.8)
-      "@repo/api-client":
+      "@monorepo-template/api-client":
         specifier: workspace:^
         version: link:../../packages/api-client
-      "@repo/entities":
+      "@monorepo-template/entities":
         specifier: workspace:^
         version: link:../../packages/entities
-      "@repo/env":
+      "@monorepo-template/env":
         specifier: workspace:^
         version: link:../../packages/env
-      "@repo/query-client":
+      "@monorepo-template/query-client":
         specifier: workspace:^
         version: link:../../packages/query-client
-      "@repo/ui":
+      "@monorepo-template/ui":
         specifier: workspace:^
         version: link:../../packages/ui
       "@tanstack/react-form":
@@ -396,10 +396,10 @@ importers:
       "@nestjs/platform-express":
         specifier: ^11.0.1
         version: 11.1.28(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)
-      "@repo/db":
+      "@monorepo-template/db":
         specifier: workspace:^
         version: link:../../packages/db
-      "@repo/env":
+      "@monorepo-template/env":
         specifier: workspace:^
         version: link:../../packages/env
       reflect-metadata:
@@ -493,19 +493,19 @@ importers:
       "@hugeicons/react":
         specifier: ^1.1.9
         version: 1.1.9(react@19.2.8)
-      "@repo/api-client":
+      "@monorepo-template/api-client":
         specifier: workspace:^
         version: link:../../packages/api-client
-      "@repo/entities":
+      "@monorepo-template/entities":
         specifier: workspace:^
         version: link:../../packages/entities
-      "@repo/env":
+      "@monorepo-template/env":
         specifier: workspace:^
         version: link:../../packages/env
-      "@repo/query-client":
+      "@monorepo-template/query-client":
         specifier: workspace:^
         version: link:../../packages/query-client
-      "@repo/ui":
+      "@monorepo-template/ui":
         specifier: workspace:^
         version: link:../../packages/ui
       "@tailwindcss/vite":
@@ -639,7 +639,7 @@ importers:
 
   packages/api-client:
     dependencies:
-      "@repo/entities":
+      "@monorepo-template/entities":
         specifier: workspace:^
         version: link:../entities
     devDependencies:
@@ -660,7 +660,7 @@ importers:
 
   packages/db:
     dependencies:
-      "@repo/env":
+      "@monorepo-template/env":
         specifier: workspace:^
         version: link:../env
       better-sqlite3:
@@ -734,10 +734,10 @@ importers:
 
   packages/query-client:
     dependencies:
-      "@repo/api-client":
+      "@monorepo-template/api-client":
         specifier: workspace:^
         version: link:../api-client
-      "@repo/entities":
+      "@monorepo-template/entities":
         specifier: workspace:^
         version: link:../entities
     devDependencies:
