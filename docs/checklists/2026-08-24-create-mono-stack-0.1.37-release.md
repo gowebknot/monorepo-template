@@ -112,3 +112,13 @@
 - Do not publish if authentication is missing or package validation fails.
 
 ## Validation Notes
+
+## Updates
+
+### 2026-08-24 Release Completion
+
+- `TEST-RELEASE-003` passing rerun: Commit `fa761fa` was created with hooks passing; `origin/master` and annotated tag `v0.1.37` point to that commit. No force-push or hook bypass was used.
+- `TEST-RELEASE-004` first observed run and passing rerun: `pnpm --filter create-mono-stack publish:package` published successfully; `npm view create-mono-stack version dist-tags --json` reports version `0.1.37` and `latest: 0.1.37`.
+- Release steps completed: version and fixture bump, validation, intended-file staging, commit, push, tag push, npm publication, and remote/package verification.
+- Follow-up commit validation failure: the repository hook's create-mono-stack test run had one transient interactive wizard timeout in `test/interactive-wizard.js` (`263 passed, 1 failed`); no files were committed by that attempt.
+- Follow-up validation recovery: the focused interactive wizard test passed all 24 tests, followed by the full create-mono-stack suite passing all 264 tests. The follow-up documentation commit is ready to retry.
