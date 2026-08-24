@@ -101,3 +101,14 @@ migration, dependency, security, or environment contract changes are included.
 
 - Planned before implementation.
 - The rerun of `just check` passed all required checks with `271/271` launcher tests passing; expected TanStack React Compiler warnings remain non-fatal.
+
+## Updates
+
+### 2026-08-24: Release completed
+
+- Updated the release-coupled management fixture to `v0.1.41` after the first focused validation exposed the stale `v0.1.40` expectation.
+- Committed the release as `3fcc0ab` and pushed `master`.
+- Created and pushed annotated tag `v0.1.41`; the tag resolves to commit `3fcc0ab`.
+- Published through `pnpm --filter create-mono-stack publish:package`; npm reports `0.1.41` as `latest`.
+- Final npm pack inspection reports `create-mono-stack-0.1.41.tgz` with no credential files.
+- Final release verification passed for remote refs, npm metadata, and a clean worktree.
