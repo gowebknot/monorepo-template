@@ -74,8 +74,8 @@
 - **Must not happen:** No amend, force-push, skipped hooks, or unrelated staged files.
 - **Planned command:** `git push origin master`, `git tag -a v0.1.36 -m "Release v0.1.36"`, and `git push origin v0.1.36`
 - **Expected result before the code change:** No release commit or `v0.1.36` tag exists remotely.
-- **First observed run:** Pending until the Git commands run.
-- **Passing rerun:** Pending until the Git commands run.
+- **First observed run:** Commit `9678713` passed all required hooks; `master` and annotated tag `v0.1.36` were pushed successfully.
+- **Passing rerun:** Remote verification confirms `origin/master` contains the release commit and `v0.1.36` points to it.
 
 ### TEST-RELEASE-004: Publish npm package
 
@@ -91,19 +91,19 @@
 - **Must not happen:** No direct npm publish or credentials in Git.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package` and `npm view create-mono-stack dist-tags version --json`
 - **Expected result before the code change:** `0.1.36` is not published and `latest` remains `0.1.35`.
-- **First observed run:** Pending until publication runs.
-- **Passing rerun:** Pending until registry verification runs.
+- **First observed run:** The package-local publish wrapper published `create-mono-stack@0.1.36` successfully.
+- **Passing rerun:** npm metadata confirms `latest` is `0.1.36`, with the published tarball and integrity hash available.
 
 ## Release Steps
 
 - [x] Bump package version and current-template fixture.
 - [x] Run and record release validation.
-- [ ] Inspect final diff and stage only intended files.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push annotated `v0.1.36`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact, and final status.
+- [x] Inspect final diff and stage only intended files.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push annotated `v0.1.36`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact, and final status.
 
 ## Risks And Follow-Up
 
@@ -116,3 +116,4 @@
 - `just check` passed, including lint, typecheck, skills tests, template tests, and server tests.
 - `pnpm --filter create-mono-stack exec npm pack --dry-run` reported `create-mono-stack@0.1.36` with 288 files and no credentials.
 - `pnpm format:check`, `pnpm skills:check`, and `git diff --check` passed.
+- Commit `9678713` and tag `v0.1.36` were pushed; npm `latest` is `0.1.36`.
