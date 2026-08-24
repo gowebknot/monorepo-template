@@ -124,3 +124,10 @@ Checklist ID: CHECKLIST-AUTOMATED-GENERATED-PROJECT-SETUP-001
 
 - The first focused rerun passed all four setup cases and the static recipe assertion after correcting the recipe test's broad `pnpm dev` match. The first lint run then reported an unused approval variable and regex indentation style violations; those are corrected before the final rerun.
 - Final focused launcher tests passed 44 tests; package lint, repository formatting, `just --dry-run setup`, and `git diff --check` passed. The full launcher suite reached 269/270 passing with one unrelated intermittent Ink timing failure (`TEST-WIZARD-007`).
+
+## Updates
+
+### 2026-08-24: Timing stabilization included in release
+
+- The render wait budget was increased to ten seconds in the subsequent timing fix.
+- The full launcher suite then passed 270/270 as part of the `0.1.40` release gate.

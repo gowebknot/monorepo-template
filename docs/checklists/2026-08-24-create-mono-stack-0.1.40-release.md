@@ -116,3 +116,13 @@
 ## Validation Notes
 
 - Version metadata was updated to `0.1.40`; package lint, formatting, whitespace validation, and npm pack dry-run passed. The first full launcher validation reached 268/270 because two unrelated Ink interaction cases exceeded the test helper's three-second render wait under suite load. The wait budget correction is pending before rerunning the release gate.
+
+## Updates
+
+### 2026-08-24: Release completed
+
+- Increased `create-mono-stack` to `0.1.40` and committed the release as `5a0e4db8da5ad236eee0b070f11514ab31ebab65`.
+- Increased the Ink test render wait budget to ten seconds; the full launcher suite passed 270/270 and `just check` passed.
+- Pushed `master` and annotated tag `v0.1.40`; both remote refs resolve to the release commit.
+- Published through `pnpm --filter create-mono-stack publish:package`; npm reports `0.1.40` as `latest`.
+- `npm pack --dry-run --json` reports `create-mono-stack-0.1.40.tgz` and no `.npmrc.auth` or credential entries.
