@@ -10,6 +10,9 @@ const sourceRoots = [
   "packages",
   "core/create-mono-stack/reference-templates/managed"
 ];
+const optionalSourceRoots = new Set([
+  "core/create-mono-stack/reference-templates/managed"
+]);
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx"]);
 
 async function collectSourceFiles(directory) {
@@ -54,7 +57,17 @@ function findManualFormManagement(source, filePath) {
 async function scanForManualFormManagement() {
   const findings = [];
   for (const sourceRoot of sourceRoots) {
-    for (const filePath of await collectSourceFiles(sourceRoot)) {
+    let sourceFiles;
+    try {
+      sourceFiles = await collectSourceFiles(sourceRoot);
+    } catch (error) {
+      if (error.code === "ENOENT" && optionalSourceRoots.has(sourceRoot)) {
+        continue;
+      }
+      throw error;
+    }
+
+    for (const filePath of sourceFiles) {
       const source = await readFile(join(repositoryRoot, filePath), "utf8");
       findings.push(
         ...findManualFormManagement(source, relative(repositoryRoot, filePath))

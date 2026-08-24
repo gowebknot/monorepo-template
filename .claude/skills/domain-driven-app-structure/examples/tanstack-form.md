@@ -6,13 +6,19 @@ authoritative value shape.
 
 ```tsx
 import { useAppForm } from "@/components/forms/form-core";
-import type { CreateTodoInput } from "@repo/entities/example";
+import {
+  createTodoInputSchema,
+  type CreateTodoInput
+} from "@repo/entities/example";
 
 const form = useAppForm({
   defaultValues: {
     userId: "",
     title: ""
   } satisfies CreateTodoInput,
+  validators: {
+    onSubmit: createTodoInputSchema
+  },
   onSubmit: async ({ value }) => {
     await createTodo(value);
     form.reset();
