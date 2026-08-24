@@ -75,7 +75,7 @@
 - **Planned command:** `git push origin master`, `git tag -a v0.1.35 -m "Release v0.1.35"`, and `git push origin v0.1.35`
 - **Expected result before the code change:** No release commit or `v0.1.35` tag exists remotely.
 - **First observed run:** Commit attempt was rejected by the required hook because one interactive wizard test timed out; no commit or tag was created.
-- **Passing rerun:** Pending until the commands run.
+- **Passing rerun:** Commit `0aa2d75` passed all required hooks; `master` and annotated tag `v0.1.35` were pushed successfully and verified against `origin`.
 
 ### TEST-RELEASE-004: Publish npm package
 
@@ -91,19 +91,19 @@
 - **Must not happen:** No direct npm publish or credentials in Git.
 - **Planned command:** `pnpm --filter create-mono-stack publish:package` and `npm view create-mono-stack@0.1.35 version dist-tags --json`
 - **Expected result before the code change:** `0.1.35` is not published.
-- **First observed run:** Pending until the commands run.
-- **Passing rerun:** Pending until the commands run.
+- **First observed run:** The package-local publish wrapper published `create-mono-stack@0.1.35` successfully.
+- **Passing rerun:** npm metadata confirms version `0.1.35`, its registry tarball, and integrity hash.
 
 ## Release Steps
 
-- [ ] Bump package version and current-template fixture.
-- [ ] Run and record release validation.
-- [ ] Inspect final diff and stage only intended files.
-- [ ] Commit with a Conventional Commit message and passing hooks.
-- [ ] Push `master`.
-- [ ] Create and push annotated `v0.1.35`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact, and final status.
+- [x] Bump package version and current-template fixture.
+- [x] Run and record release validation.
+- [x] Inspect final diff and stage only intended files.
+- [x] Commit with a Conventional Commit message and passing hooks.
+- [x] Push `master`.
+- [x] Create and push annotated `v0.1.35`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact, and final status.
 
 ## Risks And Follow-Up
 
@@ -113,3 +113,4 @@
 ## Validation Notes
 
 - The first commit attempt ran the required hooks without bypasses; 263 of 264 launcher tests passed and `interactive-wizard.test.js` timed out once.
+- The retry passed all 264 launcher tests. Registry verification returned `create-mono-stack@0.1.35` with the published tarball and integrity hash.
