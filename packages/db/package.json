@@ -12,6 +12,10 @@
     "./example": {
       "types": "./dist/example/index.d.ts",
       "default": "./dist/example.js"
+    },
+    "./auth-schema": {
+      "types": "./dist/src/auth-schema.d.ts",
+      "default": "./dist/auth-schema.js"
     }
   },
   "imports": {
@@ -21,8 +25,11 @@
   "scripts": {
     "dev": "vite build --watch",
     "db:generate": "drizzle-kit generate",
+    "db:generate:auth": "drizzle-kit generate --config ./drizzle.auth.config.ts",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:auth": "drizzle-kit migrate --config ./drizzle.auth.config.ts",
     "db:studio": "drizzle-kit studio",
+    "test": "pnpm build && node --test test/*.test.mjs",
     "build": "tsc && vite build",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",

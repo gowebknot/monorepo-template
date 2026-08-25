@@ -9,6 +9,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, "src/index.ts"),
+        "auth-schema": path.resolve(__dirname, "src/auth-schema.ts"),
         example: path.resolve(__dirname, "example/index.ts")
       },
       formats: ["es"],

@@ -73,6 +73,9 @@ export const REFERENCE_PROFILES = {
     managedTemplateRoot: managedTemplate("server"),
     replaceScriptNames: [
       "test",
+      "test:unit",
+      "test:api:e2e",
+      "test:api:smoke",
       "test:watch",
       "test:cov",
       "test:debug",

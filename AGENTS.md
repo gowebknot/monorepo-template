@@ -60,6 +60,22 @@ pnpm --filter @monorepo-template/entities build
 pnpm --filter @monorepo-template/config typecheck
 ```
 
+## Generated Project Template Updates
+
+Agents working in a generated project must preview template changes before applying them:
+
+```sh
+pnpm template:update --dry-run
+```
+
+Inspect the preview, resolve any reported conflicts or ambiguous changes, then apply the update:
+
+```sh
+pnpm template:update
+```
+
+Run the generated project's validation checks after the real update. Do not skip the preview step.
+
 Release `create-mono-stack` only after explicit user authorization. Follow the package-local release
 checklist and publish wrapper rather than calling the registry directly:
 

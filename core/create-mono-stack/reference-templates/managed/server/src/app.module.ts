@@ -5,6 +5,7 @@ import { validateServerEnv } from '@monorepo-template/env/server';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './http/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AppService } from './app.service';
       isGlobal: true,
       validate: (config: Record<string, unknown>) => validateServerEnv(config),
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

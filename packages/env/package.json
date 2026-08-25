@@ -38,6 +38,7 @@
     "dev": "vite build --watch",
     "build": "tsc && vite build",
     "lint": "eslint .",
+    "test": "pnpm build && node --test test/*.test.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "preview": "vite preview"
   },

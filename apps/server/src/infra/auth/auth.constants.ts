@@ -1,0 +1,1 @@
+export const MONOREPO_AUTH_HANDLER = Symbol('MONOREPO_AUTH_HANDLER');

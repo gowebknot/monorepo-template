@@ -69,6 +69,68 @@ test("passes generated stack features to Copier during updates", () => {
   ]);
 });
 
+test("TEST-UPDATE-013 previews without writing", () => {
+  const calls = [];
+  const writes = [];
+  const execute = (command, args, options) => {
+    calls.push({ args, command, options });
+    return command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+  };
+
+  assert.equal(
+    updateTemplate(["--dry-run"], {
+      cwd: projectRoot,
+      environment: { PATH: "/usr/bin" },
+      execute,
+      exists: () => true,
+      platform: "darwin",
+      readFile: () => stackConfig,
+      readFileSync: () => skillTriggers,
+      writeFileSync: (path, contents) => writes.push({ contents, path })
+    }),
+    0
+  );
+
+  assert.deepEqual(copierCall(calls).args, [
+    "-m",
+    "copier",
+    "update",
+    "--trust",
+    ...expectedStackArguments,
+    "--pretend",
+    "--defaults"
+  ]);
+  assert.equal(writes.length, 0);
+});
+
+test("TEST-UPDATE-014 preserves update arguments during preview", () => {
+  const calls = [];
+  const execute = (command, args) => {
+    calls.push({ args, command });
+    return command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+  };
+
+  updateTemplate(["--dry-run", "--vcs-ref", "v1.2.0"], {
+    cwd: projectRoot,
+    environment: { PATH: "/usr/bin" },
+    execute,
+    exists: () => true,
+    platform: "darwin",
+    readFile: () => stackConfig
+  });
+
+  assert.deepEqual(copierCall(calls).args.slice(-4), [
+    "--pretend",
+    "--defaults",
+    "--vcs-ref",
+    "v1.2.0"
+  ]);
+});
+
 test("synchronizes skill triggers after a template update", () => {
   const calls = [];
   const writes = [];
@@ -114,6 +176,30 @@ test("synchronizes skill triggers after a template update", () => {
   assert.ok(!rules.some((rule) => rule.when[0] === "apps/web/**"));
   assert.ok(rules.some((rule) => rule.when[0][0] === "*"));
   assert.equal(calls.filter(({ command }) => command !== "git").length, 1);
+});
+
+test("TEST-UPDATE-015 keeps normal update side effects enabled", () => {
+  const writes = [];
+  const execute = (command) =>
+    command === "git"
+      ? { status: 1, stderr: "", stdout: "" }
+      : { status: 0, stderr: "", stdout: "" };
+
+  assert.equal(
+    updateTemplate(["--defaults"], {
+      cwd: projectRoot,
+      environment: { PATH: "/usr/bin" },
+      execute,
+      exists: () => true,
+      platform: "darwin",
+      readFile: () => stackConfig,
+      readFileSync: () => skillTriggers,
+      writeFileSync: (path, contents) => writes.push({ contents, path })
+    }),
+    0
+  );
+
+  assert.equal(writes.length, 1);
 });
 
 test("failed template update leaves triggers unchanged", () => {

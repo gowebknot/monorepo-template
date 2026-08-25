@@ -165,9 +165,11 @@ export function updateTemplate(args, dependencies = {}) {
     ...stackFeatureData(stackConfig).flatMap((data) => ["--data", data]),
     ...stackAppExcludes(stackConfig).flatMap((path) => ["--exclude", path])
   ];
-  const updateArguments = args.includes("--defaults")
-    ? args
-    : ["--defaults", ...args];
+  const dryRun = args.includes("--dry-run");
+  const callerArguments = args.filter((argument) => argument !== "--dry-run");
+  const updateArguments = callerArguments.includes("--defaults")
+    ? callerArguments
+    : ["--defaults", ...callerArguments];
   const result = execute(
     python,
     [
@@ -176,6 +178,7 @@ export function updateTemplate(args, dependencies = {}) {
       "update",
       "--trust",
       ...stackArguments,
+      ...(dryRun ? ["--pretend"] : []),
       ...updateArguments
     ],
     {
@@ -188,7 +191,7 @@ export function updateTemplate(args, dependencies = {}) {
     throw missingEnvironmentError(python, platform);
   }
   if (result.error) throw commandError(python, result);
-  if ((result.status ?? 1) === 0) {
+  if (!dryRun && (result.status ?? 1) === 0) {
     synchronizeSkillTriggers(cwd, stackConfig.apps, {
       read: dependencies.readFileSync ?? readFileSync,
       write: dependencies.writeFileSync ?? writeFileSync

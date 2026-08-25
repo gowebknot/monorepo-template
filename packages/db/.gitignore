@@ -2,4 +2,6 @@ node_modules
 dist
 dist-ssr
 drizzle
+!drizzle/auth/
+!drizzle/auth/**
 *.local

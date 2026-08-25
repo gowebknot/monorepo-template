@@ -12,6 +12,14 @@ export const globalEnv = z.object({
   EXPO_PUBLIC_API_BASE_URL: z.string().url().default("http://localhost:3001"),
   RN_PUBLIC_APP_URL: z.string().default("http://localhost:8081"),
   RN_PUBLIC_API_BASE_URL: z.string().url().default("http://localhost:3001"),
+  BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
+  BETTER_AUTH_SECRET: z
+    .string()
+    .min(32)
+    .default("change-me-local-only-012345678901234567890123456789012345678901"),
+  AUTH_TRUSTED_ORIGINS: z
+    .string()
+    .default("http://localhost:5173,http://localhost:8081,expo://"),
   DATABASE_URL: z
     .string()
     .min(1)

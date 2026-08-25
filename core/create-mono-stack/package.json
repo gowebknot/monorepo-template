@@ -1,6 +1,6 @@
 {
   "name": "create-mono-stack",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "license": "MIT",
   "description": "Create a project from the Go Webknot monorepo template",
   "type": "module",
@@ -19,7 +19,7 @@
     "lint": "eslint .",
     "typecheck": "node --check bin/create-mono-stack.js",
     "publish:package": "node scripts/publish.mjs",
-    "test": "node --test test/cli.test.js test/copier-template.test.js test/create-project-native.test.js test/feature-config.test.js test/git-host-alias.test.js test/git-setup.test.js test/interactive-command.test.js test/interactive-wizard.test.js test/native-scaffold-overlays.test.js test/native-scaffold-selection.test.js test/native-scaffold.test.js test/port-allocation.test.js test/project-cleanup.test.js test/project-management.test.js test/publish.test.js test/python-runtime.test.js test/reference-profiles.test.js test/runtime-installers.test.js test/stack-config.test.js test/template-update-stack.test.js test/template-update.test.js test/vite-wizard-observer.test.js",
+    "test": "node --test test/cli.test.js test/copier-template.test.js test/create-project-native.test.js test/feature-config.test.js test/git-host-alias.test.js test/git-setup.test.js test/interactive-command.test.js test/interactive-wizard.test.js test/native-scaffold-overlays.test.js test/native-scaffold-selection.test.js test/native-scaffold.test.js test/port-allocation.test.js test/project-cleanup.test.js test/project-management.test.js test/publish.test.js test/python-runtime.test.js test/reference-profiles.test.js test/runtime-installers.test.js test/stack-config.test.js test/template-contract.test.js test/template-update-stack.test.js test/template-update.test.js test/vite-wizard-observer.test.js",
     "test:integration": "node --test test/copier-template.integration.test.js"
   },
   "engines": {

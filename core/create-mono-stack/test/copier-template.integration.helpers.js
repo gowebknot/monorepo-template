@@ -88,6 +88,26 @@ export async function assertGeneratedProject({
     "nest build --config nest-cli.reference.json"
   );
   assert.equal(serverPackage.dependencies["@acme-platform/db"], "workspace:^");
+  assert.equal(
+    serverPackage.dependencies["@acme-platform/auth"],
+    "workspace:^"
+  );
+  for (const path of [
+    "apps/server/src/http/auth/auth.controller.ts",
+    "apps/server/src/http/auth/auth.module.ts",
+    "apps/server/src/infra/auth/auth-handler.provider.ts",
+    "apps/server/src/infra/auth/auth.constants.ts",
+    "apps/server/src/http/auth/auth.controller.spec.ts"
+  ]) {
+    await access(join(projectRoot, path));
+  }
+  for (const path of [
+    "apps/server/src/auth.controller.ts",
+    "apps/server/src/auth.module.ts",
+    "apps/server/src/auth.constants.ts"
+  ]) {
+    await assert.rejects(access(join(projectRoot, path)));
+  }
   await assert.rejects(readFile(join(projectRoot, "copier.yml"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "core"), "utf8"));
   await assert.rejects(readFile(join(projectRoot, "docs/checklists"), "utf8"));
@@ -198,7 +218,11 @@ export function assertReferenceTaskGraph(graph) {
     ],
     [
       "server#dev:reference",
-      ["@acme-platform/db#build", "@acme-platform/env#build"]
+      [
+        "@acme-platform/auth#build",
+        "@acme-platform/db#build",
+        "@acme-platform/env#build"
+      ]
     ]
   ]);
 

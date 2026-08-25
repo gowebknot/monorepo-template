@@ -98,6 +98,13 @@ Omit that setting when generic GitHub SSH works. Run updates through the wrapper
 generic source URL while Git uses the local alias when needed:
 
 ```sh
+pnpm template:update --dry-run
+```
+
+Inspect the preview and resolve any reported conflicts or ambiguous changes. Apply the update only
+after review, then run the generated project's validation checks:
+
+```sh
 pnpm template:update
 ```
 

@@ -1,0 +1,45 @@
+{
+  "name": "@monorepo-template/auth",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "default": "./dist/web.js"
+    },
+    "./expo": {
+      "types": "./dist/expo.d.ts",
+      "default": "./dist/expo.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "test": "pnpm build && node --test test/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "unplugin-dts": "^1.0.3",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.1",
+    "@better-auth/expo": "^1.7.1",
+    "@monorepo-template/db": "workspace:^",
+    "better-auth": "^1.7.1",
+    "drizzle-orm": "^0.45.2"
+  }
+}

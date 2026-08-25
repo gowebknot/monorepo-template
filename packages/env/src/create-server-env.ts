@@ -6,7 +6,10 @@ export const serverEnvSchema = globalEnv.pick({
   NODE_ENV: true,
   DATABASE_URL: true,
   PORT: true,
-  ALLOWED_ORIGINS: true
+  ALLOWED_ORIGINS: true,
+  BETTER_AUTH_URL: true,
+  BETTER_AUTH_SECRET: true,
+  AUTH_TRUSTED_ORIGINS: true
 });
 
 export const validateServerEnv = (

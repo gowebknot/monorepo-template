@@ -6,9 +6,9 @@
 
 ## Template Rule
 
-- Keep `src/` connection-only in this template.
+- Keep `src/` connection-only in this template except for the intentional production Better Auth schema under `src/auth-schema.ts`.
 - Do not put driver-specific code in `src/`; concrete driver examples belong under `example/`.
-- Do not put table/schema definitions in `src/` unless adapting the template into a real project intentionally.
+- Do not put other table/schema definitions in `src/`; `src/auth-schema.ts` is the intentional production-auth exception.
 - Example schema code lives under `example/schema/` and is used by `drizzle.config.ts`.
 - Example CRUD helpers live under `example/crud/`, one file per schema file, each exporting plain async functions that take the Drizzle db instance as their first argument. These are reference implementations for the example schema — not exported from `src/`, but deliberately exported via the separate `./example` subpath (see below) so the example app (`apps/server`) can demonstrate them end-to-end. Do not treat `./example` as the package's production API surface.
 
@@ -48,6 +48,7 @@ example/crud/
 
 - `.` (JS at `dist/index.js`, types at `dist/src/index.d.ts`): connection-only helpers (`createDb`, `getDatabaseUrl`).
 - `./example` (JS at `dist/example.js`, types at `dist/example/index.d.ts`): the example db connection, schema, and CRUD helpers, bundled together. This is the entry point `apps/server` imports from.
+- `./auth-schema` (JS at `dist/auth-schema.js`, types at `dist/src/auth-schema.d.ts`): production PostgreSQL tables consumed by `@monorepo-template/auth`.
 
 ## Commands
 
@@ -58,4 +59,6 @@ pnpm --filter @monorepo-template/db build
 pnpm --filter @monorepo-template/db typecheck
 pnpm --filter @monorepo-template/db lint
 pnpm --filter @monorepo-template/db db:generate
+pnpm --filter @monorepo-template/db db:generate:auth
+pnpm --filter @monorepo-template/db test
 ```

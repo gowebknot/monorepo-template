@@ -4,7 +4,7 @@
 
 `server` is a NestJS app scaffolded via `nest new`. It is the workspace's real API app.
 
-The main application (`src/`) is intentionally minimal and exposes only a health endpoint. All example/reference modules (database, users, todos, todo-items, auth) live in `reference/` and can be run as a separate Nest application for demonstration or copy-paste purposes.
+The main application (`src/`) exposes health and production Better Auth. Example/reference modules (database, users, todos, todo-items, auth) live in `reference/` and can be run as a separate Nest application for demonstration or copy-paste purposes.
 
 ## Rules
 
@@ -12,6 +12,9 @@ The main application (`src/`) is intentionally minimal and exposes only a health
 - Do not read `process.env` directly. Import config from `@monorepo-template/env/server` (see `serverEnv` usage in `src/main.ts`) or `@monorepo-template/env/reference-server` for the reference entry point.
 - Add any new required environment variables to `packages/env`'s `globalEnv` first, then pick them into `serverEnvSchema` or `referenceServerEnvSchema`, before consuming them here.
 - The reference server (`reference/main.ts`) is the only place that imports `@monorepo-template/db/example`. The real server (`src/`) must not depend on database modules or example CRUD code.
+- Production auth transport belongs under `src/http/auth/`; Better Auth and PostgreSQL adapter construction belongs under `src/infra/auth/`.
+- `src/app.module.ts` is the composition root and imports the production auth module. Do not put production auth files at the `src/` root.
+- Production auth currently supports PostgreSQL email/password only. OAuth providers and email delivery are intentionally deferred.
 - Controllers in the reference area skip request validation (no `class-validator`/DTO pipes) for demo simplicity — a real project should add a `ValidationPipe` and validated DTOs.
 
 ## Source Layout
@@ -19,9 +22,18 @@ The main application (`src/`) is intentionally minimal and exposes only a health
 ```text
 src/
   main.ts                  # real server entry point
-  app.module.ts            # real server module (health only)
+  app.module.ts            # real server composition root
   app.controller.ts        # GET /health
   app.service.ts
+  http/
+    auth/
+      auth.controller.ts   # /api/auth/* transport boundary
+      auth.module.ts
+      auth.controller.spec.ts
+  infra/
+    auth/
+      auth-handler.provider.ts
+      auth.constants.ts
 reference/
   main.ts                  # reference server entry point
   app.module.ts            # reference server module

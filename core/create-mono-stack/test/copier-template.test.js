@@ -86,12 +86,20 @@ templateAdapters.set(
       "Omit that setting when generic GitHub SSH works.",
       "Omit the setting when generic GitHub SSH works."
     )
+    .replace(
+      "  | regex_replace",
+      "  | replace('Project setup stores any --git-host-alias', 'Preview template changes with `pnpm template:update --dry-run` first. Inspect the preview and resolve any reported conflicts or ambiguous changes before running `pnpm template:update`.\\n\\nProject setup stores any --git-host-alias')\n  | regex_replace"
+    )
 );
 
 templateAdapters.set(
   ".env.example",
   templateAdapters
     .get(".env.example")
+    .replace(
+      "RN_PUBLIC_API_BASE_URL=http://localhost:3001\n",
+      "RN_PUBLIC_API_BASE_URL=http://localhost:3001\nBETTER_AUTH_URL=http://localhost:3000\nBETTER_AUTH_SECRET=change-me-local-only-012345678901234567890123456789012345678901\nAUTH_TRUSTED_ORIGINS=http://localhost:5173,http://localhost:8081,expo://\n"
+    )
     .replace("PGADMIN_PORT=5050\n", "PGADMIN_PORT=5050\nACT_VERSION=v0.2.89\n")
 );
 
@@ -185,6 +193,9 @@ EXPO_PUBLIC_APP_URL=http://localhost:8081
 EXPO_PUBLIC_API_BASE_URL=http://localhost:3001
 RN_PUBLIC_APP_URL=http://localhost:8081
 RN_PUBLIC_API_BASE_URL=http://localhost:3001
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=change-me-local-only-012345678901234567890123456789012345678901
+AUTH_TRUSTED_ORIGINS=http://localhost:5173,http://localhost:8081,expo://
 DATABASE_URL=postgresql://app:app@localhost:5432/app
 REDIS_URL=redis://localhost:6379
 POSTGRES_DB=app

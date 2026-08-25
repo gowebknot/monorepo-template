@@ -107,8 +107,18 @@ cloning the project elsewhere or when repairing a project:
 
 ```sh
 git config --local mono-stack.template-host-alias github-webknot
+pnpm template:update --dry-run
+```
+
+Inspect the preview and resolve any reported conflicts or ambiguous changes before applying the
+update:
+
+```sh
 pnpm template:update
 ```
+
+Run the generated project's validation checks after the real update. The dry-run is mandatory and
+must be completed before applying template changes.
 
 The update wrapper applies the local setting to Copier and its cached Git mirror without changing the
 generic `_src_path` in `.copier-answers.yml`.
