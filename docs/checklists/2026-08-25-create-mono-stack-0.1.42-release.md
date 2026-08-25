@@ -17,8 +17,8 @@ configuration and validation updates.
 - [x] Package metadata is version `0.1.42`.
 - [x] The complete repository validation gate passes without bypasses.
 - [x] The npm artifact contains the intended launcher files and no credentials.
-- [ ] Release commit, branch, annotated tag, and npm `latest` metadata identify `0.1.42`.
-- [ ] This checklist records user-visible behavior, compatibility impact, and validation results.
+- [x] Release commit, branch, annotated tag, and npm `latest` metadata identify `0.1.42`.
+- [x] This checklist records user-visible behavior, compatibility impact, and validation results.
 
 ## Exact Validation Cases
 
@@ -87,17 +87,17 @@ configuration and validation updates.
 - Must not happen: No force push, skipped hooks, direct `npm publish`, or missing current-worktree changes.
 - Planned command: `git push origin master`, `git tag -a v0.1.42 -m "Release v0.1.42"`, `git push origin v0.1.42`, `pnpm --filter create-mono-stack publish:package`.
 - Expected result before the code change: `v0.1.42` and npm `0.1.42` do not exist.
-- First observed run: Pending.
-- Passing rerun: Pending.
+- First observed run: Git push, annotated tag push, and wrapper publication completed; the first npm metadata query temporarily returned `0.1.41` while the exact package version was still propagating.
+- Passing rerun: `master` and `v0.1.42` resolve to `be18eb3`; npm exposes `create-mono-stack@0.1.42` and `latest` resolves to `0.1.42`.
 
 ## Implementation Plan
 
 - [x] Update `core/create-mono-stack/package.json` from `0.1.41` to `0.1.42`.
 - [ ] Run focused tests, `just check`, formatting, diff validation, and artifact inspection.
 - [ ] Inspect the complete diff and stage every current-worktree change requested by the user, excluding credentials and generated transient files.
-- [ ] Commit the release with a detailed Conventional Commit body and normal hooks.
-- [ ] Push `master`, create and push annotated `v0.1.42`, and publish through `publish:package`.
-- [ ] Verify remote refs and npm metadata, then record completion.
+- [x] Commit the release with a detailed Conventional Commit body and normal hooks.
+- [x] Push `master`, create and push annotated `v0.1.42`, and publish through `publish:package`.
+- [x] Verify remote refs and npm metadata, then record completion.
 
 ## Validation Notes
 
@@ -113,3 +113,14 @@ configuration and validation updates.
 - Template updates now require generated-project users and agents to preview with `--dry-run` before applying changes.
 - The release contains all current worktree changes by explicit user instruction, including the existing workspace configuration change.
 - Publishing requires the repository's configured npm auth and remote Git access.
+- The first post-release documentation commit was rejected by the normal pre-commit hook because the
+  known intermittent `selects additional stack features through the multiselect screen` test timed
+  out at 274/275. No hook bypass was used; the documentation commit will be retried after a clean suite.
+
+## Completion
+
+- Release commit: `be18eb3` (`chore(release): prepare create-mono-stack 0.1.42`)
+- Branch: `master` pushed to `origin`
+- Tag: annotated `v0.1.42`, pushed to `origin`
+- npm: `create-mono-stack@0.1.42` published with `latest` pointing to `0.1.42`
+- Artifact: `create-mono-stack-0.1.42.tgz`, 294 files, no credential files
