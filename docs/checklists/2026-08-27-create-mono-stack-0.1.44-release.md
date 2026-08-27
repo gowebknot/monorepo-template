@@ -114,3 +114,11 @@ dependency contracts are unchanged.
 - The rerun of `just check` passed all repository checks, including 275 launcher tests and 104 skills tests.
 - The npm dry run reported `create-mono-stack-0.1.44.tgz` with 294 files and no auth or credential files.
 - The first commit hook run failed only on the known timing-sensitive Ink test `selects additional stack features through the multiselect screen`; the hook completed 274 launcher tests successfully before the timeout.
+
+## Updates
+
+### 2026-08-27
+
+- **Reason:** Record the release operations that occurred after the release checklist was committed.
+- **Validation:** Commit `8fc9f3c` passed the normal hooks, `master` and annotated tag `v0.1.44` point to that commit, npm `latest` reports `0.1.44`, and the final pack inspection reports 294 files with no credential paths.
+- **Completion:** `create-mono-stack@0.1.44` was published through `pnpm --filter create-mono-stack publish:package`.
