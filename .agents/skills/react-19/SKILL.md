@@ -26,6 +26,21 @@ Use React 19 patterns deliberately and avoid legacy hook-heavy implementations.
 - Use the repository's established form and server-state libraries instead of replacing them with
   ad-hoc effects.
 
+## Lazy Loading
+
+- Make lazy loading the default for non-critical React code. Prefer `lazy(() => import("..."))` or
+  the framework's route-level equivalent for routes, large features, rare views, optional overlays,
+  and heavy widgets.
+- Declare lazy components at module scope, never inside a render function. Keep dynamic import paths
+  static enough for the bundler to analyze and split into predictable chunks.
+- Put `Suspense` fallbacks at meaningful route or feature boundaries and provide an error boundary
+  that can explain, retry, or recover from a failed chunk load.
+- Keep normal imports for React/runtime foundations, bootstrap and providers, router setup, critical
+  shell UI, tiny ubiquitous primitives, global side effects, type-only imports, and platforms where
+  the bundler does not produce useful deferred chunks. Do not split code merely to satisfy a rule.
+- Measure or inspect the generated chunks when the target toolchain supports it. Prefetch only when
+  navigation intent is clear and the extra transfer is likely to improve the interaction.
+
 ## Memoization and Components
 
 - Do not add `useMemo`, `useCallback`, or `memo` by habit.

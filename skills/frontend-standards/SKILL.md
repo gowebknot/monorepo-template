@@ -20,6 +20,21 @@ predictable loading and error behavior.
 ## UI Boundaries
 
 - Keep route composition, data loading, rendering, and reusable UI responsibilities distinct.
+- Treat lazy loading and code splitting as the default for frontend imports. Require an explicit
+  performance or platform reason before keeping non-critical code in the initial bundle.
+- Prefer lazy boundaries at routes, large feature entry points, rarely visited sections, and optional
+  UI such as modals, drawers, editors, charts, maps, data grids, and client-only integrations.
+- Keep the lazy boundary at the largest meaningful cohesive unit; do not split every tiny leaf or
+  ubiquitous primitive when the extra request and loading state cost more than the deferred work.
+- Keep normal imports for React and other runtime foundations, app bootstrap, providers, router setup,
+  critical shell UI, global styles and initialization side effects, type-only imports, and targets
+  whose bundler cannot provide useful deferred chunks. “It is convenient” is not sufficient justification.
+- Use statically analyzable dynamic imports, stable lazy component declarations, and meaningful
+  `Suspense` fallbacks and error boundaries. Prefetch only on clear user intent when it improves the
+  expected interaction rather than eagerly loading the same code.
+- For web targets, verify route and feature chunks are actually deferred. For Expo or React Native,
+  apply lazy loading only when the target bundler provides useful runtime deferral; do not assume
+  browser-style chunks.
 - Use shared API contracts and client/query boundaries instead of defining duplicate request types or
   direct transport calls in components.
 - Keep server state in the repository's query or loader layer; do not mirror it into effects or local

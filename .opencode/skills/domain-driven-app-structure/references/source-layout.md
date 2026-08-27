@@ -249,6 +249,10 @@ apps/mobile/
 ```
 
 - Keep router files focused on route composition and loading.
+- Treat route modules and large feature entry points as lazy-loading boundaries by default. Keep
+  bootstrap, providers, router setup, critical shell UI, and tiny shared primitives eager only when
+  they are needed immediately. Use the target web or native bundler's real chunking behavior to
+  decide whether a boundary defers useful work.
 - Keep feature components, schemas, and feature hooks inside `features/<feature>`.
 - Keep app-level components limited to app-wide composition such as layouts, navigation, shells, and
   app-specific branding.

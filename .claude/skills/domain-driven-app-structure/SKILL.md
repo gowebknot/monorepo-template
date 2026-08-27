@@ -24,5 +24,9 @@ that should follow domain boundaries and nested conventions.
 7. Keep shared UI primitives and form fields in `packages/ui`; do not duplicate them in app or
    feature component folders.
 8. Keep the rules generic, using domain and feature examples only as vocabulary.
-9. Preserve colocated tests, barrel exports, route nesting, and mock nesting described in the reference.
-10. Run affected package build, typecheck, lint, and test checks before finishing.
+9. Make route modules and large feature entry points lazy-load boundaries by default; keep the app
+   bootstrap, providers, router setup, critical shell, and shared primitives eager only when they are
+   needed immediately. Follow the platform's actual bundler behavior rather than assuming native apps
+   produce browser-style chunks.
+10. Preserve colocated tests, barrel exports, route nesting, and mock nesting described in the reference.
+11. Run affected package build, typecheck, lint, and test checks before finishing.
