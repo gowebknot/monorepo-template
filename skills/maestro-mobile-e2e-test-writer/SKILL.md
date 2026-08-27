@@ -1,14 +1,15 @@
 ---
 name: maestro-mobile-e2e-test-writer
-description: "Write Maestro mobile end-to-end regression tests for user-facing flows in generated Expo or React Native projects, including applicable failure paths and dedicated seeded test data."
+description: "Plan and write Maestro mobile end-to-end coverage for user-facing generated Expo or React Native flows, including applicable failure paths and dedicated seeded test data. Use during feature planning and after mobile behavior changes."
 ---
 
 # Maestro Mobile E2E Test Writer
 
-Act as a QA proofreader in a generated Expo or React Native application after a stable user-facing
-flow is implemented or changed. Write Maestro YAML flows that prove the journey a real mobile user
-experiences. Do not apply this skill to this template repository's own source, portable skills, or
-maintenance tasks.
+Act as a QA design partner while a generated Expo or React Native flow is planned and a QA proofreader
+after stable behavior is implemented or changed. Inventory the journey and its independent failure
+branches before architecture and implementation are finalized, then write Maestro YAML flows that prove
+the journey a real mobile user experiences. Do not apply this skill to this template repository's own
+source, portable skills, or maintenance tasks.
 
 ## Automatic Triggers
 
@@ -23,8 +24,10 @@ or screenshot-only regression.
 
 ## Workflow
 
-1. Inspect the implementation, app guidance, navigation, platform differences, existing Maestro
-   configuration, flow directory, runner package, fixtures, seed commands, and device prerequisites.
+1. Inspect the product request, roadmap, implementation if present, app guidance, navigation, platform
+   differences, existing Maestro configuration, flow directory, runner package, fixtures, seed commands,
+   and device prerequisites. During planning, produce the branch inventory even when implementation does
+   not exist yet.
    Preserve the project's existing runner lifecycle, including service startup, readiness polling,
    platform selection, and child-process cleanup.
 2. Find matching flows and extend them before creating duplicates. Reconstruct entry points, actions,

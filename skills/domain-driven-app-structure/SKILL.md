@@ -15,6 +15,11 @@ that should follow domain boundaries and nested conventions.
    `features/<feature>/components`.
 3. Identify the feature or domain for feature-owned code, then place transport, use-case, domain,
    persistence, and UI code in its matching nested folder.
+   Before creating or moving route files, record a route-group-to-feature ownership map. A route group
+   such as `(auth)` or `(welcome)` is an entry boundary, not a substitute for a feature directory;
+   route modules should compose the owning feature and must not become the only owner of its behavior.
+   Keep app-wide shell composition in the app-level components folder and feature behavior under the
+   mapped feature directory.
 4. Use `@tanstack/react-form` for every form, filter, edit flow, field value, validation state, and
    submit interaction. Manual form management is forbidden: do not use local React state or ad hoc
    handlers to own form values. Read `examples/tanstack-form.md` before implementing form handling.

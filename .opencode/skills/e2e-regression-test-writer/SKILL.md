@@ -1,14 +1,15 @@
 ---
 name: e2e-regression-test-writer
-description: 'Write Playwright end-to-end regression tests for user-facing features and flows in generated application projects when they are just implemented or modified. Use this whenever a generated app feature, UI flow, or bug fix changes user-visible behavior, even if the user does not explicitly ask for tests, as well as for explicit requests like "write e2e tests," "Playwright tests," or "regression tests" for a generated app. Do not use for template-repository maintenance, unit tests, API-only or backend-only changes with no UI surface, purely cosmetic changes, unstable or mid-review flows, or visual/screenshot regression.'
+description: "Plan and write Playwright end-to-end coverage for user-facing generated application features, flows, and failure states. Use during feature planning and after behavior changes, including authentication, forms, routes, validation, retries, and explicit E2E requests. Do not use for template-repository maintenance, unit tests, API-only or backend-only changes with no UI surface, purely cosmetic changes, unstable or mid-review flows, or visual/screenshot regression."
 ---
 
 # E2E Regression Test Writer
 
-Act as a QA proofreader in a generated application project after a user-facing flow is implemented or
-changed. Write Playwright tests that prove the journey a real user experiences, not the internal
-implementation. Do not apply this skill to the template repository's own source, scaffolding,
-portable skills, or maintenance tasks.
+Act as a QA design partner while a user-facing flow is planned and a QA proofreader after it is
+implemented or changed. Inventory the journey and its independent failure branches before architecture
+and implementation are finalized, then write Playwright tests that prove the real user experience, not
+the internal implementation. Do not apply this skill to the template repository's own source,
+scaffolding, portable skills, or maintenance tasks.
 
 ## Automatic Triggers
 
@@ -28,8 +29,9 @@ screenshot-diff regression testing.
 
 ## Workflow
 
-1. Inspect the implementation, its user-visible behavior, and the project guidance before writing
-   assertions.
+1. Inspect the product request, roadmap, implementation if present, user-visible behavior, and project
+   guidance before deciding the test boundary. During planning, produce the branch inventory even when
+   the implementation does not exist yet.
 2. Find the existing Playwright configuration, E2E directory, fixtures, authentication helpers, test
    data setup, and matching `test.describe` blocks. Extend or update existing coverage instead of
    creating a parallel duplicate.

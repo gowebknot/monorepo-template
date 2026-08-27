@@ -23,10 +23,10 @@
       "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"
     },
     "domain-driven-app-structure": {
-      "hash": "d941de79aadb657f15b85aada764d303838532e307b90a209f5aa183be86cac5"
+      "hash": "732e7173c751a3f408c31cefa3933b8572e31e491b5cda04247c26a738517f6a"
     },
     "e2e-regression-test-writer": {
-      "hash": "d5337fa2517c8098c2acb78febc80c5f93765177f1ada76d059942e5af575dc2"
+      "hash": "dd0c8ce076ef7ea18d8d89c69586dabcf658ec48fa33a1b58bcf647b79802315"
     },
     "end-to-end-api-flow": {
       "hash": "9543f14967554afdaf3686a08796e97f1fa929342b21ab797825ed0a761dd366"
@@ -38,7 +38,7 @@
       "hash": "0723effd57a7dd745548f7c8a6d85bc1b461c7f01de8bc1d80c17dc05fcafcc9"
     },
     "maestro-mobile-e2e-test-writer": {
-      "hash": "e18bd57f93f85ff3386e4bda5a01de3fa744be7641270e6e59f481f61cdae078"
+      "hash": "590ecbdedc61842e1f4a4f2ba9baccd2efaa9f3f8b2d486cf8997316cfa29336"
     },
     "observability": {
       "hash": "09e6e6363a9c1755fcb0c5b6ef2b0039495aa038ea891e7c6f39dced8414a7e3"
@@ -53,7 +53,7 @@
       "hash": "ddcb3b8ae5ca933521d91beb64d3dfd81848235d4dc7fec5c173cee10470bc29"
     },
     "test-first-workflow": {
-      "hash": "be1313e13397b11f5b461af96bed1d2d639bcb23aa9b90674b15032b8ceb4525"
+      "hash": "cdaf52821224e1236eb86007fcb472d42707e46700460f83d072c498d5e440d0"
     },
     "testing-policy": {
       "hash": "feb253b37baef75ad083a5adbd1a3b00db82d478043054912a9d0c7c171f56e9"
