@@ -147,3 +147,11 @@ contracts are unchanged.
 ## Validation Notes
 
 - First observed and passing results will be recorded after each planned command runs.
+
+## Updates
+
+### 2026-08-27
+
+- **Reason:** Record release operations completed after the release commit was created.
+- **Validation:** Commit `5a5681c`, `origin/master`, and annotated tag `v0.1.45` identify the same release commit. npm `latest` reports `0.1.45` after registry propagation. The pack inspection reports 294 files with no credential paths.
+- **Completion:** `create-mono-stack@0.1.45` was published through `pnpm --filter create-mono-stack publish:package`.
