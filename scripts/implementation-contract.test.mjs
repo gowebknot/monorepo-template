@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validateBeforeEdit } from "../.opencode/plugins/implementation-contract-gate.js";
+import {
+  withGitRepository,
+  writeChecklist
+} from "./test-helpers/implementation-contract-fixture.mjs";
 import { validateImplementationContract } from "./implementation-contract.mjs";
 
 function contract({
@@ -105,9 +108,11 @@ test("TEST-CONTRACT-005 accepts complete coverage with explicit limitations", ()
   assert.equal(result.valid, true, result.errors.join("; "));
 });
 
-test("TEST-CONTRACT-006 allows the OpenCode hook with the active contract", async () => {
-  await validateBeforeEdit(
-    process.cwd(),
-    "scripts/implementation-contract.mjs"
-  );
+test("TEST-CONTRACT-006 validates an active contract in an isolated Git fixture", async () => {
+  await withGitRepository(async (directory) => {
+    await writeChecklist(directory, contract());
+    const { validateBeforeEdit } =
+      await import("./implementation-contract-gate.mjs");
+    await validateBeforeEdit(directory, "scripts/implementation-contract.mjs");
+  });
 });
