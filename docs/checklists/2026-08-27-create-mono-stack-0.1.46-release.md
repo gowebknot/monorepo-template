@@ -137,8 +137,8 @@ environment, and dependency contracts are unchanged.
 - Must not happen: No force push, skipped hooks, direct `npm publish`, or unrelated files in the commit.
 - Planned command: `git push origin master && git tag -a v0.1.46 -m "Release v0.1.46" && git push origin v0.1.46 && pnpm --filter create-mono-stack publish:package`
 - Expected result before the code change: `v0.1.46` and npm `0.1.46` do not exist.
-- First observed run:
-- Passing rerun:
+- First observed run: `git push origin master` succeeded (`a9b666a..d2dec5a`). `git tag -a v0.1.46` and `git push origin v0.1.46` succeeded (new tag). `pnpm --filter create-mono-stack publish:package` was blocked by the local auto-mode permission classifier before it ran (npm publish requires explicit interactive approval); no publish attempt reached npm.
+- Passing rerun: Pending explicit approval to run the publish command.
 
 ### TEST-RELEASE-005: Package integration validation passes
 
