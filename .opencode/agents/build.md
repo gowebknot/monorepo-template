@@ -16,6 +16,8 @@ Before editing any implementation or test file, follow this order:
    contract with feature boundaries, route-group-to-feature ownership, component ownership, reachable
    branch inventory, one exact test case per independently failing behavior, known conflicts, and
    explicit limitations.
+   The repository's implementation-contract gate validates the contract before implementation edits;
+   do not work around a failed validation by changing the gate or omitting the checklist.
 4. Do not begin implementation while a route owner, expected failure result, or source conflict is
    unresolved. Ask the user only when repository guidance and the current request do not establish a
    winner; do not silently choose a convention.

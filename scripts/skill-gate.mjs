@@ -12,6 +12,11 @@
 
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative } from "node:path";
+import {
+  findActiveChecklist,
+  formatValidationFailure,
+  validateImplementationContract
+} from "./implementation-contract.mjs";
 
 const SKILL_CALL_PATTERN =
   /"name"\s*:\s*"Skill"[^}]*"skill"\s*:\s*"([a-z0-9-]+)"/g;
@@ -82,13 +87,18 @@ function denyReason(relativePath, missing) {
   );
 }
 
+function contractDenyReason(relativePath, result) {
+  return `Implementation contract gate: before editing ${relativePath}, ${formatValidationFailure(result)}`;
+}
+
 export function evaluate({
   filePath,
   cwd,
   permissionMode,
   invokedSkills,
   triggers,
-  env = {}
+  env = {},
+  implementationContract
 }) {
   const allow = (missing = []) => ({ allow: true, required: [], missing });
   if (env.SKILL_GATE_DISABLE) return allow();
@@ -97,6 +107,15 @@ export function evaluate({
   const relativePath = toRelative(filePath, cwd);
   if (!relativePath) return allow();
   if (matchesAny(relativePath, triggers.exempt)) return allow();
+
+  if (implementationContract && !implementationContract.valid) {
+    return {
+      allow: false,
+      required: [],
+      missing: [],
+      reason: contractDenyReason(relativePath, implementationContract)
+    };
+  }
 
   const invoked = new Set(invokedSkills ?? []);
   const required = collectRequired(relativePath, triggers);
@@ -154,13 +173,40 @@ async function main() {
     }
   }
 
+  let implementationContract;
+  if (
+    payload.permission_mode !== "plan" &&
+    filePath &&
+    !matchesAny(toRelative(filePath, cwd), triggers.exempt)
+  ) {
+    const activeChecklist = await findActiveChecklist(cwd);
+    if (!activeChecklist) {
+      implementationContract = {
+        valid: false,
+        errors: ["no active checklist was found"]
+      };
+    } else {
+      try {
+        implementationContract = validateImplementationContract(
+          await readFile(`${cwd}/${activeChecklist}`, "utf8")
+        );
+      } catch {
+        implementationContract = {
+          valid: false,
+          errors: [`cannot read active checklist ${activeChecklist}`]
+        };
+      }
+    }
+  }
+
   const decision = evaluate({
     filePath,
     cwd,
     permissionMode: payload.permission_mode,
     invokedSkills: parseInvokedSkills(transcriptText),
     triggers,
-    env: process.env
+    env: process.env,
+    implementationContract
   });
 
   if (decision.allow) return;

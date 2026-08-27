@@ -25,10 +25,10 @@ cases, implementation steps, dependencies, and risks.
 6. Split the work into small parts and plan exact test or validation cases as described below.
 7. Load `checklist-tracking` before creating the checklist and follow its nesting, status, matching,
    cross-reference, and history rules.
-8. Create an implementation contract before editing. The contract must name each feature boundary,
-   map every route group to its owning feature, classify shared/app-wide/feature-specific components,
-   inventory reachable branches and explicit limitations, map each branch to a test ID, and record every
-   source conflict with the winning rule or the question that blocks work.
+8. Create an `## Implementation Contract` in the checklist before editing. It must contain `### Feature
+Boundaries`, `### Route-Group Ownership`, `### User Journey`, `### Complete Test Matrix`, and
+   `### Unresolved Conflicts`. The matrix must map every reachable happy and non-happy path to its own
+   test ID or explicit limitation; conflicts must name the winning rule or the blocking question.
 
 ## Split the Work Until Each Part Is Small
 
@@ -115,7 +115,7 @@ after the checklist exists and each command has actually run.
 Before creating the checklist, map every smallest task item and every known rule to its test IDs. For
 each common test area, list the test IDs or explain why that area does not apply. Do not start tests or
 implementation while an item is still broad, a known rule has no case, a case is vague, or an expected
-result is still unknown. Include the implementation contract in the checklist and do not treat skill
+result is still unknown. Validate the implementation contract before editing and do not treat skill
 invocation by itself as evidence that the contract was followed.
 
 ## Create the Checklist From the Plan

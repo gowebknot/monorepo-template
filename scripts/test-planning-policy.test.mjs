@@ -82,6 +82,20 @@ test("TEST-SKILL-020 splits work into testable parts", async () => {
   assert.match(workflow, /Do not start tests or\s+implementation/);
 });
 
+test("TEST-SKILL-021 requires the durable implementation contract", async () => {
+  const { workflow, template } = await readPolicies();
+  for (const text of [workflow, template]) {
+    assert.match(text, /Implementation Contract/);
+    assert.match(text, /Feature\s+Boundaries/);
+    assert.match(text, /Route-Group Ownership/);
+    assert.match(text, /User Journey/);
+    assert.match(text, /Complete Test Matrix/);
+    assert.match(text, /Unresolved Conflicts/);
+  }
+  assert.match(workflow, /happy and non-happy path/);
+  assert.match(template, /Every reachable happy and non-happy path/);
+});
+
 test("TEST-SKILL-022 separates normal and rejected values", async () => {
   const { workflow, guidance, template, testingPolicy } = await readPolicies();
 

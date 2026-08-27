@@ -203,6 +203,25 @@ test("TEST-GATE-013 allows a plain source edit once test-first-workflow is invok
   assert.deepEqual(result.missing, []);
 });
 
+test("TEST-GATE-023 denies implementation edits without a valid contract", () => {
+  const result = decide({
+    filePath: "apps/web/src/routes/auth.tsx",
+    invokedSkills: [
+      "test-first-workflow",
+      "frontend-standards",
+      "react-19",
+      "domain-driven-app-structure"
+    ],
+    implementationContract: {
+      valid: false,
+      errors: ["missing ### User Journey"]
+    }
+  });
+  assert.equal(result.allow, false);
+  assert.match(result.reason, /Implementation contract gate/);
+  assert.match(result.reason, /User Journey/);
+});
+
 test("TEST-GATE-014 parseInvokedSkills collects every Skill call", () => {
   const text = [
     '{"type":"tool_use","id":"a","name":"Skill","input":{"skill":"test-first-workflow"}}',

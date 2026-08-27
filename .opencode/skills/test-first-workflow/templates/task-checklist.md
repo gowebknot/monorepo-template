@@ -37,6 +37,47 @@ does not, record the conflict, ask the user, and block the affected work until i
   - [ ] Record constraints and non-goals.
   - [ ] Record affected package, application, module, and public boundaries.
 
+## Implementation Contract
+
+Complete this section before implementation begins. It is the durable contract for the work, not a
+summary of intent.
+
+### Feature Boundaries
+
+- Included product behavior: <exact behavior>
+- Excluded behavior and non-goals: <explicit exclusions>
+- Shared, app-wide, and feature-owned boundaries: <ownership decisions>
+
+### Route-Group Ownership
+
+| Route group | Entry routes | Owning feature | App-wide composition |
+| ----------- | ------------ | -------------- | -------------------- |
+| <group>     | <routes>     | <feature path> | <shell or None>      |
+
+### User Journey
+
+1. Entry point: <where the user starts>
+2. User actions: <ordered actions>
+3. Visible success result: <what the user sees>
+4. Loading and empty states: <states or why they do not apply>
+5. Failure and recovery states: <states and recovery actions>
+6. Final navigation or exit: <destination or exit>
+
+### Complete Test Matrix
+
+| Test ID       | User intent | Path                      | Exact expected result | Test place  | Limitation       |
+| ------------- | ----------- | ------------------------- | --------------------- | ----------- | ---------------- |
+| TEST-AREA-001 | <intent>    | <happy or non-happy path> | <result>              | <test file> | <None or reason> |
+
+Every reachable happy and non-happy path gets a separate test ID or an explicit limitation. The exact
+test case blocks below provide the full setup, inputs, interactions, side effects, and commands.
+
+### Unresolved Conflicts
+
+- Conflict: <None found after checking sources, or describe disagreement>
+- Winning rule or blocking question: <decision or question>
+- Blocked test IDs and implementation items: <IDs or None>
+
 ## Implementation Description
 
 For a checklist covering a commit or release, describe the concrete implementation included in that
