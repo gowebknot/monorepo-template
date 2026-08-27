@@ -85,19 +85,19 @@ The package behavior, API, database, environment, dependency, and security contr
 - **Must not happen:** No force push, skipped hooks, direct `npm publish`, or unrelated files in the release commit.
 - **Planned command:** `git push origin master`, `git tag -a v0.1.43 -m "Release v0.1.43"`, `git push origin v0.1.43`, `pnpm --filter create-mono-stack publish:package`.
 - **Expected result before the code change:** `v0.1.43` and npm `0.1.43` do not exist.
-- **First observed run:** Pending release commit and publication.
-- **Passing rerun:** Pending remote and registry verification.
+- **First observed run:** The release commit, branch push, tag push, and package publication were not yet performed.
+- **Passing rerun:** Commit `37a96fe`, remote `master`, annotated tag `v0.1.43`, and npm `latest` now identify `0.1.43`; the final artifact inspection passed.
 
 ## Implementation Plan
 
 - [x] Update `core/create-mono-stack/package.json` from `0.1.42` to `0.1.43`.
 - [x] Run `just check`, package artifact inspection, and focused metadata checks. The first full gate hit a known unrelated Ink timing timeout; the rerun passed.
-- [ ] Inspect the complete diff and stage only the intended skill, checklist, manifest, and sync metadata files.
-- [ ] Commit with a detailed Conventional Commit message and normal hooks.
-- [ ] Push `master`, create and push annotated tag `v0.1.43`.
-- [ ] Publish using `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact contents, and final worktree state.
-- [ ] Record observed failures, passing reruns, and release completion.
+- [x] Inspect the complete diff and stage only the intended skill, checklist, manifest, and sync metadata files.
+- [x] Commit with a detailed Conventional Commit message and normal hooks.
+- [x] Push `master`, create and push annotated tag `v0.1.43`.
+- [x] Publish using `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact contents, and final worktree state.
+- [x] Record observed failures, passing reruns, and release completion.
 
 ## Risks And Non-Goals
 
@@ -110,3 +110,7 @@ The package behavior, API, database, environment, dependency, and security contr
 - The first full gate exposed and then allowed correction of the release-coupled `v0.1.42` fixture.
 - The next full gate passed all checks except one known Ink timing test, which timed out after 274/275 launcher tests.
 - The final `just check` passed all checks with 275/275 launcher tests passing; existing TanStack Table React Compiler warnings remained non-fatal.
+- Release commit `37a96fe` was pushed to `master`; annotated tag `v0.1.43` was pushed and resolves to that commit.
+- `pnpm --filter create-mono-stack publish:package` published `create-mono-stack@0.1.43` as npm `latest`.
+- Final `npm pack --dry-run --json` reported `create-mono-stack-0.1.43.tgz` with 294 files and no auth or credential files; the worktree is clean.
+- The first post-publication checklist commit attempt was rejected by the normal pre-commit hook after 274/275 launcher tests; the known Ink timing test `asks only for names of selected apps` timed out. No validation bypass was used.
