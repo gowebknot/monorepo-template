@@ -67,8 +67,8 @@ environment, and dependency contracts are unchanged.
   `docs/checklists/2026-08-27-addapp-managed-template-package-scope-bug.md` and not required for
   this release.
 - [x] The npm artifact is `create-mono-stack-0.1.46.tgz` and contains no credentials.
-- [ ] Release commit, `master`, annotated tag `v0.1.46`, and npm `latest` identify this release.
-- [ ] Release documentation records the changes and validation.
+- [x] Release commit, `master`, annotated tag `v0.1.46`, and npm `latest` identify this release.
+- [x] Release documentation records the changes and validation.
 
 ## Exact Validation Cases
 
@@ -138,7 +138,7 @@ environment, and dependency contracts are unchanged.
 - Planned command: `git push origin master && git tag -a v0.1.46 -m "Release v0.1.46" && git push origin v0.1.46 && pnpm --filter create-mono-stack publish:package`
 - Expected result before the code change: `v0.1.46` and npm `0.1.46` do not exist.
 - First observed run: `git push origin master` succeeded (`a9b666a..d2dec5a`). `git tag -a v0.1.46` and `git push origin v0.1.46` succeeded (new tag). `pnpm --filter create-mono-stack publish:package` was blocked by the local auto-mode permission classifier before it ran (npm publish requires explicit interactive approval); no publish attempt reached npm.
-- Passing rerun: Pending explicit approval to run the publish command.
+- Passing rerun: After explicit user approval, `pnpm --filter create-mono-stack publish:package` published `create-mono-stack@0.1.46` (294 files, 616.2 kB packed, `latest` tag) to `https://registry.npmjs.org/`. A follow-up documentation commit (`835f5a7`) recording the push/tag results and its push were required first because `pnpm`'s Git checks reject publishing with an unclean working tree. `npm view create-mono-stack version` reports `0.1.46`, `npm view create-mono-stack dist-tags` reports `{ latest: '0.1.46' }`, `git ls-remote --tags origin v0.1.46` resolves to the tag, and `origin/master` HEAD is `835f5a7`.
 
 ### TEST-RELEASE-005: Package integration validation passes
 
@@ -165,10 +165,10 @@ environment, and dependency contracts are unchanged.
 - [x] Run metadata validation, the complete repository gate, and npm pack dry-run inspection. All three pass; the full gate needed one Prettier formatting fix to the release checklist itself before passing.
 - [/] Run `pnpm --filter create-mono-stack test:integration`. Descoped: the retry with a 10-minute timeout got past the original timeout point and found a real, pre-existing, unrelated `addApp` package-scope bug (see TEST-RELEASE-005 and Unresolved Conflicts). Tracked in `docs/checklists/2026-08-27-addapp-managed-template-package-scope-bug.md` per explicit user decision; not required for this release.
 - [x] Inspect the complete diff and stage only intended release files.
-- [ ] Commit with a detailed Conventional Commit message and normal hooks.
-- [ ] Push `master`, create and push annotated tag `v0.1.46`.
-- [ ] Publish using `pnpm --filter create-mono-stack publish:package`.
-- [ ] Verify remote refs, npm metadata, artifact contents, and final worktree state.
+- [x] Commit with a detailed Conventional Commit message and normal hooks. Commit `d2dec5a`; a required follow-up documentation commit `835f5a7` recorded push/tag results before publish so the working tree was clean for `pnpm`'s Git checks.
+- [x] Push `master`, create and push annotated tag `v0.1.46`.
+- [x] Publish using `pnpm --filter create-mono-stack publish:package`.
+- [x] Verify remote refs, npm metadata, artifact contents, and final worktree state. `npm view create-mono-stack version` and `dist-tags` report `0.1.46`/`latest`; `v0.1.46` tag and `origin/master` (`835f5a7`) are pushed; working tree is clean.
 
 ## Risks And Non-Goals
 
@@ -179,4 +179,9 @@ environment, and dependency contracts are unchanged.
 
 ## Validation Notes
 
-- First observed and passing results will be recorded after each planned command runs.
+- `just check` passed after fixing one Prettier formatting issue in this checklist file (build, lint, typecheck, format-check, skills-check, skills-test, template-test all green).
+- `pnpm --filter create-mono-stack exec npm pack --dry-run --json` reported `create-mono-stack-0.1.46.tgz`, 294 files, no unsafe or credential paths.
+- `pnpm --filter create-mono-stack test:integration` was retried with a 10-minute timeout and progressed past the previous 120-second timeout point, then surfaced a real, pre-existing, unrelated bug in `addApp`'s managed-reference-template copy path (`@monorepo-template/api-client` not rescoped for already-generated projects). Confirmed unrelated to this release's diff. Descoped for 0.1.46 by explicit user decision and tracked in `docs/checklists/2026-08-27-addapp-managed-template-package-scope-bug.md`.
+- Release commit `d2dec5a` and follow-up documentation commit `835f5a7` are both pushed to `origin/master`. Annotated tag `v0.1.46` is pushed and resolves via `git ls-remote --tags origin v0.1.46`.
+- `pnpm --filter create-mono-stack publish:package` published `create-mono-stack@0.1.46` to the npm registry with the `latest` tag; `npm view create-mono-stack version` and `dist-tags` confirm `0.1.46`/`latest`.
+- Working tree is clean after publication.
