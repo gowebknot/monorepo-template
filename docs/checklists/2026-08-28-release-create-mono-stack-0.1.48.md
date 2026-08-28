@@ -180,5 +180,18 @@ or migration changes are intended.
 - **Import-check correction:** The first follow-up used a runtime path string containing `../src`,
   which the lightweight staged scanner intentionally reports even though it is not an import
   specifier. The path will be constructed with `dirname` instead.
+
+## Updates
+
+### 2026-08-28 — Release completed
+
+- **Evidence:** Commit `e664c06` passed the repository pre-commit hook after the Ink harness
+  synchronization fix; `just check` and the 275-test launcher suite passed.
+- **Release:** Commit pushed to `master`, annotated tag `v0.1.48` pushed, and
+  `pnpm --filter create-mono-stack publish:package` published `create-mono-stack@0.1.48`.
+- **Verification:** Remote peeled tag `v0.1.48^{}` points to `e664c06`; npm reports version `0.1.48`
+  and `latest` points to `0.1.48`.
+- **Limitation:** `git tag -v v0.1.48` cannot verify a cryptographic signature because the annotated
+  tag is unsigned; the tag object and peeled commit are present remotely.
 - **Passing validation:** After formatting, `just check` passed all lint, build, typecheck, formatting,
   skills, import, server, and template checks. The launcher suite passed all 275 tests.
