@@ -29,7 +29,7 @@ typecheck:
 format:
     pnpm format
 
-check: lint typecheck format-check skills-check skills-test template-test test-unit test-api-e2e
+check: lint typecheck format-check skills-check skills-test imports-test template-test test-unit test-api-e2e
 
 format-check:
     pnpm format:check
@@ -57,6 +57,9 @@ skills-check:
 
 skills-test:
     pnpm skills:test
+
+imports-test:
+    pnpm imports:test
 
 template-test:
     pnpm template:test

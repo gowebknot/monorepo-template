@@ -7,8 +7,13 @@ import { fileURLToPath } from "node:url";
 import {
   collectRequired,
   evaluate,
-  parseInvokedSkills
+  parseInvokedSkills,
+  parseReadPaths
 } from "./skill-gate.mjs";
+
+const { extractChecklistReferences } = await import(
+  new URL("./implementation-contract.mjs", import.meta.url)
+);
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -250,6 +255,64 @@ test("TEST-GATE-016 parseInvokedSkills tolerates blank and non-JSON lines", () =
     invoked = parseInvokedSkills(text);
   });
   assert.deepEqual([...invoked], ["test-first-workflow"]);
+});
+
+test("TEST-CHECKLIST-001 extracts declared checklist paths", () => {
+  const markdown = [
+    "Related checklists:",
+    "- [Implementation contract](docs/checklists/contract.md)",
+    "- docs/checklists/imports.md",
+    "- [external](https://example.com/checklist.md)",
+    "## Implementation Contract"
+  ].join("\n");
+  assert.deepEqual(extractChecklistReferences(markdown), [
+    "docs/checklists/contract.md",
+    "docs/checklists/imports.md"
+  ]);
+});
+
+test("TEST-CHECKLIST-002 rejects implementation edits when checklist reads are missing", () => {
+  const result = decide({
+    filePath: "src/example.ts",
+    invokedSkills: ["test-first-workflow"],
+    implementationContract: {
+      valid: true,
+      activeChecklist: "docs/checklists/current.md",
+      relatedChecklists: ["docs/checklists/previous.md"]
+    },
+    checklistReads: new Set()
+  });
+  assert.equal(result.allow, false);
+  assert.match(result.reason, /current\.md/);
+  assert.match(result.reason, /previous\.md/);
+});
+
+test("TEST-CHECKLIST-003 allows implementation edits after all checklist reads", () => {
+  const result = decide({
+    filePath: "src/example.ts",
+    invokedSkills: ["test-first-workflow"],
+    implementationContract: {
+      valid: true,
+      activeChecklist: "docs/checklists/current.md",
+      relatedChecklists: ["docs/checklists/previous.md"]
+    },
+    checklistReads: new Set([
+      "docs/checklists/current.md",
+      "docs/checklists/previous.md"
+    ])
+  });
+  assert.equal(result.allow, true);
+});
+
+test("parseReadPaths extracts checklist reads from the Claude transcript", () => {
+  const transcript = [
+    '{"type":"tool_use","name":"Read","input":{"filePath":"/repo/docs/checklists/current.md"}}',
+    '{"type":"tool_use","name":"Read","input":{"filePath":"docs/checklists/previous.md"}}'
+  ].join("\n");
+  assert.deepEqual(
+    [...parseReadPaths(transcript, "/repo")],
+    ["docs/checklists/current.md", "docs/checklists/previous.md"]
+  );
 });
 
 test("TEST-GATE-017 skill-triggers.json only names real skills", async () => {

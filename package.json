@@ -20,6 +20,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo lint && eslint \"scripts/*.mjs\"",
+    "imports:check": "node scripts/check-relative-imports.mjs --staged",
+    "imports:test": "node --test scripts/check-relative-imports.test.mjs",
     "package:create": "node skills/create-minimal-package/scripts/scaffold-package.mjs",
     "precommit:checks": "node scripts/pre-commit-checks.mjs",
     "prepare": "husky",

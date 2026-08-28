@@ -99,6 +99,7 @@ export function selectChecks({ hasCoreLauncher, hasServer }) {
 
 async function main() {
   await run("staged formatting", ["lint-staged"]);
+  await run("staged relative-import validation", ["imports:check"]);
   await run("staged skill validation", ["skills:check", "--", "--staged"]);
   await run("staged shared component validation", [
     "exec",

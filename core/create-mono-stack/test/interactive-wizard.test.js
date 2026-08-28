@@ -1,17 +1,28 @@
 import assert from "node:assert/strict";
+import { dirname, join } from "node:path";
 import test from "node:test";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createElement } from "react";
 import { render } from "ink-testing-library";
 
-import {
+const sourceRoot = join(
+  dirname(dirname(fileURLToPath(import.meta.url))),
+  "src"
+);
+
+const {
   ProjectWizard,
   buildProjectArguments,
   parseSshAliases,
   promptForProjectArguments
-} from "../src/interactive-wizard.js";
-import { parseArguments } from "../src/create-project.js";
-import { FEATURE_DEFINITIONS } from "../src/feature-config.js";
+} = await import(pathToFileURL(join(sourceRoot, "interactive-wizard.js")));
+const { parseArguments } = await import(
+  pathToFileURL(join(sourceRoot, "create-project.js"))
+);
+const { FEATURE_DEFINITIONS } = await import(
+  pathToFileURL(join(sourceRoot, "feature-config.js"))
+);
 
 const downArrow = "\u001B[B";
 const enter = "\r";
@@ -31,7 +42,7 @@ async function sendInput(app, input, expectedFrame) {
   if (expectedFrame) {
     await waitFor(() => expectedFrame.test(app.lastFrame() ?? ""));
   }
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await new Promise((resolve) => setTimeout(resolve, 50));
   if (expectedFrame) {
     await waitFor(() => expectedFrame.test(app.lastFrame() ?? ""));
   }
@@ -102,9 +113,9 @@ test("selects additional stack features through the multiselect screen", async (
 
   await sendInput(app, enter, /Project name/);
   await sendInput(app, enter, /Stack features/);
-  await sendInput(app, downArrow);
-  await sendInput(app, downArrow);
-  await sendInput(app, " ");
+  await sendInput(app, downArrow, wrapped(/NestJS API —/));
+  await sendInput(app, downArrow, wrapped(/Next.js web app —/));
+  await sendInput(app, " ", wrapped(/\[x\] Next\.js web app/));
   await sendInput(app, enter, /Vite web app count/);
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);

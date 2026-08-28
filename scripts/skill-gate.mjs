@@ -13,6 +13,7 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative } from "node:path";
 import {
+  extractChecklistReferences,
   findActiveChecklist,
   formatValidationFailure,
   validateImplementationContract
@@ -61,6 +62,16 @@ export function parseInvokedSkills(transcriptText) {
   return invoked;
 }
 
+export function parseReadPaths(transcriptText, cwd) {
+  const paths = new Set();
+  const pattern =
+    /["']name["']\s*:\s*["'](?:Read|read)["'][\s\S]{0,500}?["'](?:filePath|file_path|path)["']\s*:\s*["']([^"']+)["']/g;
+  for (const match of transcriptText.matchAll(pattern)) {
+    paths.add(toRelative(match[1], cwd));
+  }
+  return paths;
+}
+
 export function collectRequired(relativePath, triggers) {
   const required = new Set(triggers.always ?? []);
   for (const rule of triggers.rules ?? []) {
@@ -98,7 +109,8 @@ export function evaluate({
   invokedSkills,
   triggers,
   env = {},
-  implementationContract
+  implementationContract,
+  checklistReads
 }) {
   const allow = (missing = []) => ({ allow: true, required: [], missing });
   if (env.SKILL_GATE_DISABLE) return allow();
@@ -115,6 +127,24 @@ export function evaluate({
       missing: [],
       reason: contractDenyReason(relativePath, implementationContract)
     };
+  }
+
+  if (implementationContract && checklistReads) {
+    const requiredReads = [
+      implementationContract.activeChecklist,
+      ...(implementationContract.relatedChecklists ?? [])
+    ].filter(Boolean);
+    const missingReads = requiredReads.filter(
+      (path) => !checklistReads.has(path)
+    );
+    if (missingReads.length > 0) {
+      return {
+        allow: false,
+        required: [],
+        missing: [],
+        reason: `Checklist gate: before editing ${relativePath}, read the active and related checklist file(s): ${missingReads.join(", ")}.`
+      };
+    }
   }
 
   const invoked = new Set(invokedSkills ?? []);
@@ -187,9 +217,12 @@ async function main() {
       };
     } else {
       try {
-        implementationContract = validateImplementationContract(
-          await readFile(`${cwd}/${activeChecklist}`, "utf8")
-        );
+        const markdown = await readFile(`${cwd}/${activeChecklist}`, "utf8");
+        implementationContract = {
+          ...validateImplementationContract(markdown),
+          activeChecklist,
+          relatedChecklists: extractChecklistReferences(markdown)
+        };
       } catch {
         implementationContract = {
           valid: false,
@@ -204,6 +237,7 @@ async function main() {
     cwd,
     permissionMode: payload.permission_mode,
     invokedSkills: parseInvokedSkills(transcriptText),
+    checklistReads: parseReadPaths(transcriptText, cwd),
     triggers,
     env: process.env,
     implementationContract

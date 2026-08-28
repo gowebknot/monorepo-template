@@ -20,6 +20,7 @@ The main application (`src/`) exposes health and production Better Auth. Example
 - `src/app.module.ts` is the composition root and imports the production auth module. Do not put production auth files at the `src/` root.
 - Production auth currently supports PostgreSQL email/password only. OAuth providers and email delivery are intentionally deferred.
 - Controllers in the reference area skip request validation (no `class-validator`/DTO pipes) for demo simplicity — a real project should add a `ValidationPipe` and validated DTOs.
+- Implementation, test, and configuration imports must use project aliases or package names. Relative imports are prohibited outside barrel exports; fix module resolution instead of adding a convenience exception.
 
 ## Source Layout
 

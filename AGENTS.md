@@ -94,7 +94,7 @@ Use `pnpm package:create <project-name>` or `just package-create <project-name>`
 
 The scaffold creates Vite lib-mode package files (`package.json`, `tsconfig.json`, `vite.config.ts`, `.gitignore`, `README.md`, `AGENTS.md`, `src/index.ts`) and refuses to overwrite an existing package unless `--force` is passed to the pnpm script.
 
-Package source convention: use absolute `@/...` imports in implementation files, but use relative exports in barrel files (`src/index.ts`, nested `index.ts`) so emitted declarations do not leak the private `@/` alias.
+Import convention: implementation, test, and configuration source files must use project aliases or package-name imports. Relative imports are prohibited except for exports in barrel files (`index.ts`, `index.tsx`, and equivalent nested index files) so emitted declarations do not leak private aliases. The staged relative-import check enforces this rule. Fix module resolution rather than adding a convenience exception.
 
 ## Turbo pipeline
 
@@ -228,6 +228,9 @@ Every agent task must begin with the `test-first-workflow` skill, regardless of 
 changes code, tests, documentation, configuration, packages, or skills. Define acceptance criteria
 and executable tests or equivalent validation checks before editing, then run the checks after the
 change.
+
+Every code-generation or code-editing task must also invoke the `code-quality` skill before editing.
+Before implementation edits, read the active checklist and every path it declares under `Related checklists`; the implementation gate verifies these reads when supported by the agent adapter.
 
 Invoke each applicable skill through the agent's skill mechanism at the moment you enter an
 implementation phase. Entering implementation after a planning phase, after exiting plan mode, after

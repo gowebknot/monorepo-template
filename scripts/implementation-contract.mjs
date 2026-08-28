@@ -103,6 +103,13 @@ export function validateImplementationContract(markdown) {
   return { valid: errors.length === 0, errors };
 }
 
+export function extractChecklistReferences(markdown) {
+  const section = sectionBetween(markdown, "Related checklists:", "##");
+  return [
+    ...section.matchAll(/(?:\]\(|^\s*[-*]\s+)(docs\/checklists\/[^)\s]+\.md)/gm)
+  ].map((match) => match[1]);
+}
+
 export async function findActiveChecklist(cwd) {
   try {
     const { stdout } = await execFileAsync(

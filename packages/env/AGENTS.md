@@ -24,7 +24,7 @@
 
 ## Import Rules
 
-- Implementation files may use absolute `@/...` imports.
+- Implementation, test, and configuration files must use absolute `@/...` imports or package names.
 - Barrel files (`src/index.ts`, `src/env.ts`) use relative exports so generated `.d.ts` files stay portable.
 - Keep `@t3-oss/env-core` and `zod` external in `vite.config.ts`.
 

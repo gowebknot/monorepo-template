@@ -3,6 +3,7 @@ import { isAbsolute, relative, resolve } from "node:path";
 
 import {
   findActiveChecklist,
+  extractChecklistReferences,
   formatValidationFailure,
   validateImplementationContract
 } from "./implementation-contract.mjs";
@@ -83,4 +84,11 @@ export async function validateBeforeEdit(directory, filePaths) {
     await readFile(resolve(directory, activeChecklist), "utf8")
   );
   if (!result.valid) throw new Error(formatValidationFailure(result));
+}
+
+export async function getChecklistReadRequirements(directory) {
+  const activeChecklist = await findActiveChecklist(directory);
+  if (!activeChecklist) return [];
+  const markdown = await readFile(resolve(directory, activeChecklist), "utf8");
+  return [activeChecklist, ...extractChecklistReferences(markdown)];
 }

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
@@ -10,8 +11,12 @@ import {
   writeChecklist
 } from "./test-helpers/implementation-contract-fixture.mjs";
 
-const pluginModule =
-  await import("../.opencode/plugins/implementation-contract-gate.js");
+const pluginModule = await import(
+  new URL(
+    "../.opencode/plugins/implementation-contract-gate.js",
+    import.meta.url
+  )
+);
 
 const validChecklist = `# Plan
 
@@ -50,6 +55,11 @@ const validChecklist = `# Plan
 - Conflict: None found after checking repository guidance.
 `;
 
+const validChecklistWithRelated = validChecklist.replace(
+  "## Implementation Contract",
+  "Related checklists:\n- docs/checklists/previous.md\n\n## Implementation Contract"
+);
+
 async function invokeTool(directory, tool, args) {
   const hooks = await pluginModule.default({ directory });
   return hooks["tool.execute.before"](
@@ -68,7 +78,45 @@ test("TEST-OPENCODE-001 exports one plugin and returns its hooks", async () => {
 test("TEST-OPENCODE-002 allows a valid edit using output args", async () => {
   await withGitRepository(async (directory) => {
     await writeChecklist(directory, validChecklist);
-    await invokeTool(directory, "edit", { filePath: "src/example.ts" });
+    const hooks = await pluginModule.default({ directory });
+    await hooks["tool.execute.before"](
+      { callID: "read", sessionID: "session", tool: "read" },
+      { args: { filePath: join(directory, "docs/checklists/plan.md") } }
+    );
+    await hooks["tool.execute.before"](
+      { callID: "edit", sessionID: "session", tool: "edit" },
+      { args: { filePath: "src/example.ts" } }
+    );
+  });
+});
+
+test("TEST-CHECKLIST-004 rejects an implementation edit before checklist reads", async () => {
+  await withGitRepository(async (directory) => {
+    await writeChecklist(directory, validChecklist);
+    await assert.rejects(
+      invokeTool(directory, "edit", { filePath: "src/example.ts" }),
+      /Checklist gate:.*plan\.md/
+    );
+  });
+});
+
+test("TEST-CHECKLIST-005 allows an implementation edit after checklist reads", async () => {
+  await withGitRepository(async (directory) => {
+    await writeChecklist(directory, "# Previous checklist\n", "previous.md");
+    await writeChecklist(directory, validChecklistWithRelated);
+    const hooks = await pluginModule.default({ directory });
+    await hooks["tool.execute.before"](
+      { callID: "read", sessionID: "session", tool: "read" },
+      { args: { filePath: "docs/checklists/plan.md" } }
+    );
+    await hooks["tool.execute.before"](
+      { callID: "read", sessionID: "session", tool: "read" },
+      { args: { filePath: "docs/checklists/previous.md" } }
+    );
+    await hooks["tool.execute.before"](
+      { callID: "edit", sessionID: "session", tool: "edit" },
+      { args: { filePath: "src/example.ts" } }
+    );
   });
 });
 

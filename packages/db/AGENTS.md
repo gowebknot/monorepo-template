@@ -41,7 +41,7 @@ example/crud/
 
 ## Imports
 
-- Implementation files may use absolute `@/...` imports.
+- Implementation, test, and configuration files must use absolute `@/...` imports or package names.
 - Barrel files (`src/index.ts`, `example/index.ts`, `example/schema/index.ts`, `example/crud/index.ts`) use relative exports **with explicit `.js` extensions** (e.g. `export * from "./db.js"`), even though the source files are `.ts`. This is required: the package is built with `vite.config.ts`'s multi-entry lib mode (`index` + `example`), and NodeNext-mode consumers (e.g. `apps/server`, which uses `moduleResolution: "nodenext"`) cannot resolve extensionless relative specifiers inside a consumed `.d.ts` — they silently drop the exports instead of erroring. Any new barrel file added here must follow the same `.js`-extension convention.
 - Keep runtime-only packages external in `vite.config.ts` (`better-sqlite3`, `drizzle-orm`, `drizzle-orm/better-sqlite3`, `drizzle-orm/node-postgres`, `drizzle-orm/sqlite-core`, `pg`, `@monorepo-template/env/server`).
 - Read database configuration from `@monorepo-template/env/server`; never read `process.env` directly in this package.

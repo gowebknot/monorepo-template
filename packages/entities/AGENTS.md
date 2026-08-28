@@ -68,7 +68,7 @@ Use explicit names: `<action><Resource>RequestSchema`, `<action><Resource>Respon
 
 ## Imports
 
-- Implementation files may use absolute `@/...` imports.
+- Implementation, test, and configuration files must use absolute `@/...` imports or package names.
 - Barrel files (`src/index.ts`, nested `index.ts`) use relative exports so generated `.d.ts` files stay portable.
 - Example barrel files under `example/` also use relative exports.
 - `zod` is both a peer dependency and dev dependency; consumers must provide a compatible `zod` install.

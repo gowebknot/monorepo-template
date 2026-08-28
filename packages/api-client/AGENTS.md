@@ -49,7 +49,7 @@ The `example/` directory is built as a separate entry (`dist/example.js`) and ex
 
 ## Imports
 
-- Implementation files may use absolute `@/...` imports (resolves to `./src/*`) — this works from `example/` files too, since the alias is package-root-relative, not importer-relative.
+- Implementation, test, and configuration files must use absolute `@/...` imports (resolves to `./src/*`) or package names — this works from `example/` files too, since the alias is package-root-relative, not importer-relative.
 - Barrel files use relative exports so generated `.d.ts` files stay portable.
 
 ## Validation
