@@ -101,7 +101,7 @@ template's documented authentication and authorization workflow for future gener
 - Planned command: `pnpm --filter create-mono-stack exec npm pack --dry-run --json`
 - Expected result before the code change: Artifact reports version 0.1.46.
 - First observed run: The dry run reported `create-mono-stack-0.1.47.tgz`, 294 files, and no credential paths.
-- Passing rerun: The artifact inspection remained valid after the final validation.
+- Passing rerun: The final wrapper inspection reported `create-mono-stack-0.1.47.tgz`, 294 files, and no credential paths.
 
 ### TEST-RELEASE-004: Git and npm references agree
 
@@ -118,7 +118,7 @@ template's documented authentication and authorization workflow for future gener
 - Planned command: `git push origin master && git tag -a v0.1.47 -m "Release v0.1.47" && git push origin v0.1.47 && pnpm --filter create-mono-stack publish:package`
 - Expected result before the code change: Version 0.1.47 refs and npm metadata do not exist.
 - First observed run: Not run before commit because the release workflow requires validation and a clean release commit first.
-- Passing rerun: Pending until commit, push, tag, publication, and registry verification complete.
+- Passing rerun: `master` and annotated `v0.1.47` were pushed; the package wrapper published successfully; npm latest reports 0.1.47.
 
 ### TEST-RELEASE-005: Publication failure stops safely
 
@@ -142,13 +142,32 @@ template's documented authentication and authorization workflow for future gener
 - [x] Create and validate this release checklist.
 - [x] Bump `core/create-mono-stack/package.json` to 0.1.47.
 - [x] Run focused tests, artifact inspection, and `just check`.
-- [ ] Inspect diff and commit only intended files with normal hooks.
-- [ ] Push `master`, create/push annotated `v0.1.47`.
-- [ ] Publish through the package-local wrapper.
-- [ ] Verify registry metadata, remote refs, artifact safety, and final status.
+- [x] Inspect diff and commit only intended files with normal hooks. Release commit: `8982362`.
+- [x] Push `master`, create/push annotated `v0.1.47`.
+- [x] Publish through the package-local wrapper.
+- [x] Verify registry metadata, remote refs, artifact safety, and final status.
 
 ## Risks and Non-Goals
 
 - The npm artifact's allowlist excludes the new skill and AGENTS documentation; those changes remain in the repository release commit, not the package payload.
 - Publication requires the ignored `.npmrc.auth` or explicit `NPM_CONFIG_USERCONFIG`.
 - No runtime auth/RBAC feature is introduced by this release.
+
+## Validation Notes
+
+- The initial package-wide test run exposed the expected version fixture mismatch; updating the
+  controlled `TEST-MANAGE-001` fixture to `v0.1.47` resolved it.
+- The first release-commit hook run reached the full checks but hit a transient `TEST-WIZARD` Ink
+  timeout; no source failure was identified and the commit was not created.
+- A second normal-hook attempt hit another transient interactive-wizard timeout in
+  `TEST-MULTI-007`; rerunning the complete package suite passed all 275 tests before retrying the
+  documentation commit.
+- `just check` passed all repository checks, including 275 launcher tests, 22 typechecks, formatting,
+  skill validation, and server tests. Existing non-blocking React Compiler warnings remain in table
+  demo files.
+- `pnpm --filter create-mono-stack publish:package` published `create-mono-stack@0.1.47` with the
+  `latest` tag. `npm view` reports version/latest 0.1.47; remote `master` and tag `v0.1.47` resolve
+  to release commit `8982362`. npm emitted existing unknown-config warnings but publication succeeded.
+- The follow-up release-documentation commit is pending after this checklist update; the package
+  release itself is already published and the working tree must be revalidated before pushing the
+  documentation record.
