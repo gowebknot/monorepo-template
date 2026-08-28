@@ -6,6 +6,9 @@
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before changing authentication, session, role, permission,
+  or authorization behavior. Keep its server-side boundary rules aligned with this package.
+
 - Keep this package focused on reusable library code.
 - Do not read `process.env` directly in this package. Runtime configuration should be passed in by consumers or imported from `@monorepo-template/env` when appropriate.
 - Keep runtime-only peer dependencies external in `vite.config.ts`.

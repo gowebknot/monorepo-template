@@ -8,6 +8,10 @@ contracts and data layer power web and native clients.
 
 ## Conventions
 
+- Invoke the `authentication-rbac` skill before changing generated authentication, protected Expo
+  Router layouts, roles, permissions, or authorization UX. Navigation gating must never replace
+  API-side authorization.
+
 - File-based routing with Expo Router under `app/` (`_layout.tsx` stack, `index.tsx`, `todos.tsx`).
   The entry is `index.ts` → `import "expo-router/entry"`; `package.json` `main` stays `index.ts`.
 - UI uses React Native primitives (`View`, `Text`, `TextInput`, `Pressable`, `FlatList`) with

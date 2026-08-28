@@ -19,6 +19,10 @@ simulator/emulator and Expo Go must already exist and be running before `pnpm te
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before adding or changing mobile authentication, protected
+  navigation, role, permission, ownership, or forbidden-state flows. Use deterministic synthetic
+  accounts and treat navigation checks as UX rather than security.
+
 - Test user journeys through accessible, user-facing interactions: prefer visible text for buttons
   and headings; use `testID` selectors only for inputs with no visible label text.
 - Keep each flow independent and rely on Maestro's built-in polling instead of arbitrary sleeps or

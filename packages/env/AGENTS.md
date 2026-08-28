@@ -6,6 +6,9 @@
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before adding or changing authentication or authorization
+  environment values. Keep secrets server-only and document provider scope before adding variables.
+
 - Put every env schema in the `globalEnv` Zod object in `src/global-env.ts` first.
 - App-specific envs must derive their schema with `globalEnv.pick(...).shape`; do not define app env schemas directly in apps.
 - This package is the only place that may read `process.env`; all other packages must import parsed envs, validators, or factory functions from `@monorepo-template/env`.

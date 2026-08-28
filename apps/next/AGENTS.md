@@ -8,6 +8,10 @@ data layer power both a Vite SPA and a Next.js app.
 
 ## Conventions
 
+- Invoke the `authentication-rbac` skill before changing login, sessions, protected App Router
+  segments, roles, permissions, or authorization UX. Keep private data checks on the server; client
+  and layout guards only complement them.
+
 - App Router under `src/app`, `@/*` alias → `src/*`.
 - UI uses shadcn (`base-mira` style) + Tailwind v4, ported to match `apps/web`. Add components with
   `pnpm dlx shadcn@latest add <name>`.

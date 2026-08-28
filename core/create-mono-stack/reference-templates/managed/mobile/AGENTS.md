@@ -8,6 +8,10 @@ data layer power web and native clients.
 
 ## Conventions
 
+- Invoke the `authentication-rbac` skill before changing generated authentication, protected
+  navigation, roles, permissions, or authorization UX. React Navigation checks are presentation
+  only; the API remains the authorization boundary.
+
 - Navigation uses `@react-navigation/native` + native-stack (`src/app.tsx` sets up `Home`, `FormDemo`,
   `TableDemo`, `Reference`, `Todos`, and `TodoDetail` screens). The entry stays `index.js` →
   `AppRegistry.registerComponent`.

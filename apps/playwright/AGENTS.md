@@ -6,6 +6,10 @@
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before adding or changing authentication, session,
+  protected-route, role, permission, ownership, or forbidden-state journeys. Use synthetic accounts
+  and verify both denial UX and absence of protected side effects.
+
 - Test user journeys through accessible, user-facing interactions.
 - Keep each test independent and use Playwright auto-waiting and web-first assertions.
 - Never add arbitrary waits, brittle CSS/XPath selectors, live third-party calls, or shared mutable test state.

@@ -220,6 +220,10 @@ Each skill lives in `skills/<name>/SKILL.md` with exactly two frontmatter keys (
 
 ## Mandatory Agent Workflow
 
+Authentication, protected routes, sessions, roles, permissions, ownership, and authorization tests
+must also invoke the portable `authentication-rbac` skill. It is the source of truth for separating
+navigation guards from server-side data authorization.
+
 Every agent task must begin with the `test-first-workflow` skill, regardless of whether the task
 changes code, tests, documentation, configuration, packages, or skills. Define acceptance criteria
 and executable tests or equivalent validation checks before editing, then run the checks after the

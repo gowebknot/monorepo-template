@@ -6,6 +6,10 @@
 
 ## Contract Rule
 
+- Invoke the `authentication-rbac` skill before defining or changing identity, session, role,
+  permission, ownership, or authorization error contracts. Never model client-supplied policy data
+  as trusted authorization.
+
 - Define API request, response, params, and error contracts here first.
 - Export each contract as a Zod schema plus an inferred TypeScript type.
 - Use current Zod imports, methods, and functions only; do not add deprecated pre-Zod-4 patterns or compatibility implementations.

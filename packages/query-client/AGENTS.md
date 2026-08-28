@@ -6,6 +6,10 @@
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before changing auth/session queries, cache invalidation,
+  role/permission presentation, or authorization error handling. Do not treat query visibility as
+  server authorization.
+
 - Keep generic hook factories in `src/`.
 - Keep product-level concrete hooks (e.g., health, root API) in `src/`.
 - Concrete hooks must consume services exported from `@monorepo-template/api-client` (or its `/example` subpath); do not build API services inside `query-client`.

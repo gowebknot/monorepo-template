@@ -8,6 +8,10 @@ The main application (`src/`) exposes health and production Better Auth. All exa
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before changing generated authentication, sessions, roles,
+  permissions, ownership, protected endpoints, or authorization tests. Enforce authorization before
+  protected reads and writes; route/UI guards are not a data boundary.
+
 - This app intentionally keeps Nest's default CommonJS runtime (no `"type": "module"` in `package.json`, so it runs as CommonJS at runtime despite `tsconfig.json`'s `module`/`moduleResolution: "nodenext"`; its own `eslint.config.mjs`/`.prettierrc`, Vitest) instead of the repo's ESM-everywhere convention — same kind of deliberate, self-contained exception `packages/entities` and `packages/env` make for their own build tooling.
 - Do not read `process.env` directly. Import config from `@monorepo-template/env/server` (see `serverEnv` usage in `src/main.ts`) or `@monorepo-template/env/reference-server` for the reference entry point.
 - Add any new required environment variables to `packages/env`'s `globalEnv` first, then pick them into `serverEnvSchema` or `referenceServerEnvSchema`, before consuming them here.

@@ -6,6 +6,10 @@
 
 ## Template Rule
 
+- Invoke the `authentication-rbac` skill before changing auth persistence, session tables, role or
+  permission data, ownership data, or authorization-related migrations. Persistence must not be the
+  only authorization boundary.
+
 - Keep `src/` connection-only in this template except for the intentional production Better Auth schema under `src/auth-schema.ts`.
 - Do not put driver-specific code in `src/`; concrete driver examples belong under `example/`.
 - Do not put other table/schema definitions in `src/`; `src/auth-schema.ts` is the intentional production-auth exception.

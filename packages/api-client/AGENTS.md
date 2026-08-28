@@ -6,6 +6,9 @@
 
 ## Rules
 
+- Invoke the `authentication-rbac` skill before changing auth/session clients or authorization-aware
+  API helpers. Client checks are UX only; private operations must be authorized by the server.
+
 - Keep this package focused on reusable API path helpers, Axios client setup, and typed service helpers.
 - Keep `axios` as a peer dependency and dev dependency; consumers provide their own compatible Axios install.
 - Do not validate responses in this package. Make API calls and return `response.data` only.

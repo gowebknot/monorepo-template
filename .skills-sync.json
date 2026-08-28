@@ -1,6 +1,9 @@
 {
   "version": 1,
   "skills": {
+    "authentication-rbac": {
+      "hash": "ff2ae01cc60d11bea93ff23497616eb116483c4ae0bb238a9da47a21545f41e8"
+    },
     "backend-standards": {
       "hash": "48f65ed66e32be52811a0d5dab201e16b7d6f3889d8c06efda775dbc3a2a760c"
     },
