@@ -1,6 +1,6 @@
 ---
 name: e2e-regression-test-writer
-description: "Plan and write Playwright end-to-end coverage for user-facing generated application features, flows, and failure states. Use during feature planning and after behavior changes, including authentication, forms, routes, validation, retries, and explicit E2E requests. Do not use for template-repository maintenance, unit tests, API-only or backend-only changes with no UI surface, purely cosmetic changes, unstable or mid-review flows, or visual/screenshot regression."
+description: "Plan and write Playwright end-to-end coverage for user-facing generated application features, flows, and failure states. Engage only when a user-facing web flow's observable behavior changes (route, navigation, form behavior, validation, authorization, redirect, success or error state) or when editing any file under apps/playwright/**. Do not use for component-internal edits that change no flow behavior, behavior-neutral refactors, dependency or configuration changes, documentation, light-tier changes, unit tests, API-only or backend-only changes with no UI surface, unstable or mid-review flows, or visual/screenshot regression."
 ---
 
 # E2E Regression Test Writer
@@ -9,9 +9,17 @@ Act as a QA design partner while a user-facing flow is planned and a QA proofrea
 implemented or changed. Inventory the journey and its independent failure branches before architecture
 and implementation are finalized, then write Playwright tests that prove the real user experience, not
 the internal implementation. Do not apply this skill to the template repository's own source,
-scaffolding, portable skills, or maintenance tasks.
+scaffolding, portable skills, or maintenance tasks. The one exception is the template's own
+`apps/playwright` reference suite: when you edit those example tests, apply this skill's authoring
+rules to them.
 
 ## Automatic Triggers
+
+This skill is path-gated: editing any file under `apps/playwright/**` requires invoking it. Outside
+that path, engage only when a user-facing web flow's observable behavior actually changes — not for
+component-internal edits, behavior-neutral refactors, dependency or configuration changes,
+documentation, or light-tier changes. A change that a unit or integration test already covers does
+not need this skill.
 
 Use this skill in a generated application project when:
 
@@ -22,10 +30,12 @@ Use this skill in a generated application project when:
   success state.
 - The user explicitly requests E2E tests, Playwright tests, regression tests, or tests for a flow.
 
-Do not use this skill for template-repository maintenance or source changes, CSS-only or copy-only
-changes, behavior-neutral refactors, dependency or configuration changes, backend-only or unit-testable
-work with no UI surface, unstable flows still awaiting design or product review, or visual and
-screenshot-diff regression testing.
+Do not use this skill for template-repository maintenance or source changes, component-internal
+edits that change no route, navigation, form behavior, validation, permission, or success/error
+state, CSS-only or copy-only changes, behavior-neutral refactors, dependency or configuration
+changes, documentation, light-tier changes, backend-only or unit-testable work with no UI surface,
+unstable flows still awaiting design or product review, or visual and screenshot-diff regression
+testing.
 
 ## Workflow
 

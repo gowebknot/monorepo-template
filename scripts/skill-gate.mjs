@@ -16,42 +16,13 @@ import {
   extractChecklistReferences,
   findActiveChecklist,
   formatValidationFailure,
-  validateImplementationContract
+  parseLightAttestation,
+  validateActiveChecklist
 } from "./implementation-contract.mjs";
+import { matchesAny } from "#scripts/glob.mjs";
 
 const SKILL_CALL_PATTERN =
   /"name"\s*:\s*"Skill"[^}]*"skill"\s*:\s*"([a-z0-9-]+)"/g;
-
-function globToRegExp(glob) {
-  let regex = "^";
-  for (let index = 0; index < glob.length; index += 1) {
-    const char = glob[index];
-    if (char === "*") {
-      if (glob[index + 1] === "*") {
-        index += 1;
-        if (glob[index + 1] === "/") {
-          index += 1;
-          regex += "(?:.*/)?"; // **/  → any number of leading path segments
-        } else {
-          regex += ".*"; // **   → anything, including separators
-        }
-      } else {
-        regex += "[^/]*"; // *    → anything except a separator
-      }
-    } else if (char === "?") {
-      regex += "[^/]";
-    } else if (".+^${}()|[]\\".includes(char)) {
-      regex += `\\${char}`;
-    } else {
-      regex += char;
-    }
-  }
-  return new RegExp(`${regex}$`);
-}
-
-function matchesAny(relativePath, patterns = []) {
-  return patterns.some((pattern) => globToRegExp(pattern).test(relativePath));
-}
 
 export function parseInvokedSkills(transcriptText) {
   const invoked = new Set();
@@ -110,7 +81,8 @@ export function evaluate({
   triggers,
   env = {},
   implementationContract,
-  checklistReads
+  checklistReads,
+  changeTierLight = false
 }) {
   const allow = (missing = []) => ({ allow: true, required: [], missing });
   if (env.SKILL_GATE_DISABLE) return allow();
@@ -120,7 +92,11 @@ export function evaluate({
   if (!relativePath) return allow();
   if (matchesAny(relativePath, triggers.exempt)) return allow();
 
-  if (implementationContract && !implementationContract.valid) {
+  if (
+    !changeTierLight &&
+    implementationContract &&
+    !implementationContract.valid
+  ) {
     return {
       allow: false,
       required: [],
@@ -129,7 +105,7 @@ export function evaluate({
     };
   }
 
-  if (implementationContract && checklistReads) {
+  if (!changeTierLight && implementationContract && checklistReads) {
     const requiredReads = [
       implementationContract.activeChecklist,
       ...(implementationContract.relatedChecklists ?? [])
@@ -203,8 +179,11 @@ async function main() {
     }
   }
 
+  const changeTierLight = parseLightAttestation(transcriptText) === "light";
+
   let implementationContract;
   if (
+    !changeTierLight &&
     payload.permission_mode !== "plan" &&
     filePath &&
     !matchesAny(toRelative(filePath, cwd), triggers.exempt)
@@ -219,7 +198,7 @@ async function main() {
       try {
         const markdown = await readFile(`${cwd}/${activeChecklist}`, "utf8");
         implementationContract = {
-          ...validateImplementationContract(markdown),
+          ...(await validateActiveChecklist(markdown, { cwd })),
           activeChecklist,
           relatedChecklists: extractChecklistReferences(markdown)
         };
@@ -240,7 +219,8 @@ async function main() {
     checklistReads: parseReadPaths(transcriptText, cwd),
     triggers,
     env: process.env,
-    implementationContract
+    implementationContract,
+    changeTierLight
   });
 
   if (decision.allow) return;

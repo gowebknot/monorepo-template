@@ -8,6 +8,44 @@ description: "Required at the start of every repository task, including code, te
 Plan first, copy the completed plan into a checklist, and then use that checklist as the source of
 truth for tests, implementation, and results.
 
+## Choose the Change Tier
+
+Before editing, pick one tier and size the process to the change. Use the disqualifier checklist in
+[plan-to-test guidance](references/plan-to-test.md#change-tier-selection) to decide.
+
+| Tier     | When                                                                                                                                                                                                                                              | Artifact                                                                                                                                                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| light    | A single configuration value, port number, dependency version bump, copy-only wording tweak, or documentation fix. No runtime behavior, contract, route, authorization, endpoint, or end-to-end test change, and one small cohesive set of edits. | No checklist file. Emit the attestation below and record the acceptance criteria, validation cases, and results in your response and the commit message body.                                                                  |
+| standard | Anything that fails a light disqualifier: a behavior or branch change, a contract or schema change, a route or form change, authorization, a new endpoint or job or migration, or new behavior-locking tests.                                     | One `docs/checklists/<date>-<slug>.md` with the full `## Implementation Contract`, `## Missing-Case Review`, and `## Exact Test Cases`, exactly as described below.                                                            |
+| large    | Two or more independently shippable behaviors, or work spanning multiple route groups, packages, or contracts.                                                                                                                                    | A parent checklist that declares `Tier: large` and links at least two child checklists under `## Child Checklists`. Each child is a standard-tier checklist with its own contract. Implement and validate one child at a time. |
+
+Self-select the tier honestly. Any disqualifier answered "yes" forces standard tier; two or more
+independently shippable behaviors force large tier. When unsure, choose the heavier tier.
+
+Light tier creates no checklist file. Before the first edit, emit this block as visible text with
+every answer filled in as `no`, then keep the acceptance criteria, validation cases, and recorded
+results in your response and the commit body. The template
+[light-change-record.md](templates/light-change-record.md) has the same block.
+
+```
+LIGHT-TIER-ATTESTATION
+1. Changes runtime behavior, control flow, or a conditional branch: <yes or no>
+2. Adds or changes an API contract, schema, DTO, validator, or shared type: <yes or no>
+3. Changes a route, navigation, form behavior, or user-facing validation: <yes or no>
+4. Touches authentication, authorization, sessions, roles, permissions, or ownership: <yes or no>
+5. Adds or changes an endpoint, background job, scheduled task, or data migration: <yes or no>
+6. Adds or modifies an e2e/integration/behavior test or any file under apps/playwright or apps/maestro: <yes or no>
+7. Needs more than one small cohesive edit, or is really a large multi-behavior change: <yes or no>
+Acceptance criteria: <1-3 lines>
+Validation: <exact command(s) + expected result>
+Recorded results: <command + observed result, filled after running>
+```
+
+Light-tier changes never invoke `e2e-regression-test-writer` or `maestro-mobile-e2e-test-writer`:
+any end-to-end work, or any edit under `apps/playwright/**` or `apps/maestro/**`, is disqualifier
+six and forces standard tier. Standard and large tiers are unchanged by this section and still
+create checklist files and complete the Implementation Contract before editing.
+
 ## Plan Before the Checklist
 
 Start every new task with a planning phase. Do not create the new checklist or change implementation

@@ -5,8 +5,13 @@ import {
   findActiveChecklist,
   extractChecklistReferences,
   formatValidationFailure,
-  validateImplementationContract
+  parseLightAttestation,
+  validateActiveChecklist
 } from "./implementation-contract.mjs";
+
+// Re-exported so the OpenCode plugin can reach it through this single adapter
+// module rather than importing the shared validator across package boundaries.
+export { parseLightAttestation };
 
 const checklistPath = "docs/checklists";
 const patchMarkers = [
@@ -64,7 +69,11 @@ export function getToolPaths(tool, args = {}) {
   return [filePath];
 }
 
-export async function validateBeforeEdit(directory, filePaths) {
+export async function validateBeforeEdit(
+  directory,
+  filePaths,
+  transcriptText = ""
+) {
   const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
   if (paths.length === 0 || paths.some((filePath) => !filePath)) {
     throw new Error(
@@ -73,6 +82,8 @@ export async function validateBeforeEdit(directory, filePaths) {
   }
   if (paths.every((filePath) => isChecklistPath(directory, filePath))) return;
 
+  if (parseLightAttestation(transcriptText) === "light") return;
+
   const activeChecklist = await findActiveChecklist(directory);
   if (!activeChecklist) {
     throw new Error(
@@ -80,8 +91,9 @@ export async function validateBeforeEdit(directory, filePaths) {
     );
   }
 
-  const result = validateImplementationContract(
-    await readFile(resolve(directory, activeChecklist), "utf8")
+  const result = await validateActiveChecklist(
+    await readFile(resolve(directory, activeChecklist), "utf8"),
+    { cwd: directory }
   );
   if (!result.valid) throw new Error(formatValidationFailure(result));
 }

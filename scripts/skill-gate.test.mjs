@@ -41,7 +41,12 @@ const triggers = {
       when: ["apps/web/**", "apps/next/**", "apps/expo/**", "apps/mobile/**"],
       require: ["frontend-standards"]
     },
-    { when: ["**/*.tsx", "**/*.jsx"], require: ["react-19"] }
+    { when: ["**/*.tsx", "**/*.jsx"], require: ["react-19"] },
+    { when: ["apps/playwright/**"], require: ["e2e-regression-test-writer"] },
+    {
+      when: ["apps/maestro/**"],
+      require: ["maestro-mobile-e2e-test-writer"]
+    }
   ],
   exempt: [
     "docs/checklists/**",
@@ -365,6 +370,77 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
       filePath
     );
   }
+
+  assert.deepEqual(requiredFor("apps/playwright/tests/auth.spec.ts").sort(), [
+    "e2e-regression-test-writer",
+    "testing-policy"
+  ]);
+  assert.deepEqual(requiredFor("apps/maestro/flows/auth.yaml"), [
+    "maestro-mobile-e2e-test-writer"
+  ]);
+});
+
+test("TEST-GATE-025 denies a Playwright spec edit missing the e2e skill", () => {
+  const result = decide({
+    filePath: "apps/playwright/tests/auth.spec.ts",
+    invokedSkills: ["test-first-workflow", "testing-policy"]
+  });
+  assert.equal(result.allow, false);
+  assert.ok(result.missing.includes("e2e-regression-test-writer"));
+  assert.ok(!result.missing.includes("maestro-mobile-e2e-test-writer"));
+});
+
+test("TEST-GATE-026 denies a Maestro flow edit missing the mobile e2e skill", () => {
+  const result = decide({
+    filePath: "apps/maestro/flows/auth.yaml",
+    invokedSkills: ["test-first-workflow"]
+  });
+  assert.equal(result.allow, false);
+  assert.ok(result.missing.includes("maestro-mobile-e2e-test-writer"));
+  assert.ok(!result.missing.includes("e2e-regression-test-writer"));
+});
+
+test("TEST-GATE-027 allows a light edit once test-first-workflow is invoked", () => {
+  const result = decide({
+    filePath: "scripts/dev-ports.mjs",
+    invokedSkills: ["test-first-workflow"],
+    changeTierLight: true
+  });
+  assert.equal(result.allow, true);
+  assert.deepEqual(result.missing, []);
+});
+
+test("TEST-GATE-028 denies a light edit when no skill was invoked", () => {
+  const result = decide({
+    filePath: "scripts/dev-ports.mjs",
+    invokedSkills: [],
+    changeTierLight: true
+  });
+  assert.equal(result.allow, false);
+  assert.ok(result.missing.includes("test-first-workflow"));
+});
+
+test("TEST-GATE-029 a light edit bypasses an invalid contract object", () => {
+  const result = decide({
+    filePath: "scripts/dev-ports.mjs",
+    invokedSkills: ["test-first-workflow"],
+    changeTierLight: true,
+    implementationContract: {
+      valid: false,
+      errors: ["missing ### User Journey"]
+    }
+  });
+  assert.equal(result.allow, true);
+});
+
+test("TEST-GATE-030 a light edit on a Playwright path still needs the e2e skill", () => {
+  const result = decide({
+    filePath: "apps/playwright/tests/auth.spec.ts",
+    invokedSkills: ["test-first-workflow", "testing-policy"],
+    changeTierLight: true
+  });
+  assert.equal(result.allow, false);
+  assert.ok(result.missing.includes("e2e-regression-test-writer"));
 });
 
 test("TEST-GATE-018 settings.json registers the PreToolUse gate", async () => {

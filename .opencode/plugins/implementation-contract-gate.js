@@ -2,6 +2,7 @@ import {
   getChecklistReadRequirements,
   getToolPaths,
   isChecklistPath,
+  parseLightAttestation,
   validateBeforeEdit
 } from "../../scripts/implementation-contract-gate.mjs";
 import { readFile } from "node:fs/promises";
@@ -9,8 +10,25 @@ import { relative, resolve } from "node:path";
 
 const editableTools = new Set(["apply_patch", "edit", "write"]);
 
-export default async ({ directory }) => {
+export default async ({ directory, client }) => {
   let readPaths = new Set();
+
+  const readTranscript = async (sessionID) => {
+    if (!client?.session?.messages || !sessionID) return "";
+    try {
+      const response = await client.session.messages({
+        path: { id: sessionID }
+      });
+      const messages = response?.data ?? response ?? [];
+      return messages
+        .flatMap((entry) => entry?.parts ?? [])
+        .filter((part) => part?.type === "text")
+        .map((part) => part?.text ?? "")
+        .join("\n");
+    } catch {
+      return ""; // Fail closed to the checklist requirement.
+    }
+  };
   const normalize = (filePath) =>
     relative(directory, resolve(directory, String(filePath))).replaceAll(
       "\\",
@@ -41,7 +59,13 @@ export default async ({ directory }) => {
         return;
       }
       if (!editableTools.has(tool)) return;
-      await validateBeforeEdit(directory, getToolPaths(tool, output?.args));
+      const transcript = await readTranscript(input?.sessionID);
+      await validateBeforeEdit(
+        directory,
+        getToolPaths(tool, output?.args),
+        transcript
+      );
+      if (parseLightAttestation(transcript) === "light") return;
       await checkReads();
     }
   };

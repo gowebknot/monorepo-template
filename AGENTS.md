@@ -229,6 +229,16 @@ changes code, tests, documentation, configuration, packages, or skills. Define a
 and executable tests or equivalent validation checks before editing, then run the checks after the
 change.
 
+Select a change tier before editing: `light`, `standard`, or `large`, per `test-first-workflow`. A
+light-tier change — a single configuration value, port, dependency bump, wording tweak, or
+documentation fix with no behavior, contract, route, authorization, endpoint, or end-to-end test
+impact — creates no checklist file; emit the `LIGHT-TIER-ATTESTATION` block from
+`skills/test-first-workflow/templates/light-change-record.md` in your response and commit message
+body. Standard tier is unchanged and still requires the full Implementation Contract checklist.
+Large tier splits into a parent checklist that links at least two standard-tier child checklists.
+The `commit-msg` hook rejects a commit that changes non-exempt files with neither a checklist nor a
+completed light attestation.
+
 Every code-generation or code-editing task must also invoke the `code-quality` skill before editing.
 Before implementation edits, read the active checklist and every path it declares under `Related checklists`; the implementation gate verifies these reads when supported by the agent adapter.
 
@@ -259,6 +269,13 @@ Load the additional skills when their task boundaries apply:
   involved.
 - `end-to-end-api-flow` when API behavior crosses contracts, backend endpoints, API clients,
   query-client hooks, and consuming clients.
+- `e2e-regression-test-writer` only when a user-facing web flow's observable behavior changes
+  (route, navigation, form behavior, validation, authorization, redirect, success or error state),
+  or when editing any file under `apps/playwright/**` (path-gated by `.claude/skill-triggers.json`).
+  Never for component-internal edits, behavior-neutral refactors, dependency or configuration
+  changes, documentation, or light-tier changes.
+- `maestro-mobile-e2e-test-writer` only when a user-facing mobile flow's observable behavior
+  changes, or when editing any file under `apps/maestro/**` (path-gated). Same exclusions.
 - `observability` whenever changing logs, metrics, traces, audit events, correlation IDs, lifecycle
   status, retries, or error metadata.
 - `code-review` whenever reviewing a patch, pull request, refactor, migration, dependency change,

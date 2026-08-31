@@ -1,1 +1,2 @@
 pnpm commitlint --edit "$1"
+node scripts/change-tier-commit-check.mjs "$1"

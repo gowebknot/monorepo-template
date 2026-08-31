@@ -10,6 +10,23 @@
 - Affected paths: <packages, apps, or files>
 - Status legend: `[ ]` incomplete, `[/]` partial, `[x]` complete
 
+## Change Tier
+
+- Tier: <standard | large>
+- Disqualifiers: <which disqualifier(s) forced this tier, or "multiple independently shippable
+  behaviors" for large>
+
+A light-tier change does not use this template; it has no checklist file. See
+[light-change-record.md](light-change-record.md).
+
+## Child Checklists
+
+Only when `Tier: large`. List one standard-tier child checklist per cohesive behavior; there must
+be at least two. Leave this section out for a standard-tier checklist.
+
+- <link to docs/checklists/...-child-a.md>
+- <link to docs/checklists/...-child-b.md>
+
 ## Planning Record
 
 - [ ] Confirm the planning phase was completed before creating this checklist.

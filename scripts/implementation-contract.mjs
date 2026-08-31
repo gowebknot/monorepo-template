@@ -2,6 +2,7 @@
 
 import { readFile, stat } from "node:fs/promises";
 import { execFile } from "node:child_process";
+import { resolve } from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
@@ -103,6 +104,125 @@ export function validateImplementationContract(markdown) {
   return { valid: errors.length === 0, errors };
 }
 
+const LIGHT_ATTESTATION_MARKER = "LIGHT-TIER-ATTESTATION";
+const LIGHT_ATTESTATION_WINDOW = 2000;
+
+// The seven disqualifiers an agent must answer "no" to claim the light tier.
+// Each entry only anchors on the leading "<n>." so the exact wording can evolve
+// in the skill text without breaking the gate; the answer must be an explicit
+// "yes" or "no" so the committed "<yes or no>" placeholder never counts.
+function lightAnswerPattern(index) {
+  return new RegExp(`(?:^|\\n)\\s*${index}\\.[^\\n]*?:\\s*(yes|no)\\b`, "i");
+}
+
+// Transcript text reaches the gate as JSON-encoded lines, so a multi-line
+// attestation an agent typed arrives with "\n" (and "\"") escaped. Normalize a
+// candidate block back to real newlines before matching, mirroring the
+// [\s\S] bridging that parseReadPaths uses for the same reason.
+function normalizeTranscriptBlock(block) {
+  return block
+    .replace(/\\r\\n|\\n|\\r/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\"/g, '"');
+}
+
+export function detectChangeTier(markdown) {
+  if (typeof markdown !== "string") return "standard";
+  const section = sectionBetween(markdown, "## Change Tier", "\n## ");
+  const match = section.match(/Tier:\s*(light|standard|large)\b/i);
+  return match ? match[1].toLowerCase() : "standard";
+}
+
+export function parseLightAttestation(text) {
+  if (typeof text !== "string") return undefined;
+
+  const declarations = [
+    ...text.matchAll(/Change tier:\s*(light|standard|large)\b/gi)
+  ].map((match) => ({ index: match.index, tier: match[1].toLowerCase() }));
+  const markerIndex = text.lastIndexOf(LIGHT_ATTESTATION_MARKER);
+  if (markerIndex >= 0) {
+    declarations.push({ index: markerIndex, tier: "light" });
+  }
+  if (declarations.length === 0) return undefined;
+
+  const last = declarations
+    .sort((left, right) => left.index - right.index)
+    .at(-1);
+  if (last.tier !== "light" || markerIndex < 0) return undefined;
+
+  const block = normalizeTranscriptBlock(
+    text.slice(markerIndex, markerIndex + LIGHT_ATTESTATION_WINDOW)
+  );
+  for (let index = 1; index <= 7; index += 1) {
+    const answer = block.match(lightAnswerPattern(index));
+    if (!answer || answer[1].toLowerCase() !== "no") return undefined;
+  }
+  if (!/(?:^|\n)\s*Acceptance criteria:\s*\S/i.test(block)) return undefined;
+  if (!/(?:^|\n)\s*Validation:\s*\S/i.test(block)) return undefined;
+  return "light";
+}
+
+export async function validateLargeChecklist(
+  markdown,
+  { cwd = process.cwd(), readFile: read = readFile } = {}
+) {
+  const errors = [];
+  if (!markdown.includes("## Change Tier")) {
+    addError(errors, "missing ## Change Tier");
+  }
+
+  const section = sectionBetween(markdown, "## Child Checklists", "\n## ");
+  const links = [
+    ...new Set(
+      [...section.matchAll(/(docs\/checklists\/[^)\s]+\.md)/g)].map(
+        (match) => match[1]
+      )
+    )
+  ];
+  if (links.length < 2) {
+    addError(
+      errors,
+      "large-tier parent must link at least two child checklists under ## Child Checklists"
+    );
+    return { valid: errors.length === 0, errors, tier: "large" };
+  }
+
+  for (const link of links) {
+    try {
+      const childMarkdown = await read(resolve(cwd, link), "utf8");
+      if (!childMarkdown.includes("## Implementation Contract")) {
+        addError(
+          errors,
+          `child checklist ${link} is missing its ## Implementation Contract`
+        );
+      }
+    } catch {
+      addError(errors, `child checklist ${link} does not exist`);
+    }
+  }
+
+  return { valid: errors.length === 0, errors, tier: "large" };
+}
+
+export async function validateActiveChecklist(markdown, options = {}) {
+  if (typeof markdown !== "string" || markdown.trim() === "") {
+    return { valid: false, errors: ["checklist is empty"], tier: "standard" };
+  }
+
+  const tier = detectChangeTier(markdown);
+  if (tier === "light") {
+    return {
+      valid: false,
+      tier: "light",
+      errors: [
+        "light-tier changes must not create a checklist file; record the attestation, validation, and results in the response and commit body, or reclassify the change as standard"
+      ]
+    };
+  }
+  if (tier === "large") return validateLargeChecklist(markdown, options);
+  return { ...validateImplementationContract(markdown), tier: "standard" };
+}
+
 export function extractChecklistReferences(markdown) {
   const section = sectionBetween(markdown, "Related checklists:", "##");
   return [
@@ -143,7 +263,13 @@ export async function findActiveChecklist(cwd) {
 }
 
 export function formatValidationFailure(result) {
-  return `Implementation contract is incomplete:\n- ${result.errors.join("\n- ")}`;
+  const label =
+    result.tier === "large"
+      ? "Large-tier checklist is incomplete"
+      : result.tier === "light"
+        ? "Light-tier declaration is incomplete"
+        : "Implementation contract is incomplete";
+  return `${label}:\n- ${result.errors.join("\n- ")}`;
 }
 
 if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
@@ -154,8 +280,9 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
     );
     process.exitCode = 2;
   } else {
-    const result = validateImplementationContract(
-      await readFile(filePath, "utf8")
+    const result = await validateActiveChecklist(
+      await readFile(filePath, "utf8"),
+      { cwd: process.cwd() }
     );
     if (!result.valid) {
       console.error(formatValidationFailure(result));

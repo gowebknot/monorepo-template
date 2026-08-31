@@ -1,5 +1,5 @@
 {
-  "$comment": "Path-detectable skill triggers enforced by scripts/skill-gate.mjs (a PreToolUse hook). 'always' skills are required for every non-exempt edit; each rule adds skills when an edited path matches any 'when' glob. Edit this table to tighten or extend coverage. Skills that remain intent-only because a path cannot identify their scope (code-review, release-flow, observability, security-testing-policy, jsx-component-extraction) stay governed by AGENTS.md. Opt out with SKILL_GATE_DISABLE=1.",
+  "$comment": "Path-detectable skill triggers enforced by scripts/skill-gate.mjs (a PreToolUse hook). 'always' skills are required for every non-exempt edit; each rule adds skills when an edited path matches any 'when' glob. Edit this table to tighten or extend coverage. Skills that remain intent-only because a path cannot identify their scope (code-review, release-flow, observability, security-testing-policy, jsx-component-extraction) stay governed by AGENTS.md. The apps/playwright and apps/maestro rules gate the two end-to-end test-writer skills to the directories that hold those suites; outside those paths they stay intent-only, and both rules survive template sync (scripts/skill-triggers.mjs) because their require lists exclude frontend-standards, backend-standards, and domain-driven-app-structure. Opt out with SKILL_GATE_DISABLE=1.",
   "always": ["test-first-workflow"],
   "rules": [
     {
@@ -26,7 +26,15 @@
       "when": ["apps/web/**", "apps/next/**", "apps/expo/**", "apps/mobile/**"],
       "require": ["frontend-standards", "domain-driven-app-structure"]
     },
-    { "when": ["**/*.tsx", "**/*.jsx"], "require": ["react-19"] }
+    { "when": ["**/*.tsx", "**/*.jsx"], "require": ["react-19"] },
+    {
+      "when": ["apps/playwright/**"],
+      "require": ["e2e-regression-test-writer"]
+    },
+    {
+      "when": ["apps/maestro/**"],
+      "require": ["maestro-mobile-e2e-test-writer"]
+    }
   ],
   "exempt": [
     "docs/checklists/**",

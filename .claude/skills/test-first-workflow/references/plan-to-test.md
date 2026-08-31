@@ -26,6 +26,54 @@ test cases before implementation starts.
     evidence, impact, corrective action, validation, and a backlink to the bottom of the original
     checklist. Do not edit its prior plan, items, or statuses.
 
+## Change Tier Selection
+
+Pick one tier before editing and size the process to the change.
+
+Answer these seven disqualifiers for the whole change:
+
+1. Changes runtime behavior, control flow, or a conditional branch.
+2. Adds or changes an API contract, schema, DTO, validator, or shared inferred type.
+3. Changes a route, navigation target, form behavior, or user-facing validation. Pure display
+   wording stays light.
+4. Touches authentication, authorization, sessions, roles, permissions, or ownership.
+5. Adds or changes an HTTP endpoint, background job, scheduled task, or data migration.
+6. Adds or modifies an end-to-end, integration, or behavior-locking test, or any file under
+   `apps/playwright/**` or `apps/maestro/**`.
+7. Needs more than one small cohesive set of edits, or is really a large multi-behavior change.
+
+Any disqualifier answered "yes" forces standard tier. Two or more independently shippable
+behaviors, or work spanning multiple route groups, packages, or contracts, forces large tier:
+create a parent checklist that declares `Tier: large` and links at least two child checklists under
+`## Child Checklists`, one standard-tier child checklist per cohesive behavior, and implement one
+child at a time.
+
+Light-tier examples: a configuration value or port number, a dependency version bump, a
+display-wording tweak, a documentation fix.
+
+Light tier produces no `docs/checklists/` file. Before the first edit, emit the attestation block
+below as visible text with every answer filled in as `no`, and record the acceptance criteria,
+validation cases, and observed results in your response and the commit message body using
+[light-change-record.md](templates/light-change-record.md).
+
+Light-tier changes never invoke `e2e-regression-test-writer` or `maestro-mobile-e2e-test-writer`.
+Editing any file under `apps/playwright/**` or `apps/maestro/**`, or adding a behavior-locking
+test, is disqualifier six and forces standard tier.
+
+```
+LIGHT-TIER-ATTESTATION
+1. Changes runtime behavior, control flow, or a conditional branch: <yes or no>
+2. Adds or changes an API contract, schema, DTO, validator, or shared type: <yes or no>
+3. Changes a route, navigation, form behavior, or user-facing validation: <yes or no>
+4. Touches authentication, authorization, sessions, roles, permissions, or ownership: <yes or no>
+5. Adds or changes an endpoint, background job, scheduled task, or data migration: <yes or no>
+6. Adds or modifies an e2e/integration/behavior test or any file under apps/playwright or apps/maestro: <yes or no>
+7. Needs more than one small cohesive edit, or is really a large multi-behavior change: <yes or no>
+Acceptance criteria: <1-3 lines>
+Validation: <exact command(s) + expected result>
+Recorded results: <command + observed result, filled after running>
+```
+
 ## Split Large Work Into Small Parts
 
 Use as many checklist levels as the task needs. Do not stop at a feature, page, endpoint, service,
@@ -213,6 +261,9 @@ Exact cases include:
 
 "Test quantity validation" would be only a heading. It would not be a complete plan because it hides
 the exact situations above.
+
+See the [complete quantity-field example](../examples/quantity-field-plan.md) for the full task map
+and every field of each exact case.
 
 ## Validation Sequence
 

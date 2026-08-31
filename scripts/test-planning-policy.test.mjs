@@ -232,3 +232,91 @@ test("TEST-SKILL-034 lists interaction steps and one main behavior", async () =>
     assert.match(text, /main behavior/i);
   }
 });
+
+async function readTierFiles() {
+  const workflowRoot = join(repositoryRoot, "skills/test-first-workflow");
+  const [workflow, guidance, template, lightRecord, agents] = await Promise.all(
+    [
+      readFile(join(workflowRoot, "SKILL.md"), "utf8"),
+      readFile(join(workflowRoot, "references/plan-to-test.md"), "utf8"),
+      readFile(join(workflowRoot, "templates/task-checklist.md"), "utf8"),
+      readFile(join(workflowRoot, "templates/light-change-record.md"), "utf8"),
+      readFile(join(repositoryRoot, "AGENTS.md"), "utf8")
+    ]
+  );
+  return { workflow, guidance, template, lightRecord, agents };
+}
+
+test("TEST-SKILL-161 documents the three change tiers", async () => {
+  const { workflow, guidance } = await readTierFiles();
+  assert.match(workflow, /## Choose the Change Tier/);
+  assert.match(guidance, /## Change Tier Selection/);
+  for (const text of [workflow, guidance]) {
+    assert.match(text, /\blight\b/);
+    assert.match(text, /\bstandard\b/);
+    assert.match(text, /\blarge\b/);
+  }
+});
+
+test("TEST-SKILL-162 lists the disqualifiers and the any-yes rule", async () => {
+  const { guidance } = await readTierFiles();
+  for (let index = 1; index <= 7; index += 1) {
+    assert.match(guidance, new RegExp(`(^|\\n)\\s*${index}\\. `));
+  }
+  assert.match(
+    guidance,
+    /any (disqualifier |answer )?(is |answered )?["']?yes/i
+  );
+});
+
+test("TEST-SKILL-163 states light-tier never invokes the e2e skills", async () => {
+  const { workflow, guidance } = await readTierFiles();
+  for (const text of [workflow, guidance]) {
+    assert.match(text, /e2e-regression-test-writer/);
+    assert.match(text, /maestro-mobile-e2e-test-writer/);
+    assert.match(text, /light[- ]tier changes? (never|do not)/i);
+  }
+});
+
+test("TEST-SKILL-164 ships the light attestation template", async () => {
+  const { workflow, guidance, lightRecord } = await readTierFiles();
+  for (const text of [workflow, guidance, lightRecord]) {
+    assert.match(text, /LIGHT-TIER-ATTESTATION/);
+    for (let index = 1; index <= 7; index += 1) {
+      assert.match(text, new RegExp(`(^|\\n)\\s*${index}\\. `));
+    }
+  }
+});
+
+test("TEST-SKILL-165 requires a large parent to link standard-tier children", async () => {
+  const { workflow, guidance } = await readTierFiles();
+  for (const text of [workflow, guidance]) {
+    assert.match(text, /at least two child checklists/i);
+    assert.match(text, /standard[- ]tier/i);
+  }
+});
+
+test("TEST-SKILL-166 keeps the light-change record lightweight", async () => {
+  const { lightRecord } = await readTierFiles();
+  assert.match(lightRecord, /## Acceptance Criteria/);
+  assert.match(lightRecord, /## Validation Cases/);
+  assert.match(lightRecord, /## Recorded Results/);
+  assert.doesNotMatch(lightRecord, /## Implementation Contract/);
+  assert.doesNotMatch(lightRecord, /## Missing-Case Review/);
+  assert.doesNotMatch(lightRecord, /## Exact Test Case Rules/);
+});
+
+test("TEST-SKILL-167 adds the tier headings to the task checklist template", async () => {
+  const { template } = await readTierFiles();
+  assert.match(template, /## Change Tier/);
+  assert.match(template, /## Child Checklists/);
+});
+
+test("TEST-SKILL-168 documents the e2e skill boundaries in AGENTS.md", async () => {
+  const { agents } = await readTierFiles();
+  assert.match(agents, /change tier/i);
+  assert.match(agents, /e2e-regression-test-writer/);
+  assert.match(agents, /maestro-mobile-e2e-test-writer/);
+  assert.match(agents, /apps\/playwright/);
+  assert.match(agents, /apps\/maestro/);
+});

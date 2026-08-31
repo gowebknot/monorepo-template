@@ -1,6 +1,6 @@
 ---
 name: maestro-mobile-e2e-test-writer
-description: "Plan and write Maestro mobile end-to-end coverage for user-facing generated Expo or React Native flows, including applicable failure paths and dedicated seeded test data. Use during feature planning and after mobile behavior changes."
+description: "Plan and write Maestro mobile end-to-end coverage for user-facing generated Expo or React Native flows, including applicable failure paths and dedicated seeded test data. Engage only when a user-facing mobile flow's observable behavior changes or when editing any file under apps/maestro/**. Do not use for component-internal edits that change no flow behavior, behavior-neutral refactors, dependency or configuration changes, documentation, light-tier changes, unit or API-only work, cosmetic-only changes, unstable flows, or screenshot-only regression."
 ---
 
 # Maestro Mobile E2E Test Writer
@@ -9,9 +9,15 @@ Act as a QA design partner while a generated Expo or React Native flow is planne
 after stable behavior is implemented or changed. Inventory the journey and its independent failure
 branches before architecture and implementation are finalized, then write Maestro YAML flows that prove
 the journey a real mobile user experiences. Do not apply this skill to this template repository's own
-source, portable skills, or maintenance tasks.
+source, portable skills, or maintenance tasks. The one exception is the template's own `apps/maestro`
+reference suite: when you edit those example flows, apply this skill's authoring rules to them.
 
 ## Automatic Triggers
+
+This skill is path-gated: editing any file under `apps/maestro/**` requires invoking it. Outside
+that path, engage only when a user-facing mobile flow's observable behavior actually changes — not
+for component-internal edits, behavior-neutral refactors, dependency or configuration changes,
+documentation, or light-tier changes.
 
 Use this skill when:
 
@@ -19,8 +25,9 @@ Use this skill when:
 - A mobile bug fix changes user-visible behavior.
 - The user explicitly requests Maestro, mobile E2E, device-flow, or regression tests.
 
-Do not use it for template maintenance, unit or API-only work, cosmetic-only changes, unstable flows,
-or screenshot-only regression.
+Do not use it for template maintenance, component-internal edits that change no flow behavior,
+behavior-neutral refactors, dependency or configuration changes, documentation, light-tier changes,
+unit or API-only work, cosmetic-only changes, unstable flows, or screenshot-only regression.
 
 ## Workflow
 
