@@ -78,28 +78,29 @@ this is additive for existing template consumers.
 
 ## Acceptance Criteria
 
-- [ ] `core/create-mono-stack/package.json` version is `0.1.49` and
+- [x] `core/create-mono-stack/package.json` version is `0.1.49` and
       `core/create-mono-stack/test/cli.test.js` expects `_commit: v0.1.49`.
-- [ ] `pnpm --filter create-mono-stack test` passes.
-- [ ] `just check` exits 0 without any bypass flag.
-- [ ] `npm pack --dry-run` from the package shows version 0.1.49 and no unintended files.
-- [ ] The release commit is pushed to `origin/master` before the tag.
-- [ ] Annotated tag `v0.1.49` is created at the release commit and pushed.
-- [ ] `pnpm --filter create-mono-stack publish:package` publishes `create-mono-stack@0.1.49`.
-- [ ] `npm view create-mono-stack@latest version` reports `0.1.49` and the remote tag peels to the
-      release commit.
+- [x] `pnpm --filter create-mono-stack test` passes (275).
+- [x] `just check` exits 0 without any bypass flag.
+- [x] `npm pack --dry-run` from the package shows version 0.1.49 and no unintended files (294 files,
+      the package's own `test/` excluded).
+- [x] The release commit `73528af` is pushed to `origin/master` before the tag.
+- [x] Annotated tag `v0.1.49` is created at `73528af` and pushed.
+- [x] `pnpm --filter create-mono-stack publish:package` published `create-mono-stack@0.1.49`.
+- [x] `npm view create-mono-stack@0.1.49 version` reports `0.1.49`, `dist-tags.latest` is `0.1.49`,
+      and the remote peeled tag `v0.1.49^{}` is `73528af`.
 
 ## Planned Work
 
-- [ ] Bump `core/create-mono-stack/package.json` 0.1.48 -> 0.1.49.
-- [ ] Update `core/create-mono-stack/test/cli.test.js` `_commit: v0.1.48` -> `_commit: v0.1.49`.
-- [ ] Run `pnpm --filter create-mono-stack test` and `just check`; record results.
-- [ ] Inspect `npm pack --dry-run` and complete the release-impact review.
-- [ ] Inspect `git status`, `git diff`, and recent history; stage only intended files; commit with
-      hooks (subject `feat(skills): ...` bundling the release).
-- [ ] Push the release commit to `origin/master`; create and push annotated tag `v0.1.49`.
-- [ ] Publish with `pnpm --filter create-mono-stack publish:package`; verify npm and the tag.
-- [ ] Append an `## Updates` record with the publication evidence and commit it.
+- [x] Bump `core/create-mono-stack/package.json` 0.1.48 -> 0.1.49.
+- [x] Update `core/create-mono-stack/test/cli.test.js` `_commit: v0.1.48` -> `_commit: v0.1.49`.
+- [x] Run `pnpm --filter create-mono-stack test` (275 pass) and `just check` (exit 0).
+- [x] Inspect `npm pack --dry-run` (0.1.49, 294 files) and complete the release-impact review.
+- [x] Inspect `git status`, `git diff`, and recent history; stage only intended files; commit
+      `73528af` with hooks.
+- [x] Push the release commit to `origin/master`; create and push annotated tag `v0.1.49`.
+- [x] Publish with `pnpm --filter create-mono-stack publish:package`; verify npm and the tag.
+- [x] Append this `## Updates` record with the publication evidence and commit it.
 
 ## Exact Test Cases
 
@@ -118,8 +119,8 @@ this is additive for existing template consumers.
 - Planned command: `pnpm --filter create-mono-stack test`.
 - Expected result before the code change: the suite passes against 0.1.48; there is no 0.1.49
   assertion yet.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-01 ran green (release commit 73528af); see Validation Notes.
+- Passing rerun: 2026-09-01 same commands re-run green after the release.
 
 ### TEST-RELEASE-011 repository validation gate
 
@@ -138,8 +139,8 @@ this is additive for existing template consumers.
 - Must not happen: no `--no-verify`, `HUSKY=0`, or skipped hooks.
 - Planned command: `just check`.
 - Expected result before the code change: the same gate passed before the version bump.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-01 ran green (release commit 73528af); see Validation Notes.
+- Passing rerun: 2026-09-01 same commands re-run green after the release.
 
 ### TEST-RELEASE-012 package artifact
 
@@ -156,8 +157,8 @@ this is additive for existing template consumers.
 - Must not happen: do not publish an unverified artifact.
 - Planned command: `pnpm --filter create-mono-stack exec npm pack --dry-run`.
 - Expected result before the code change: the dry run would report 0.1.48.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-01 ran green (release commit 73528af); see Validation Notes.
+- Passing rerun: 2026-09-01 same commands re-run green after the release.
 
 ### TEST-RELEASE-013 remote and registry verification
 
@@ -175,8 +176,8 @@ this is additive for existing template consumers.
 - Must not happen: no publish before the commit and tag are pushed.
 - Planned command: `git ls-remote --tags origin v0.1.49 && npm view create-mono-stack@latest version`.
 - Expected result before the code change: the tag and npm latest remain at 0.1.48.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-01 ran green (release commit 73528af); see Validation Notes.
+- Passing rerun: 2026-09-01 same commands re-run green after the release.
 
 ## Missing-Case Review
 
@@ -224,33 +225,58 @@ this is additive for existing template consumers.
 
 ## Implementation Plan
 
-- [ ] Set `core/create-mono-stack/package.json` `"version"` to `"0.1.49"`.
-- [ ] Set `core/create-mono-stack/test/cli.test.js` line ~115 `"_commit: v0.1.48\n"` to
+- [x] Set `core/create-mono-stack/package.json` `"version"` to `"0.1.49"`.
+- [x] Set `core/create-mono-stack/test/cli.test.js` line ~115 `"_commit: v0.1.48\n"` to
       `"_commit: v0.1.49\n"`.
-- [ ] `pnpm --filter create-mono-stack test` -> record.
-- [ ] `just check` -> record.
-- [ ] `pnpm --filter create-mono-stack exec npm pack --dry-run` -> record version and file list.
-- [ ] `git add` only the intended files (the tiered-workflow change, the doc-link fix, the version
+- [x] `pnpm --filter create-mono-stack test` -> record.
+- [x] `just check` -> record.
+- [x] `pnpm --filter create-mono-stack exec npm pack --dry-run` -> record version and file list.
+- [x] `git add` only the intended files (the tiered-workflow change, the doc-link fix, the version
       bump, the fixture, both checklists); `git commit` with the pre-commit and commit-msg hooks.
-- [ ] `git push origin master`.
-- [ ] `git tag -a v0.1.49 -m "create-mono-stack 0.1.49"` at the release commit; `git push origin v0.1.49`.
-- [ ] `pnpm --filter create-mono-stack publish:package`.
-- [ ] `git ls-remote --tags origin v0.1.49` and `npm view create-mono-stack@latest version` -> record.
-- [ ] Append `## Updates` with the evidence; `git commit` the record and `git push origin master`.
+- [x] `git push origin master`.
+- [x] `git tag -a v0.1.49 -m "create-mono-stack 0.1.49"` at the release commit; `git push origin v0.1.49`.
+- [x] `pnpm --filter create-mono-stack publish:package`.
+- [x] `git ls-remote --tags origin v0.1.49` and `npm view create-mono-stack@latest version` -> record.
+- [x] Append `## Updates` with the evidence; `git commit` the record and `git push origin master`.
 
 ## Verification
 
-- [ ] `pnpm --filter create-mono-stack test`
-- [ ] `just check`
-- [ ] `pnpm --filter create-mono-stack exec npm pack --dry-run`
-- [ ] `git ls-remote --tags origin v0.1.49`
-- [ ] `npm view create-mono-stack@latest version`
+- [x] `pnpm --filter create-mono-stack test`
+- [x] `just check`
+- [x] `pnpm --filter create-mono-stack exec npm pack --dry-run`
+- [x] `git ls-remote --tags origin v0.1.49`
+- [x] `npm view create-mono-stack@latest version`
 
 ## Validation Notes
 
-- Pending first run.
-- Release execution stops on any validation, hook, push, tag, or publish failure; unrelated
-  pre-existing failures are documented rather than hidden.
+- `pnpm --filter create-mono-stack test` -> 275 pass, 0 fail.
+- `just check` -> exit 0. Only non-clean output is the pre-existing `react-hooks/incompatible-library`
+  warning in `apps/web/src/routes/table-demo.tsx` and `apps/next` (0 errors).
+- `npm pack --dry-run` -> `create-mono-stack-0.1.49.tgz`, 294 files, 616.5 kB packed / 1.0 MB
+  unpacked. The package's own `test/` directory, `node_modules`, and `.npmrc*` are excluded; the
+  `.test.ts` files present are inside `reference-templates/managed/*` and ship intentionally.
+- Pre-commit hook passed on commit `73528af` (build, server unit + api-e2e, `skills:test` 167 pass,
+  lint, typecheck). `commit-msg` passed commitlint and the new `change-tier-commit-check` (a staged
+  `docs/checklists/*.md` satisfies the backstop).
+- Release execution stopped for no failures; there were none.
+
+## Updates
+
+### 2026-09-01 - Release completed
+
+- **Commit:** `73528af71e80763140e4ce4beddd3e2482bac160`
+  `feat(skills): tier the test-first workflow, path-gate the e2e skills, release create-mono-stack 0.1.49`,
+  pushed to `origin/master` (`8a49ecc..73528af`).
+- **Tag:** annotated `v0.1.49` (`ef4a1c0`) created at `73528af` and pushed; peeled
+  `refs/tags/v0.1.49^{}` = `73528af`.
+- **Publish:** `pnpm --filter create-mono-stack publish:package` -> `+ create-mono-stack@0.1.49`
+  to `https://registry.npmjs.org/` with tag `latest` and public access.
+- **Verification:** `npm view create-mono-stack@0.1.49 version` -> `0.1.49`;
+  `npm view create-mono-stack dist-tags` -> `{ latest: '0.1.49' }`;
+  `npm view create-mono-stack versions` includes `0.1.49`.
+- **Limitation:** the annotated tag is unsigned, matching prior releases; `git tag -v` cannot verify
+  a signature. `npm view ...@latest version` briefly returned the cached `0.1.48` immediately after
+  publish; the version-pinned query and `dist-tags` confirm `0.1.49`.
 
 ## Risks and Follow-Up
 
@@ -258,4 +284,6 @@ this is additive for existing template consumers.
   `package.json` and the new `scripts/glob.mjs` / `scripts/change-tier-commit-check.mjs` /
   `.husky/commit-msg` all flow through Copier. `pnpm template:test` (part of `just check`) covers
   the create and update integration paths.
+- Existing generated projects pick up the change on the next `pnpm template:update`; no manual
+  migration is required.
 - The annotated tag is unsigned, matching prior releases.
