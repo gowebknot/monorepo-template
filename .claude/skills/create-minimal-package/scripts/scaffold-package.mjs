@@ -206,6 +206,7 @@ await writeFile(
 await writeFile(path.join(packageDir, "vite.config.ts"), viteConfig);
 await writeFile(path.join(packageDir, ".gitignore"), gitignore);
 await writeFile(path.join(packageDir, "AGENTS.md"), agents);
+await writeFile(path.join(packageDir, "CLAUDE.md"), "@AGENTS.md\n");
 await writeFile(path.join(packageDir, "README.md"), readme);
 await writeFile(path.join(packageDir, "src", "index.ts"), "export {};\n");
 

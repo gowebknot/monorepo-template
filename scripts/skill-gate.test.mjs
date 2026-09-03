@@ -358,6 +358,11 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
   assert.deepEqual(requiredFor("packages/query-client/src/users.ts"), [
     "end-to-end-api-flow"
   ]);
+  assert.ok(
+    requiredFor("apps/server/src/example.controller.ts").includes(
+      "contract-validation"
+    )
+  );
   for (const filePath of [
     "apps/web/src/App.tsx",
     "apps/next/src/app/page.tsx",

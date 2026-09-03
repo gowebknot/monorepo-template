@@ -1,11 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { collectRequired } from "../../../scripts/skill-gate.mjs";
 import {
   buildAppTriggerRules,
   syncSkillTriggers
 } from "../src/skill-triggers.js";
+
+const skillGateUrl = new URL(
+  "../../../scripts/skill-gate.mjs",
+  import.meta.url
+);
+const { collectRequired } = await import(skillGateUrl);
 
 const baseTriggers = {
   always: ["test-first-workflow"],
@@ -43,7 +48,11 @@ test("TEST-TRIGGER-001 builds rules for custom frontend and backend apps", () =>
     },
     {
       when: ["apps/api/**"],
-      require: ["backend-standards", "domain-driven-app-structure"]
+      require: [
+        "backend-standards",
+        "contract-validation",
+        "domain-driven-app-structure"
+      ]
     }
   ]);
 });

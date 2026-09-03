@@ -20,7 +20,11 @@
     },
     {
       "when": ["apps/server/**"],
-      "require": ["backend-standards", "domain-driven-app-structure"]
+      "require": [
+        "backend-standards",
+        "contract-validation",
+        "domain-driven-app-structure"
+      ]
     },
     {
       "when": ["apps/web/**", "apps/next/**", "apps/expo/**", "apps/mobile/**"],

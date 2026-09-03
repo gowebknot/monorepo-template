@@ -36,6 +36,7 @@ After scaffolding, add feature files and barrel exports. The helper intentionall
 ```text
 packages/<name>/
 ├── AGENTS.md
+├── CLAUDE.md
 ├── README.md
 ├── package.json
 ├── tsconfig.json

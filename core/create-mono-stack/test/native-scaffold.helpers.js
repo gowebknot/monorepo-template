@@ -312,6 +312,8 @@ export const nestNativeTree = {
 
 const renderedWebTree = {
   ".gitignore": "web-ignore-marker",
+  "AGENTS.md": "web-agent-marker",
+  "CLAUDE.md": "@AGENTS.md",
   "components.json": '{"marker":"components"}',
   "eslint.config.js": "web-eslint-marker",
   "index.html": "template-index",

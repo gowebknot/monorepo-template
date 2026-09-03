@@ -17,7 +17,11 @@ function appSkills(feature) {
     return ["frontend-standards", "domain-driven-app-structure"];
   }
   if (backendFeatures.has(feature)) {
-    return ["backend-standards", "domain-driven-app-structure"];
+    return [
+      "backend-standards",
+      "contract-validation",
+      "domain-driven-app-structure"
+    ];
   }
   return [];
 }

@@ -30,6 +30,11 @@ export function parseInvokedSkills(transcriptText) {
   for (const match of transcriptText.matchAll(SKILL_CALL_PATTERN)) {
     invoked.add(match[1]);
   }
+  for (const match of transcriptText.matchAll(
+    /"(?:skill|skillName)"\s*:\s*"([a-z0-9-]+)"/g
+  )) {
+    invoked.add(match[1]);
+  }
   return invoked;
 }
 

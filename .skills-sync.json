@@ -5,7 +5,7 @@
       "hash": "ff2ae01cc60d11bea93ff23497616eb116483c4ae0bb238a9da47a21545f41e8"
     },
     "backend-standards": {
-      "hash": "48f65ed66e32be52811a0d5dab201e16b7d6f3889d8c06efda775dbc3a2a760c"
+      "hash": "39992df835650c584c05a9655ac27bef87b8459d06feb98680e8d91bec7bd431"
     },
     "checklist-tracking": {
       "hash": "4ab9f6f9e8763411b7c591a62f9d025a8a88aea54f9ec8049d2a6165b18974a1"
@@ -17,10 +17,10 @@
       "hash": "6d6b61887c5515964359afaef6a19c9a89817f001a97d61db241f4b6b753ca01"
     },
     "contract-validation": {
-      "hash": "bc3cb2b0da52bb31878c2a92aa039496015f30f68c3008b640f4e97eedf821b5"
+      "hash": "e6ed7ae26226703183139317ead2bb41de905b2974ffd804be825b8b9b6861f1"
     },
     "create-minimal-package": {
-      "hash": "2116239d2e77b2c5ecff96789d60bd08b5d27fd470a11263d8c59ca00b6ee4e8"
+      "hash": "c112417793dcbaec3f1d337309c85e2848b98ed620088fed429630aa41e1a077"
     },
     "create-portable-skill": {
       "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"

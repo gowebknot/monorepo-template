@@ -122,6 +122,8 @@ export const REFERENCE_PROFILES = {
     postProcess: "tailwind-vite",
     matches: matchesReactTypeScript,
     referenceEntries: [
+      { destination: "AGENTS.md", source: "AGENTS.md" },
+      { destination: "CLAUDE.md", source: "CLAUDE.md" },
       { destination: "vitest.config.ts", source: "vitest.config.ts" },
       { destination: "reference/index.html", source: "index.html" },
       { destination: "reference/src", source: "src" }

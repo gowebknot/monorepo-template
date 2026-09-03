@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import test from "node:test";
 
@@ -269,4 +270,39 @@ test("TEST-OPENCODE-010 rejects an apply_patch without a path", () => {
       }),
     /apply_patch did not contain a file path/
   );
+});
+
+test("TEST-OPENCODE-015 enforces Claude skill triggers for OpenCode edits", async () => {
+  await withGitRepository(async (directory) => {
+    await writeChecklist(directory, validChecklist);
+    await mkdir(join(directory, ".claude"), { recursive: true });
+    await writeFile(
+      join(directory, ".claude", "skill-triggers.json"),
+      JSON.stringify({
+        always: ["test-first-workflow"],
+        rules: [
+          {
+            when: ["apps/server/**"],
+            require: ["backend-standards", "contract-validation"]
+          }
+        ],
+        exempt: ["docs/checklists/**"]
+      })
+    );
+    const hooks = await pluginModule.default({
+      directory,
+      client: fakeClient('{"skill":"test-first-workflow"}')
+    });
+    await hooks["tool.execute.before"](
+      { callID: "read", sessionID: "session", tool: "read" },
+      { args: { filePath: "docs/checklists/plan.md" } }
+    );
+    await assert.rejects(
+      hooks["tool.execute.before"](
+        { callID: "edit", sessionID: "session", tool: "edit" },
+        { args: { filePath: "apps/server/src/example.controller.ts" } }
+      ),
+      /backend-standards.*contract-validation/
+    );
+  });
 });

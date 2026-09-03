@@ -65,6 +65,9 @@ side effects.
 
 ## Verification
 
+- For Nest HTTP controllers, document every route with `@ApiOperation` and at least one `@Api*Response`. Use DTO classes only as transport adapters; runtime request and response shapes remain owned by the shared entity schema package.
+- Configure OpenAPI and Swagger UI in the application bootstrap, include named examples and descriptions for each response, and log the public documentation URL after successful startup. Keep delegated third-party handlers documented as boundaries with canonical external documentation rather than duplicating their contracts.
+- Run the repository Swagger convention checker before completing controller work when it is available.
 - Add focused unit tests for domain and application behavior.
 - Add integration tests for persistence, middleware, authorization, serialization, and external adapters
   when those boundaries changed.

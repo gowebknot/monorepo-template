@@ -104,3 +104,12 @@
 - Initial observations: Source packages and generated fixtures currently use `@repo/`; the root generated project name is normalized to `acme-platform`.
 - First observed run: The full launcher suite initially reported the stale scope assertion and one unrelated timing-sensitive wizard failure; the stale assertion was corrected before rerunning focused scope tests. The integration suite remains blocked by the unavailable Docker socket. The first commit hook run reproduced the wizard timeout under full pre-commit load.
 - Passing rerun: The isolated interactive-wizard suite passed after increasing its polling budget to three seconds. The hook-backed commit validation is pending rerun. `pnpm --filter create-mono-stack lint`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm skills:check`, `pnpm format:check`, `git diff --check`, the focused scope tests, and the direct dynamic-scope renderer test passed. The Docker integration remains blocked by the unavailable local Docker socket.
+
+## Updates
+
+### 2026-09-03: Package guidance bridge correction
+
+- **Reason and evidence:** The package scaffold created `AGENTS.md` but omitted the sibling `CLAUDE.md`; the Vite React app profile likewise lacked its guidance pair.
+- **Impact:** New package and supported Vite React app users could not rely on Claude discovering their local agent guidance.
+- **Corrective action:** [Scaffold Claude Guidance Files](./2026-09-03-scaffold-claude-guidance.md) adds behavior tests and the missing scaffold outputs.
+- **Validation:** 43 focused scaffold tests, `pnpm skills:check`, `pnpm format:check`, and `git diff --check` passed.

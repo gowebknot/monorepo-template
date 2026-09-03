@@ -8,6 +8,9 @@ import {
 import { readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
 
+const skillGateUrl = new URL("../../scripts/skill-gate.mjs", import.meta.url);
+const { evaluate, parseInvokedSkills } = await import(skillGateUrl);
+
 const editableTools = new Set(["apply_patch", "edit", "write"]);
 
 export default async ({ directory, client }) => {
@@ -47,6 +50,31 @@ export default async ({ directory, client }) => {
     }
   };
 
+  const checkSkills = async (paths, transcript) => {
+    let triggers;
+    try {
+      triggers = JSON.parse(
+        await readFile(
+          resolve(directory, ".claude/skill-triggers.json"),
+          "utf8"
+        )
+      );
+    } catch {
+      return;
+    }
+    for (const filePath of paths) {
+      const result = evaluate({
+        filePath,
+        cwd: directory,
+        env: process.env,
+        invokedSkills: parseInvokedSkills(transcript),
+        permissionMode: "default",
+        triggers
+      });
+      if (!result.allow) throw new Error(result.reason);
+    }
+  };
+
   return {
     "tool.execute.before": async (input, output) => {
       const tool = String(input?.tool ?? "").toLowerCase();
@@ -60,6 +88,7 @@ export default async ({ directory, client }) => {
       }
       if (!editableTools.has(tool)) return;
       const transcript = await readTranscript(input?.sessionID);
+      await checkSkills(getToolPaths(tool, output?.args), transcript);
       await validateBeforeEdit(
         directory,
         getToolPaths(tool, output?.args),

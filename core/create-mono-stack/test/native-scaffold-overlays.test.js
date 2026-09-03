@@ -83,6 +83,13 @@ test("TEST-REFERENCE-009 copies an isolated React TypeScript reference", async (
   );
 });
 
+test("TEST-SCAFFOLD-002 copies guidance files for a Vite React app", async (t) => {
+  const { root } = await scaffoldWeb(t);
+
+  assert.equal(await fixtureText(root, "AGENTS.md"), "web-agent-marker");
+  assert.equal(await fixtureText(root, "CLAUDE.md"), "@AGENTS.md");
+});
+
 test("TEST-REFERENCE-008 preserves every native Vite file", async (t) => {
   const { apps, root } = await scaffoldWeb(
     t,

@@ -38,6 +38,7 @@ Keep data crossing a process, package, transport, persistence, or UI boundary ex
 
 ## Verification
 
+- When an OpenAPI implementation needs a Nest DTO, make it a thin transport adapter over the authoritative shared schema and inferred type. Put examples and descriptions on the DTO/OpenAPI decorators without recreating validation rules or a second domain contract.
 - Search for duplicate handwritten types or schemas after the change.
 - Confirm public barrels and package exports expose the intended contract.
 - Run focused schema tests, affected package checks, and the repository's required validation.
