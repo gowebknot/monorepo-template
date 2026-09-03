@@ -13,9 +13,13 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
-import { selectChecks } from "../../../scripts/pre-commit-checks.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+const root = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))));
+const preCommitChecksUrl = new URL(
+  "../../../scripts/pre-commit-checks.mjs",
+  import.meta.url
+);
+const { selectChecks } = await import(preCommitChecksUrl);
 const templateAdapters = new Map([
   [
     ".env.example",
@@ -153,6 +157,7 @@ test("TEST-HOOK-001 selects generated-project checks without the launcher", () =
     [
       "build",
       "skill tests",
+      "swagger documentation",
       "server unit tests",
       "shared component checker tests"
     ]
@@ -555,4 +560,32 @@ test("TEST-SCOPE-003 scaffolds new packages in the root project scope", async (t
     await readFile(join(temporaryRoot, "packages/billing/package.json"), "utf8")
   );
   assert.equal(packageJson.name, "@acme-platform/billing");
+});
+
+test("TEST-SCAFFOLD-001 creates a Claude guidance bridge for packages", async (t) => {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "package-guidance-test-"));
+  t.after(() => rm(temporaryRoot, { recursive: true, force: true }));
+  await writeFile(
+    join(temporaryRoot, "package.json"),
+    '{"name":"acme-platform"}\n'
+  );
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      join(root, "skills/create-minimal-package/scripts/scaffold-package.mjs"),
+      "billing",
+      "--root",
+      temporaryRoot
+    ],
+    { encoding: "utf8" }
+  );
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  assert.equal(
+    (
+      await readFile(join(temporaryRoot, "packages/billing/CLAUDE.md"), "utf8")
+    ).trim(),
+    "@AGENTS.md"
+  );
 });

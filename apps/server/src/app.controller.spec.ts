@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppController } from '@/app.controller';
+import { AppService } from '@/app.service';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -16,8 +16,8 @@ describe('AppController', () => {
   });
 
   describe('health', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHealth()).toBe('Hello World!');
+    it('returns the entity-owned ready health response', () => {
+      expect(appController.getHealth()).toEqual({ status: 'ok' });
     });
   });
 });

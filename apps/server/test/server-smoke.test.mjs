@@ -85,7 +85,7 @@ async function startServer() {
       }
       try {
         const response = await fetchHealth(port);
-        if (response.ok) return { child, port };
+        if (response.ok) return { child, output, port };
       } catch {
         // The server may still be binding its configured port.
       }
@@ -106,17 +106,21 @@ async function withServer(callback) {
   try {
     const started = await startServer();
     child = started.child;
-    return await callback({ port: started.port });
+    return await callback({ output: started.output, port: started.port });
   } finally {
     if (child) await stopServer(child);
   }
 }
 
-test('TEST-API-003 running-server smoke serves health over localhost', async () => {
-  await withServer(async ({ port }) => {
+test('TEST-API-003 running-server smoke serves health and logs Swagger over localhost', async () => {
+  await withServer(async ({ output, port }) => {
     const response = await fetchHealth(port);
     assert.equal(response.status, 200);
-    assert.equal(await response.text(), 'Hello World!');
+    assert.deepEqual(await response.json(), { status: 'ok' });
+    assert.match(
+      output.stdout,
+      new RegExp(`Swagger UI: http://localhost:${port}/api/docs`),
+    );
   });
 });
 

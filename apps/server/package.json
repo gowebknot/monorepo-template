@@ -28,15 +28,18 @@
     "test:e2e": "pnpm test:api:e2e"
   },
   "dependencies": {
+    "@monorepo-template/auth": "workspace:^",
+    "@monorepo-template/db": "workspace:^",
+    "@monorepo-template/entities": "workspace:^",
+    "@monorepo-template/env": "workspace:^",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
-    "@monorepo-template/auth": "workspace:^",
-    "@monorepo-template/db": "workspace:^",
-    "@monorepo-template/env": "workspace:^",
+    "@nestjs/swagger": "^11.4.7",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -47,6 +50,7 @@
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
     "@types/supertest": "^7.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -59,7 +63,6 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0",
-    "vitest": "^4.1.11",
-    "@vitest/coverage-v8": "^4.1.11"
+    "vitest": "^4.1.11"
   }
 }

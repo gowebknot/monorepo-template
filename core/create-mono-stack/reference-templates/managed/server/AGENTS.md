@@ -19,6 +19,7 @@ The main application (`src/`) exposes health and production Better Auth. All exa
 - Production auth transport belongs under `src/http/auth/`; Better Auth and PostgreSQL adapter construction belongs under `src/infra/auth/`.
 - `src/app.module.ts` is the composition root and imports the production auth module. Do not put production auth files at the `src/` root.
 - Production auth currently supports PostgreSQL email/password only. OAuth providers and email delivery are intentionally deferred.
+- Production OpenAPI JSON is served at `/api/docs-json` and Swagger UI at `/api/docs`. Every `src/**/*.controller.ts` HTTP handler must have `@ApiOperation` and at least one `@Api*Response`; `pnpm swagger:check` enforces this in pre-commit. Health DTOs are transport adapters over entity-owned schemas, while Better Auth remains a documented delegation boundary rather than duplicated DTO contracts.
 - Controllers in the reference area skip request validation (no `class-validator`/DTO pipes) for demo simplicity — a real project should add a `ValidationPipe` and validated DTOs.
 
 ## Source Layout
@@ -26,6 +27,7 @@ The main application (`src/`) exposes health and production Better Auth. All exa
 ```text
 src/
   main.ts                  # real server entry point
+  swagger.ts               # OpenAPI/Swagger UI bootstrap and local URL helper
   app.module.ts            # real server composition root
   app.controller.ts        # GET /health
   app.service.ts

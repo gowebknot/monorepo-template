@@ -81,6 +81,10 @@ export function selectChecks({ hasCoreLauncher, hasServer }) {
 
   if (hasServer) {
     checks.splice(2, 0, {
+      label: "swagger documentation",
+      args: ["swagger:check"]
+    });
+    checks.splice(3, 0, {
       label: "server unit tests",
       args: ["--filter", "server", "test"]
     });
