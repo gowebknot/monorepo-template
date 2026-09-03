@@ -72,8 +72,8 @@ or credential changes.
 
 - [x] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.50` / `v0.1.50`.
 - [x] Package suite, full repository gate, and dry-run artifact validation pass.
-- [ ] The release commit and annotated `v0.1.50` tag are pushed to `origin` before publication.
-- [ ] The package-local wrapper publishes `create-mono-stack@0.1.50`; npm latest and remote tag
+- [x] The release commit and annotated `v0.1.50` tag are pushed to `origin` before publication.
+- [x] The package-local wrapper publishes `create-mono-stack@0.1.50`; npm latest and remote tag
       confirm it.
 
 ## Exact Test Cases
@@ -166,8 +166,8 @@ or credential changes.
 - [x] Set `core/create-mono-stack/package.json` version to 0.1.50.
 - [x] Set the CLI fixture to `_commit: v0.1.50`.
 - [x] Record TEST-RELEASE-020 through 022 validation results in this checklist.
-- [ ] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.50`.
-- [ ] Publish with the package wrapper and record TEST-RELEASE-023 evidence.
+- [x] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.50`.
+- [x] Publish with the package wrapper and record TEST-RELEASE-023 evidence.
 
 ## Validation Notes
 
@@ -180,3 +180,20 @@ or credential changes.
   stopped.
 - TEST-RELEASE-021 passing rerun: `just check` passed after Prettier formatted this checklist. The
   only non-error output remains the existing React Compiler warnings in the web and Next table demos.
+- TEST-RELEASE-023: `v0.1.50` was pushed as annotated tag `4a63dc8931f3d8d689fa1288e6760df647345ce2`,
+  peeling to release commit `0c23736fa798246ee9db45a6ddb2ada32c5e46ef`. The package-local wrapper
+  published `create-mono-stack@0.1.50`; npm reports that version as `latest`.
+
+## Updates
+
+### 2026-09-03 - Release completed
+
+- Release commit: `0c23736fa798246ee9db45a6ddb2ada32c5e46ef`
+  (`chore(release): prepare create-mono-stack 0.1.50`), pushed to `origin/master` with the two
+  requested feature commits.
+- Tag: annotated `v0.1.50` (`4a63dc8931f3d8d689fa1288e6760df647345ce2`) pushed to origin;
+  peeled ref `v0.1.50^{}` is `0c23736fa798246ee9db45a6ddb2ada32c5e46ef`.
+- Publication: `pnpm --filter create-mono-stack publish:package` completed successfully with public
+  latest access.
+- Verification: `npm view create-mono-stack@0.1.50 version dist-tags --json` reports version and
+  `latest` as `0.1.50`; `npm view create-mono-stack@latest version` also reports `0.1.50`.
