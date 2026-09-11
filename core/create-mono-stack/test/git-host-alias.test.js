@@ -1,12 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   DEFAULT_TEMPLATE_SOURCE,
   createProject,
   parseArguments
-} from "../src/create-project.js";
-import { GIT_HOST_ALIAS_CONFIG_KEY } from "../../../scripts/update-template.mjs";
+} from "#src/create-project.js";
+
+// scripts/update-template.mjs is a repo-root dev script outside this package's own boundary;
+// Node's package "imports" field cannot target a path above the package root, so it is loaded
+// by a computed URL instead of a static relative specifier.
+const { GIT_HOST_ALIAS_CONFIG_KEY } = await import(
+  fileURLToPath(
+    new URL("../../../scripts/update-template.mjs", import.meta.url)
+  )
+);
 
 const versionScript =
   "import sys; print('.'.join(map(str, sys.version_info[:3])))";
@@ -106,6 +115,7 @@ test("persists an SSH alias without changing Copier's recorded source", async ()
       "project_name=Acme Platform",
       "--vcs-ref",
       "master",
+      "--trust",
       DEFAULT_TEMPLATE_SOURCE,
       destination
     ],

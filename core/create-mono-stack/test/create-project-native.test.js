@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createProject, main } from "../src/create-project.js";
+import { createProject, main } from "#src/create-project.js";
 
 const destination = "/workspace/acme-platform";
 
@@ -215,6 +215,29 @@ test("TEST-ENV-002 copies the environment example to the local environment", asy
     type: "copyFile"
   });
   assert.ok(copierIndex < events.indexOf(copy));
+});
+
+test("TEST-TRUST-002 does not trust a custom --template source", async () => {
+  const events = [];
+
+  await createProject(
+    {
+      destination,
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    projectDependencies({ events })
+  );
+
+  const copierCall = events.find(
+    (event) =>
+      event.type === "command" &&
+      event.args[0] === "-m" &&
+      event.args[1] === "copier"
+  );
+  assert.ok(copierCall);
+  assert.ok(!copierCall.args.includes("--trust"));
 });
 
 test("TEST-ENV-006 explains when a template lacks the environment example", async () => {

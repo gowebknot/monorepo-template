@@ -1,6 +1,6 @@
 {
   "name": "create-mono-stack",
-  "version": "0.1.51",
+  "version": "0.1.52",
   "license": "MIT",
   "description": "Create a project from the Go Webknot monorepo template",
   "type": "module",
@@ -15,6 +15,9 @@
     "LICENSE",
     "README.md"
   ],
+  "imports": {
+    "#src/*": "./src/*"
+  },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "node --check bin/create-mono-stack.js",

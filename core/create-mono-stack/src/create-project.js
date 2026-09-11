@@ -16,30 +16,30 @@ import {
   initializeGit,
   preflightGit,
   sanitizeGitEnvironment
-} from "./git-setup.js";
-import { promptForProjectManagement } from "./management-wizard.js";
-import { cleanupFailedProject } from "./project-cleanup.js";
-import { promptForProjectArguments } from "./interactive-wizard.js";
-import { runInteractiveCommand } from "./interactive-command.js";
-import { confirmInstallation, requirePython } from "./python-runtime.js";
+} from "#src/git-setup.js";
+import { promptForProjectManagement } from "#src/management-wizard.js";
+import { cleanupFailedProject } from "#src/project-cleanup.js";
+import { promptForProjectArguments } from "#src/interactive-wizard.js";
+import { runInteractiveCommand } from "#src/interactive-command.js";
+import { confirmInstallation, requirePython } from "#src/python-runtime.js";
 import {
   listUserPackages,
   manageProject as runProjectManagement,
   readManifest
-} from "./project-management.js";
+} from "#src/project-management.js";
 import {
   defaultInstanceName,
   normalizeFeatures,
   serializeFeatureData
-} from "./feature-config.js";
+} from "#src/feature-config.js";
 import {
   nativeScaffoldDependencies,
   scaffoldNativeApps,
   validateAppName
-} from "./native-scaffold.js";
-import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
-import { syncSkillTriggers } from "./skill-triggers.js";
-import { promptForSetup } from "./setup-prompt.js";
+} from "#src/native-scaffold.js";
+import { allocateAppPorts, configureAppScripts } from "#src/port-allocation.js";
+import { syncSkillTriggers } from "#src/skill-triggers.js";
+import { promptForSetup } from "#src/setup-prompt.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
   "git@github.com:gowebknot/monorepo-template.git";
@@ -353,6 +353,9 @@ export async function createProject(
       }
     }
     copierArguments.push("--vcs-ref", options.vcsRef ?? DEFAULT_TEMPLATE_REF);
+    if (options.template === DEFAULT_TEMPLATE_SOURCE) {
+      copierArguments.push("--trust");
+    }
     copierArguments.push(options.template, options.destination);
     const environment = sanitizeGitEnvironment(dependencies.environment);
     const aliasEnvironment = gitHostAliasEnvironment(
