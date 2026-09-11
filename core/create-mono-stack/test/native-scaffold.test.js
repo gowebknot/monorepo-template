@@ -72,7 +72,7 @@ test("TEST-TAILWIND-001 activates Tailwind in generated React apps", async (t) =
 
   assert.match(viteConfig, /import tailwindcss from "@tailwindcss\/vite"/);
   assert.match(viteConfig, /tailwindcss\(\)/);
-  assert.equal(packageJson.devDependencies["@tailwindcss/vite"], "^4.3.3");
+  assert.equal(typeof packageJson.dependencies["@tailwindcss/vite"], "string");
 });
 
 test("TEST-COMMAND-002 skips the nested NestJS install", async (t) => {

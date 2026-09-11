@@ -59,23 +59,23 @@ test("TEST-REFERENCE-009 copies an isolated React TypeScript reference", async (
   assert.equal(await fixtureText(root, "src/App.tsx"), "native-app");
   assert.equal(
     await fixtureText(root, "vitest.config.ts"),
-    "vitest-config-marker"
+    await managedText("web", "vitest.config.ts")
   );
   assert.equal(
     JSON.parse(await fixtureText(root, "package.json")).scripts.test,
     "vitest run"
   );
   assert.equal(
-    await fixtureText(root, "reference/src/template-only.tsx"),
-    "template-only"
+    await fixtureText(root, "reference/src/main.tsx"),
+    await managedText("web", "src/main.tsx")
   );
   assert.equal(
-    await fixtureText(root, "reference/src/main.tsx"),
-    "template-main"
+    await fixtureText(root, "reference/src/lib/utils.ts"),
+    await managedText("web", "src/lib/utils.ts")
   );
   assert.equal(
     await fixtureText(root, "reference/index.html"),
-    "template-index"
+    await managedText("web", "index.html")
   );
   assert.equal(
     await pathExists(join(root, "reference/components.json")),
@@ -86,8 +86,14 @@ test("TEST-REFERENCE-009 copies an isolated React TypeScript reference", async (
 test("TEST-SCAFFOLD-002 copies guidance files for a Vite React app", async (t) => {
   const { root } = await scaffoldWeb(t);
 
-  assert.equal(await fixtureText(root, "AGENTS.md"), "web-agent-marker");
-  assert.equal(await fixtureText(root, "CLAUDE.md"), "@AGENTS.md");
+  assert.equal(
+    await fixtureText(root, "AGENTS.md"),
+    await managedText("web", "AGENTS.md")
+  );
+  assert.equal(
+    await fixtureText(root, "CLAUDE.md"),
+    await managedText("web", "CLAUDE.md")
+  );
 });
 
 test("TEST-REFERENCE-008 preserves every native Vite file", async (t) => {
@@ -110,13 +116,16 @@ test("TEST-REFERENCE-008 preserves every native Vite file", async (t) => {
     ["tsconfig.app.json", "native"],
     ["tsconfig.json", "native"],
     ["tsconfig.node.json", "native"],
-    ["vite.config.ts", "native-react-compiler-vite"],
-    ["vitest.config.ts", "vitest-config-marker"]
+    ["vite.config.ts", "native-react-compiler-vite"]
   ]);
 
   for (const [path, marker] of expectedMarkers) {
     assert.match(await fixtureText(root, path), new RegExp(marker));
   }
+  assert.equal(
+    await fixtureText(root, "vitest.config.ts"),
+    await managedText("web", "vitest.config.ts")
+  );
   assert.equal(apps[0].referenceProfile, "vite/react-ts");
 });
 
@@ -139,49 +148,67 @@ test("TEST-OVERLAY-004 omits web reference support for Vue TypeScript", async (t
 test("TEST-OVERLAY-005 replaces native NestJS source", async (t) => {
   const { root } = await scaffoldNest(t);
 
-  assert.match(await fixtureText(root, "src/main.ts"), /template-main/);
+  assert.equal(
+    await fixtureText(root, "src/main.ts"),
+    await managedText("server", "src/main.ts")
+  );
   assert.equal(await pathExists(join(root, "src/native.controller.ts")), false);
 });
 
 test("TEST-OVERLAY-006 copies NestJS reference and test source", async (t) => {
   const { root } = await scaffoldNest(t);
 
-  assert.equal(await fixtureText(root, "reference/main.ts"), "reference-main");
+  assert.equal(
+    await fixtureText(root, "reference/main.ts"),
+    await managedText("server", "reference/main.ts")
+  );
   assert.equal(
     await fixtureText(root, "test/app.e2e-spec.ts"),
-    "template-test"
+    await managedText("server", "test/app.e2e-spec.ts")
   );
   assert.equal(await pathExists(join(root, "test/native.e2e-spec.ts")), false);
 });
 
 test("TEST-OVERLAY-007 copies exact NestJS profile configuration", async (t) => {
   const { apps, root } = await scaffoldNest(t);
-  const expectedMarkers = new Map([
-    [".prettierrc", "prettier"],
-    ["eslint.config.mjs", "server-eslint-marker"],
-    ["nest-cli.json", "nest-main"],
-    ["nest-cli.reference.json", "nest-reference"],
-    ["tsconfig.build.json", "build-tsconfig"],
-    ["tsconfig.json", "root-tsconfig"],
-    ["tsconfig.reference.build.json", "reference-tsconfig"],
-    ["vitest.config.ts", "vitest-config-marker"],
-    ["vitest.e2e.config.ts", "vitest-e2e-config-marker"]
-  ]);
+  const overlayFiles = [
+    ".prettierrc",
+    "eslint.config.mjs",
+    "nest-cli.json",
+    "nest-cli.reference.json",
+    "tsconfig.build.json",
+    "tsconfig.json",
+    "tsconfig.reference.build.json",
+    "vitest.config.ts",
+    "vitest.e2e.config.ts"
+  ];
 
-  for (const [path, marker] of expectedMarkers) {
-    assert.match(await fixtureText(root, path), new RegExp(marker));
+  for (const path of overlayFiles) {
+    assert.equal(
+      await fixtureText(root, path),
+      await managedText("server", path)
+    );
   }
   assert.equal(apps[0].referenceProfile, "nestjs/default");
   const packageJson = JSON.parse(await fixtureText(root, "package.json"));
-  assert.equal(packageJson.scripts.test, "vitest run");
+  const managedPackageJson = JSON.parse(
+    await managedText("server", "package.json")
+  );
+  assert.equal(packageJson.scripts.test, managedPackageJson.scripts.test);
   assert.equal(packageJson.jest, undefined);
 });
 
 test("TEST-OVERLAY-008 copies NestJS agent memory files", async (t) => {
   const { root } = await scaffoldNest(t);
 
-  assert.equal(await fixtureText(root, "AGENTS.md"), "server-agent-marker");
-  assert.equal(await fixtureText(root, "CLAUDE.md"), "server-claude-marker");
+  assert.equal(
+    await fixtureText(root, "AGENTS.md"),
+    await managedText("server", "AGENTS.md")
+  );
+  assert.equal(
+    await fixtureText(root, "CLAUDE.md"),
+    await managedText("server", "CLAUDE.md")
+  );
 });
 
 test("TEST-VITE-PROFILE-001 records matching observed profile evidence", async (t) => {
@@ -220,7 +247,7 @@ test("TEST-VITE-PROFILE-003 supports Oxlint without replacing native source", as
   assert.equal(await fixtureText(root, "src/main.tsx"), "native-main");
   assert.equal(
     await fixtureText(root, "reference/src/main.tsx"),
-    "template-main"
+    await managedText("web", "src/main.tsx")
   );
 });
 
@@ -301,47 +328,63 @@ test("TEST-OVERLAY-009 keeps the generated Next app and copies the demo into ref
   assert.equal(await fixtureText(root, "src/app/page.tsx"), "next-native-page");
   assert.equal(await fixtureText(root, "next.config.ts"), "next-native-config");
   // The root tsconfig is overlaid so the app build excludes reference/.
-  assert.equal(
-    await fixtureText(root, "tsconfig.json"),
-    '{"marker":"next-tsconfig"}'
-  );
+  const managedTsconfig = await managedText("next", "tsconfig.json");
+  assert.equal(await fixtureText(root, "tsconfig.json"), managedTsconfig);
   assert.equal(
     await fixtureText(root, "reference/tsconfig.json"),
-    '{"marker":"next-tsconfig"}'
+    managedTsconfig
   );
   // The canonical demo is copied into a runnable reference/ sub-app.
   assert.equal(
     await fixtureText(root, "reference/src/app/page.tsx"),
-    "next-template-page"
+    await managedText("next", "src/app/page.tsx")
   );
   assert.equal(
     await fixtureText(root, "reference/src/app/reference/todos/page.tsx"),
-    "next-template-todos"
+    await managedText("next", "src/app/reference/todos/page.tsx")
   );
   assert.equal(
     await fixtureText(root, "reference/components.json"),
-    '{"marker":"next-components"}'
+    await managedText("next", "components.json")
   );
   assert.equal(
     await fixtureText(root, "reference/next.config.ts"),
-    "next-template-config"
+    await managedText("next", "next.config.ts")
   );
   assert.equal(
     await fixtureText(root, "vitest.config.ts"),
-    "vitest-config-marker"
+    await managedText("next", "vitest.config.ts")
   );
   // Agent docs + env example land at the app root.
-  assert.equal(await fixtureText(root, "AGENTS.md"), "next-agent-marker");
-  assert.equal(await fixtureText(root, "CLAUDE.md"), "next-claude-marker");
-  assert.equal(await fixtureText(root, ".env.example"), "next-env-example");
+  assert.equal(
+    await fixtureText(root, "AGENTS.md"),
+    await managedText("next", "AGENTS.md")
+  );
+  assert.equal(
+    await fixtureText(root, "CLAUDE.md"),
+    await managedText("next", "CLAUDE.md")
+  );
+  assert.equal(
+    await fixtureText(root, ".env.example"),
+    await managedText("next", ".env.example")
+  );
   // Native (generated) versions win; @repo deps + reference scripts are merged.
+  const managedNextPackageJson = JSON.parse(
+    await managedText("next", "package.json")
+  );
   assert.equal(packageJson.dependencies.next, "^15.0.0");
   assert.equal(
     packageJson.dependencies["@monorepo-template/env"],
-    "workspace:^"
+    managedNextPackageJson.dependencies["@monorepo-template/env"]
   );
-  assert.equal(packageJson.scripts["build:reference"], "next build reference");
-  assert.equal(packageJson.scripts["dev:reference"], "next dev reference");
+  assert.equal(
+    packageJson.scripts["build:reference"],
+    managedNextPackageJson.scripts["build:reference"]
+  );
+  assert.equal(
+    packageJson.scripts["dev:reference"],
+    managedNextPackageJson.scripts["dev:reference"]
+  );
   assert.equal(packageJson.name, "next");
   assert.equal(apps[0].referenceProfile, "next/default");
   assert.equal(apps[0].selection, undefined);
@@ -355,47 +398,80 @@ test("TEST-OVERLAY-010 overlays the Expo canonical app and merges dependencies",
   });
   const packageJson = JSON.parse(await fixtureText(root, "package.json"));
 
-  assert.equal(await fixtureText(root, "app/index.tsx"), "expo-template-home");
-  assert.equal(await fixtureText(root, "app/todos.tsx"), "expo-template-todos");
+  assert.equal(
+    await fixtureText(root, "app/index.tsx"),
+    await managedText("expo", "app/index.tsx")
+  );
+  assert.equal(
+    await fixtureText(root, "app/todos.tsx"),
+    await managedText("expo", "app/todos.tsx")
+  );
   assert.equal(
     await fixtureText(root, "app/form-demo.tsx"),
-    "expo-template-form"
+    await managedText("expo", "app/form-demo.tsx")
   );
   assert.equal(
-    await fixtureText(root, "app/reference/todos/[todoId].tsx"),
-    "expo-template-detail"
+    await fixtureText(root, "app/reference/todos.tsx"),
+    await managedText("expo", "app/reference/todos.tsx")
   );
-  assert.equal(await fixtureText(root, "globals.css"), "expo-global-css");
-  assert.equal(await fixtureText(root, "babel.config.js"), "expo-babel-config");
-  assert.equal(await fixtureText(root, "metro.config.js"), "expo-metro-config");
-  assert.equal(await fixtureText(root, ".env.example"), "expo-env-example");
-  assert.equal(await fixtureText(root, "AGENTS.md"), "expo-agent-marker");
-  assert.equal(await fixtureText(root, "CLAUDE.md"), "expo-claude-marker");
+  assert.equal(
+    await fixtureText(root, "globals.css"),
+    await managedText("expo", "globals.css")
+  );
+  assert.equal(
+    await fixtureText(root, "babel.config.js"),
+    await managedText("expo", "babel.config.js")
+  );
+  assert.equal(
+    await fixtureText(root, "metro.config.js"),
+    await managedText("expo", "metro.config.js")
+  );
+  assert.equal(
+    await fixtureText(root, ".env.example"),
+    await managedText("expo", ".env.example")
+  );
+  assert.equal(
+    await fixtureText(root, "AGENTS.md"),
+    await managedText("expo", "AGENTS.md")
+  );
+  assert.equal(
+    await fixtureText(root, "CLAUDE.md"),
+    await managedText("expo", "CLAUDE.md")
+  );
   // Expo Router entry + config are overlaid so the router boots; native was replaced.
   assert.equal(
     await fixtureText(root, "index.ts"),
-    'import "expo-router/entry";\n'
+    await managedText("expo", "index.ts")
   );
   assert.equal(
     await fixtureText(root, "app.json"),
-    '{"expo":{"name":"expo-template"}}'
+    await managedText("expo", "app.json")
+  );
+  const managedExpoPackageJson = JSON.parse(
+    await managedText("expo", "package.json")
   );
   assert.equal(packageJson.dependencies.expo, "^52.0.0");
   assert.equal(
     packageJson.dependencies["react-native-safe-area-context"],
-    "5.9.1"
+    managedExpoPackageJson.dependencies["react-native-safe-area-context"]
   );
   assert.equal(
     packageJson.dependencies["@monorepo-template/env"],
-    "workspace:^"
+    managedExpoPackageJson.dependencies["@monorepo-template/env"]
   );
-  assert.equal(packageJson.dependencies["expo-router"], "^3.0.0");
-  assert.equal(packageJson.scripts.dev, "expo start");
-  assert.equal(packageJson.scripts["dev:reference"], "expo start");
+  assert.equal(
+    packageJson.dependencies["expo-router"],
+    managedExpoPackageJson.dependencies["expo-router"]
+  );
+  assert.equal(packageJson.scripts.dev, managedExpoPackageJson.scripts.dev);
+  assert.equal(
+    packageJson.scripts["dev:reference"],
+    managedExpoPackageJson.scripts["dev:reference"]
+  );
   assert.equal(packageJson.scripts.test, "vitest run");
   assert.equal(
     await fixtureText(root, "vitest.config.ts"),
-    "vitest-config-marker"
+    await managedText("expo", "vitest.config.ts")
   );
   assert.equal(apps[0].referenceProfile, "expo/default");
   assert.equal(apps[0].selection, undefined);
@@ -409,45 +485,72 @@ test("TEST-OVERLAY-011 overlays the bare React Native canonical app and merges d
   });
   const packageJson = JSON.parse(await fixtureText(root, "package.json"));
 
-  assert.equal(await fixtureText(root, "App.tsx"), "mobile-template-app");
+  assert.equal(
+    await fixtureText(root, "App.tsx"),
+    await managedText("mobile", "App.tsx")
+  );
   assert.equal(
     await fixtureText(root, "src/screens/home.tsx"),
-    "mobile-template-home"
-  );
-  assert.equal(await fixtureText(root, "src/app.tsx"), "mobile-template-root");
-  assert.equal(await fixtureText(root, "src/global.css"), "mobile-global-css");
-  assert.equal(
-    await fixtureText(root, "src/components/ui/button.tsx"),
-    "mobile-button"
+    await managedText("mobile", "src/screens/home.tsx")
   );
   assert.equal(
-    await fixtureText(root, "src/components/forms/form-core.ts"),
-    "mobile-form-core"
+    await fixtureText(root, "src/app.tsx"),
+    await managedText("mobile", "src/app.tsx")
   );
-  assert.equal(await fixtureText(root, "AGENTS.md"), "mobile-agent-marker");
-  assert.equal(await fixtureText(root, "CLAUDE.md"), "mobile-claude-marker");
+  assert.equal(
+    await fixtureText(root, "src/global.css"),
+    await managedText("mobile", "src/global.css")
+  );
+  assert.equal(
+    await fixtureText(root, "src/lib/utils.ts"),
+    await managedText("mobile", "src/lib/utils.ts")
+  );
+  assert.equal(
+    await fixtureText(root, "src/lib/env.ts"),
+    await managedText("mobile", "src/lib/env.ts")
+  );
+  assert.equal(
+    await fixtureText(root, "AGENTS.md"),
+    await managedText("mobile", "AGENTS.md")
+  );
+  assert.equal(
+    await fixtureText(root, "CLAUDE.md"),
+    await managedText("mobile", "CLAUDE.md")
+  );
   assert.equal(
     await fixtureText(root, "metro.config.js"),
-    "mobile-metro-config"
+    await managedText("mobile", "metro.config.js")
   );
-  assert.equal(await fixtureText(root, "index.js"), "mobile-entry");
+  assert.equal(
+    await fixtureText(root, "index.js"),
+    await managedText("mobile", "index.js")
+  );
   assert.equal(packageJson.scripts.test, "vitest run");
   assert.equal(
     await fixtureText(root, "vitest.config.ts"),
-    "vitest-config-marker"
+    await managedText("mobile", "vitest.config.ts")
+  );
+  const managedMobilePackageJson = JSON.parse(
+    await managedText("mobile", "package.json")
   );
   assert.equal(packageJson.dependencies["react-native"], "^0.76.0");
   assert.equal(
     packageJson.dependencies["react-native-safe-area-context"],
-    "5.9.1"
+    managedMobilePackageJson.dependencies["react-native-safe-area-context"]
   );
-  assert.equal(packageJson.dependencies["@react-navigation/native"], "^7.0.0");
+  assert.equal(
+    packageJson.dependencies["@react-navigation/native"],
+    managedMobilePackageJson.dependencies["@react-navigation/native"]
+  );
   assert.equal(
     packageJson.dependencies["@monorepo-template/env"],
-    "workspace:^"
+    managedMobilePackageJson.dependencies["@monorepo-template/env"]
   );
-  assert.equal(packageJson.scripts.dev, "react-native start");
-  assert.equal(packageJson.scripts["dev:reference"], "react-native start");
+  assert.equal(packageJson.scripts.dev, managedMobilePackageJson.scripts.dev);
+  assert.equal(
+    packageJson.scripts["dev:reference"],
+    managedMobilePackageJson.scripts["dev:reference"]
+  );
   assert.equal(packageJson.name, "mobile");
   assert.equal(apps[0].referenceProfile, "react-native/default");
   assert.equal(apps[0].selection, undefined);
@@ -490,4 +593,18 @@ test("TEST-MULTI-008 detects reference profiles independently for two Vite insta
 async function fixtureText(root, path) {
   const { readFile } = await import("node:fs/promises");
   return readFile(join(root, path), "utf8");
+}
+
+const managedTemplatesRoot = new URL(
+  "../reference-templates/managed/",
+  import.meta.url
+);
+
+async function managedText(name, path) {
+  const { readFile } = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+  return readFile(
+    fileURLToPath(new URL(`${name}/${path}`, managedTemplatesRoot)),
+    "utf8"
+  );
 }

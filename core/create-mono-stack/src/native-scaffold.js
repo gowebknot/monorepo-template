@@ -322,7 +322,8 @@ export async function scaffoldNativeApps(options, dependencies) {
         name: definition.name,
         nativeTarget,
         profileId: referenceProfile,
-        templateTarget: appPath(options.destination, definition.canonicalName)
+        templateTarget: appPath(options.destination, definition.canonicalName),
+        useManagedTemplate: true
       },
       dependencies
     );
