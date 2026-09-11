@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -23,11 +23,19 @@ const managedWebRoot = fileURLToPath(
 // bug this test guards against. This repo's own apps/web/ has never had an AGENTS.md, so a fresh
 // destination here has no apps/web/ at all, matching the real condition that caused the live
 // failure.
-async function createDestinationWithoutWebApp(t) {
+async function createDestinationWithoutWebApp(
+  t,
+  { projectName = "jump-cloud-clone" } = {}
+) {
   const root = await mkdtemp(join(tmpdir(), "native-scaffold-managed-"));
   const destination = join(root, "project");
   const temporaryRoot = join(root, "temporary");
+  await mkdir(destination, { recursive: true });
   await mkdir(temporaryRoot, { recursive: true });
+  await writeFile(
+    join(destination, "package.json"),
+    `${JSON.stringify({ name: projectName, private: true }, null, 2)}\n`
+  );
   t.after(() => rm(root, { force: true, recursive: true }));
 
   const runCommand = async (command, args) => {
@@ -53,10 +61,8 @@ async function createDestinationWithoutWebApp(t) {
   };
 }
 
-test("TEST-MANAGED-001 scaffolds a Vite React+TS app from the managed template, not the live repo apps/web", async (t) => {
-  const fixture = await createDestinationWithoutWebApp(t);
-
-  const apps = await scaffoldNativeApps(
+async function scaffoldDashboard(fixture) {
+  return scaffoldNativeApps(
     {
       appNames: { "web-vite": ["dashboard"] },
       destination: fixture.destination,
@@ -69,6 +75,12 @@ test("TEST-MANAGED-001 scaffolds a Vite React+TS app from the managed template, 
       temporaryRoot: fixture.temporaryRoot
     }
   );
+}
+
+test("TEST-MANAGED-001 scaffolds a Vite React+TS app from the managed template, not the live repo apps/web", async (t) => {
+  const fixture = await createDestinationWithoutWebApp(t);
+
+  const apps = await scaffoldDashboard(fixture);
 
   assert.equal(apps[0].referenceProfile, "vite/react-ts");
   const appRoot = join(fixture.destination, "apps/dashboard");
@@ -77,4 +89,45 @@ test("TEST-MANAGED-001 scaffolds a Vite React+TS app from the managed template, 
     readFile(join(managedWebRoot, "AGENTS.md"), "utf8")
   ]);
   assert.equal(agentsMd, expected);
+});
+
+test("TEST-SCOPE-001 rewrites @monorepo-template/ to the destination project's own scope", async (t) => {
+  const fixture = await createDestinationWithoutWebApp(t, {
+    projectName: "jump-cloud-clone"
+  });
+
+  await scaffoldDashboard(fixture);
+
+  const appRoot = join(fixture.destination, "apps/dashboard");
+  const packageJson = JSON.parse(
+    await readFile(join(appRoot, "package.json"), "utf8")
+  );
+  assert.equal(
+    packageJson.dependencies["@jump-cloud-clone/env"],
+    "workspace:^"
+  );
+  assert.equal(packageJson.dependencies["@monorepo-template/env"], undefined);
+  const envSource = await readFile(
+    join(appRoot, "reference/src/lib/env.ts"),
+    "utf8"
+  );
+  assert.match(envSource, /@jump-cloud-clone\/env/);
+  assert.doesNotMatch(envSource, /@monorepo-template\//);
+});
+
+test("TEST-SCOPE-002 leaves @monorepo-template/ untouched when the project is named monorepo-template", async (t) => {
+  const fixture = await createDestinationWithoutWebApp(t, {
+    projectName: "monorepo-template"
+  });
+
+  await scaffoldDashboard(fixture);
+
+  const appRoot = join(fixture.destination, "apps/dashboard");
+  const packageJson = JSON.parse(
+    await readFile(join(appRoot, "package.json"), "utf8")
+  );
+  assert.equal(
+    packageJson.dependencies["@monorepo-template/env"],
+    "workspace:^"
+  );
 });

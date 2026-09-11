@@ -6,19 +6,19 @@ import {
   listUserPackages,
   removePackage,
   TEMPLATE_OWNED_PACKAGE_NAMES
-} from "./project-management-packages.js";
+} from "#src/project-management-packages.js";
 import {
   invalid,
   projectPath,
   runProjectCommand,
   validateName
-} from "./project-management-runtime.js";
-import { allocateAppPorts, configureAppScripts } from "./port-allocation.js";
-import { syncSkillTriggers } from "./skill-triggers.js";
+} from "#src/project-management-runtime.js";
+import { allocateAppPorts, configureAppScripts } from "#src/port-allocation.js";
+import { syncSkillTriggers } from "#src/skill-triggers.js";
 import {
   applyReferenceProfile,
   nativeScaffoldDependencies
-} from "./native-scaffold.js";
+} from "#src/native-scaffold.js";
 
 export const MANAGEABLE_APP_DEFINITIONS = [
   {
@@ -174,6 +174,7 @@ export async function addApp(
       name,
       nativeTarget: join(cwd, "apps", name),
       profileId: definition.referenceProfile,
+      projectRoot: cwd,
       templateTarget: join(cwd, "apps", name),
       useManagedTemplate: true
     },

@@ -455,6 +455,16 @@ export async function createNativeScaffoldFixture(
   const temporaryRoot = join(root, "temporary");
   const calls = [];
   await mkdir(temporaryRoot, { recursive: true });
+  // Named literally "monorepo-template" so applyReferenceProfile's managed-template scope
+  // rewrite is a no-op here, matching the real managed-template file content these fixtures
+  // (and the tests asserting against it) still expect byte for byte.
+  await writeTree(destination, {
+    "package.json": JSON.stringify(
+      { name: "monorepo-template", private: true },
+      null,
+      2
+    )
+  });
   await writeTree(join(destination, "apps", "web"), renderedWebTree);
   await writeTree(join(destination, "apps", "server"), renderedServerTree);
   await writeTree(join(destination, "apps", "next"), renderedNextTree);

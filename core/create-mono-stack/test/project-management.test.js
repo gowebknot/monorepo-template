@@ -43,6 +43,10 @@ const skillTriggers = {
 
 async function project() {
   const cwd = await mkdtemp(join(tmpdir(), "project-management-"));
+  await writeFile(
+    join(cwd, "package.json"),
+    `${JSON.stringify({ name: "acme-platform", private: true }, null, 2)}\n`
+  );
   await mkdir(join(cwd, ".claude"), { recursive: true });
   await writeFile(
     join(cwd, ".claude/skill-triggers.json"),

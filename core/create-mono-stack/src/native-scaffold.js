@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import {
@@ -60,6 +60,53 @@ const temporaryArtifacts = [
   "pnpm-lock.yaml",
   "yarn.lock"
 ];
+
+const templateScope = "@monorepo-template/";
+// Mirrors scripts/render-package-scope.mjs's own rule exactly: that script rewrites the whole
+// destination project once, right after `copier copy` finishes; managed-template content is
+// copied in afterward (see applyReferenceProfile below), so it needs the same rewrite applied
+// again, scoped to just the app directory it was copied into.
+const scopeRenderIgnoredDirectories = new Set([
+  ".git",
+  ".venv",
+  "dist",
+  "node_modules"
+]);
+const scopeRenderTextExtensions = new Set([
+  ".cjs",
+  ".css",
+  ".js",
+  ".json",
+  ".md",
+  ".mjs",
+  ".ts",
+  ".tsx",
+  ".txt",
+  ".yaml",
+  ".yml"
+]);
+
+async function renderTemplateScope(root, scope, dependencies) {
+  for (const entry of await dependencies.readdir(root, {
+    withFileTypes: true
+  })) {
+    if (entry.isDirectory() && scopeRenderIgnoredDirectories.has(entry.name)) {
+      continue;
+    }
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) {
+      await renderTemplateScope(path, scope, dependencies);
+      continue;
+    }
+    const extension = entry.name.includes(".")
+      ? `.${entry.name.split(".").pop()}`
+      : "";
+    if (!scopeRenderTextExtensions.has(extension)) continue;
+    const contents = await dependencies.readFile(path, "utf8");
+    const rendered = contents.replaceAll(templateScope, `@${scope}/`);
+    if (rendered !== contents) await dependencies.writeFile(path, rendered);
+  }
+}
 
 function appPath(root, name) {
   return join(root, "apps", name);
@@ -214,7 +261,14 @@ async function removeTemporaryArtifacts(root, dependencies) {
 }
 
 export async function applyReferenceProfile(
-  { name, nativeTarget, profileId, templateTarget, useManagedTemplate = false },
+  {
+    name,
+    nativeTarget,
+    profileId,
+    projectRoot,
+    templateTarget,
+    useManagedTemplate = false
+  },
   dependencies
 ) {
   const nativePackage = JSON.parse(
@@ -278,6 +332,13 @@ export async function applyReferenceProfile(
     join(nativeTarget, "package.json"),
     `${JSON.stringify(packageJson, null, 2)}\n`
   );
+
+  if (useManagedTemplate && profile.managedTemplateRoot) {
+    const projectPackage = JSON.parse(
+      await dependencies.readFile(join(projectRoot, "package.json"), "utf8")
+    );
+    await renderTemplateScope(nativeTarget, projectPackage.name, dependencies);
+  }
 }
 
 export async function scaffoldNativeApps(options, dependencies) {
@@ -322,6 +383,7 @@ export async function scaffoldNativeApps(options, dependencies) {
         name: definition.name,
         nativeTarget,
         profileId: referenceProfile,
+        projectRoot: options.destination,
         templateTarget: appPath(options.destination, definition.canonicalName),
         useManagedTemplate: true
       },
@@ -360,6 +422,7 @@ export function nativeScaffoldDependencies({
   cp: copy,
   mkdir: makeDirectory,
   readFile: read,
+  readdir: readDirectory,
   rm: remove,
   writeFile: write
 }) {
@@ -367,6 +430,7 @@ export function nativeScaffoldDependencies({
     cp: copy ?? cp,
     mkdir: makeDirectory ?? mkdir,
     readFile: read ?? readFile,
+    readdir: readDirectory ?? readdir,
     rm: remove ?? rm,
     writeFile: write ?? writeFile
   };
