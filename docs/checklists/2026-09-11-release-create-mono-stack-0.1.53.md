@@ -97,8 +97,8 @@ then publish order, which this release follows.
 
 - [x] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.53` / `v0.1.53`.
 - [x] Package suite, full repository gate, and dry-run artifact validation pass.
-- [ ] The release commit and annotated `v0.1.53` tag are pushed to `origin` before publication.
-- [ ] The package-local wrapper publishes `create-mono-stack@0.1.53`; npm latest and remote tag
+- [x] The release commit and annotated `v0.1.53` tag are pushed to `origin` before publication.
+- [x] The package-local wrapper publishes `create-mono-stack@0.1.53`; npm latest and remote tag
       confirm it.
 
 ## Exact Test Cases
@@ -176,8 +176,14 @@ then publish order, which this release follows.
 - Must not happen: direct npm publish, credentials in Git, or publish before the pushed tag.
 - Planned command: `git ls-remote --tags origin v0.1.53 && npm view create-mono-stack@latest version`.
 - Expected result before the code change: tag does not exist and npm latest is 0.1.52.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-11, before pushing, `origin/master` had no `v0.1.53` tag and
+  `npm view create-mono-stack@latest version` returned `0.1.52`.
+- Passing rerun: 2026-09-11, `git push origin master` (`aa6c7f3..cf8d36f`), `git tag -a v0.1.53`
+  then `git push origin v0.1.53` (`git ls-remote --tags origin v0.1.53` returned
+  `7757bdbd3b9a95073269ff50d31504e43fb80b99`, peeling via `git rev-parse v0.1.53^{}` to
+  `cf8d36fe60ef36505e3601c140f7b6d02720c47c`, equal to `HEAD`), then
+  `pnpm --filter create-mono-stack publish:package` succeeded. `npm view create-mono-stack@latest
+version` reported `0.1.53` on the first poll (no propagation delay this time).
 
 ## Missing-Case Review
 
@@ -204,8 +210,8 @@ then publish order, which this release follows.
 - [x] Set `core/create-mono-stack/package.json` version to 0.1.53.
 - [x] Set the CLI fixture to `_commit: v0.1.53`.
 - [x] Record TEST-RELEASE-050 through 052 validation results in this checklist.
-- [ ] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.53`.
-- [ ] Publish with the package wrapper and record TEST-RELEASE-053 evidence.
+- [x] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.53`.
+- [x] Publish with the package wrapper and record TEST-RELEASE-053 evidence.
 
 ## Validation Notes
 
@@ -213,3 +219,22 @@ then publish order, which this release follows.
 - TEST-RELEASE-050: `pnpm --filter create-mono-stack test` passed at 0.1.53 (280/280).
 - TEST-RELEASE-052: dry run produced `create-mono-stack-0.1.53.tgz`, 299 files, 617.0 kB packed,
   1.0 MB unpacked; excludes the package `test/` directory, `node_modules`, and `.npmrc*`.
+- TEST-RELEASE-053: `v0.1.53` was pushed as annotated tag `7757bdbd3b9a95073269ff50d31504e43fb80b99`,
+  peeling to release commit `cf8d36fe60ef36505e3601c140f7b6d02720c47c`. The package-local wrapper
+  published `create-mono-stack@0.1.53`; npm reports that version as `latest`.
+
+## Updates
+
+### 2026-09-11 - Hotfix released
+
+- Release commit: `cf8d36fe60ef36505e3601c140f7b6d02720c47c`
+  (`fix(create-mono-stack): scaffold native apps from the managed template, not live apps/*`),
+  pushed to `origin/master`.
+- Tag: annotated `v0.1.53` (`7757bdbd3b9a95073269ff50d31504e43fb80b99`) pushed to origin; peeled ref
+  `v0.1.53^{}` is `cf8d36fe60ef36505e3601c140f7b6d02720c47c`.
+- Publication: `pnpm --filter create-mono-stack publish:package` completed successfully with public
+  latest access.
+- Verification: `npm view create-mono-stack@latest version` reports `0.1.53`.
+- Known limitation carried forward: not re-verified with a full real interactive
+  `npx create-mono-stack` run driving the Vite CLI's own prompts (see Missing-Case Review item 5);
+  if a third live failure surfaces, prioritize a real interactive smoke test before further fixes.
