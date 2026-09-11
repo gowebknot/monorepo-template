@@ -100,10 +100,10 @@ authorized bundling them into this release commit when asked, given they carry n
 
 ## Acceptance Criteria
 
-- [ ] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.51` / `v0.1.51`.
-- [ ] Package suite, full repository gate, and dry-run artifact validation pass.
-- [ ] The release commit and annotated `v0.1.51` tag are pushed to `origin` before publication.
-- [ ] The package-local wrapper publishes `create-mono-stack@0.1.51`; npm latest and remote tag
+- [x] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.51` / `v0.1.51`.
+- [x] Package suite, full repository gate, and dry-run artifact validation pass.
+- [x] The release commit and annotated `v0.1.51` tag are pushed to `origin` before publication.
+- [x] The package-local wrapper publishes `create-mono-stack@0.1.51`; npm latest and remote tag
       confirm it.
 
 ## Exact Test Cases
@@ -189,8 +189,14 @@ authorized bundling them into this release commit when asked, given they carry n
 - Must not happen: direct npm publish, credentials in Git, or publish before the pushed tag.
 - Planned command: `git ls-remote --tags origin v0.1.51 && npm view create-mono-stack@latest version`.
 - Expected result before the code change: tag does not exist and npm latest is 0.1.50.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-11, before pushing, `origin/master` had no `v0.1.51` tag and
+  `npm view create-mono-stack@latest version` returned `0.1.50`.
+- Passing rerun: 2026-09-11, `git push origin master` (`420b041..47916da`), `git tag -a v0.1.51` then
+  `git push origin v0.1.51` (`git ls-remote --tags origin v0.1.51` returned
+  `a7085ae6ce6baa5845b60bc85e16062a97551c91`, and `git rev-parse v0.1.51^{}` equaled `HEAD`,
+  `47916da0c9348d8b0bfe6508897694232b27251a`), then `pnpm --filter create-mono-stack publish:package`
+  succeeded. `npm view create-mono-stack@0.1.51 version dist-tags --json` and
+  `npm view create-mono-stack@latest version` both report `0.1.51`.
 
 ## Missing-Case Review
 
@@ -211,8 +217,8 @@ authorized bundling them into this release commit when asked, given they carry n
 - [x] Set `core/create-mono-stack/package.json` version to 0.1.51.
 - [x] Set the CLI fixture to `_commit: v0.1.51`.
 - [x] Record TEST-RELEASE-030 through 032 validation results in this checklist.
-- [ ] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.51`.
-- [ ] Publish with the package wrapper and record TEST-RELEASE-033 evidence.
+- [x] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.51`.
+- [x] Publish with the package wrapper and record TEST-RELEASE-033 evidence.
 
 ## Validation Notes
 
@@ -226,3 +232,22 @@ authorized bundling them into this release commit when asked, given they carry n
   `pnpm --filter @monorepo-template/db lint` (clean) passed after the `preserve-caught-error` fix
   recorded in the ORM checklist. `apps/server` build, build:reference, typecheck, lint, test:unit
   (5/5), test:api:e2e (3/3), and `node --test test/reference-database.test.mjs` (1/1) all passed.
+- TEST-RELEASE-033: `v0.1.51` was pushed as annotated tag `a7085ae6ce6baa5845b60bc85e16062a97551c91`,
+  peeling to release commit `47916da0c9348d8b0bfe6508897694232b27251a`. The package-local wrapper
+  published `create-mono-stack@0.1.51`; npm reports that version as `latest`.
+
+## Updates
+
+### 2026-09-11 - Release completed
+
+- Release commit: `47916da0c9348d8b0bfe6508897694232b27251a`
+  (`chore(release): prepare create-mono-stack 0.1.51`), pushed to `origin/master` alongside the
+  bundled ORM/atomic-design/shallow-code skill-documentation changes the user authorized including.
+- Tag: annotated `v0.1.51` (`a7085ae6ce6baa5845b60bc85e16062a97551c91`) pushed to origin; peeled ref
+  `v0.1.51^{}` is `47916da0c9348d8b0bfe6508897694232b27251a`.
+- Publication: `pnpm --filter create-mono-stack publish:package` completed successfully with public
+  latest access.
+- Verification: `npm view create-mono-stack@0.1.51 version dist-tags --json` reports version and
+  `latest` as `0.1.51`; `npm view create-mono-stack@latest version` also reports `0.1.51`.
+- Unrelated note: GitHub reported 3 pre-existing Dependabot vulnerabilities (2 high, 1 low) on the
+  default branch when pushing; not investigated as part of this release, flagged to the user.
