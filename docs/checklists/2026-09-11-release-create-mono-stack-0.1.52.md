@@ -81,8 +81,8 @@ then publish order, which this release follows.
 
 - [x] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.52` / `v0.1.52`.
 - [x] Package suite, full repository gate, and dry-run artifact validation pass.
-- [ ] The release commit and annotated `v0.1.52` tag are pushed to `origin` before publication.
-- [ ] The package-local wrapper publishes `create-mono-stack@0.1.52`; npm latest and remote tag
+- [x] The release commit and annotated `v0.1.52` tag are pushed to `origin` before publication.
+- [x] The package-local wrapper publishes `create-mono-stack@0.1.52`; npm latest and remote tag
       confirm it.
 
 ## Exact Test Cases
@@ -159,8 +159,26 @@ then publish order, which this release follows.
 - Must not happen: direct npm publish, credentials in Git, or publish before the pushed tag.
 - Planned command: `git ls-remote --tags origin v0.1.52 && npm view create-mono-stack@latest version`.
 - Expected result before the code change: tag does not exist and npm latest is 0.1.51.
-- First observed run: pending.
-- Passing rerun: pending.
+- First observed run: 2026-09-11, before pushing, `npm view create-mono-stack@latest version`
+  returned `0.1.51` and `origin` had no `v0.1.52` tag.
+- Passing rerun: 2026-09-11, `git push origin master` (`40dc859..2907bde`), `git tag -a v0.1.52` then
+  `git push origin v0.1.52` (`git ls-remote --tags origin v0.1.52` returned
+  `0d9b1948615e20e836c7626edec63ee75fb36eeb`, peeling via `git rev-parse v0.1.52^{}` to
+  `2907bde187730aa0486f458e9278cc8c4bbb8f73`, equal to `HEAD`), then
+  `pnpm --filter create-mono-stack publish:package` succeeded. Registry propagation took roughly 15
+  seconds: `npm view create-mono-stack@0.1.52 version` initially 404'd, then
+  `npm view create-mono-stack@latest version` and `npm view create-mono-stack@0.1.52 version
+dist-tags --json` both reported `0.1.52` as `latest`.
+- End-to-end confirmation beyond the planned command: ran
+  `npx --yes create-mono-stack@0.1.52 /tmp/create-mono-stack-smoke-test --features web-vite
+--git-host-alias github-webknot` against the real published package (a first attempt without the
+  host alias failed on an unrelated local SSH permission error against `git@github.com` directly, the
+  same reason the user's own wizard run used `--git-host-alias github-webknot`). It completed with
+  "Project setup complete." and no "Template uses potentially unsafe feature" warning. Verified the
+  `_tasks` script actually ran (not just silently skipped): the generated
+  `packages/*/package.json` files were rewritten to the project-specific scope
+  `@create-mono-stack-smoke-test/*`, which is exactly what `scripts/render-package-scope.mjs`
+  performs. Removed the scratch directory afterward.
 
 ## Missing-Case Review
 
@@ -180,8 +198,8 @@ then publish order, which this release follows.
 - [x] Set the CLI fixture to `_commit: v0.1.52`.
 - [x] Record TEST-RELEASE-040 and 042 validation results in this checklist.
 - [x] Run `just check` and record TEST-RELEASE-041.
-- [ ] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.52`.
-- [ ] Publish with the package wrapper and record TEST-RELEASE-043 evidence.
+- [x] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.52`.
+- [x] Publish with the package wrapper and record TEST-RELEASE-043 evidence.
 
 ## Validation Notes
 
@@ -189,3 +207,25 @@ then publish order, which this release follows.
 - TEST-RELEASE-040: `pnpm --filter create-mono-stack test` passed at 0.1.52 (279/279).
 - TEST-RELEASE-042: dry run produced `create-mono-stack-0.1.52.tgz`, 299 files, 617.0 kB packed,
   1.0 MB unpacked; excludes the package `test/` directory, `node_modules`, and `.npmrc*`.
+- TEST-RELEASE-043: `v0.1.52` was pushed as annotated tag `0d9b1948615e20e836c7626edec63ee75fb36eeb`,
+  peeling to release commit `2907bde187730aa0486f458e9278cc8c4bbb8f73`. The package-local wrapper
+  published `create-mono-stack@0.1.52`; npm reports that version as `latest`.
+- Real end-to-end confirmation: `npx --yes create-mono-stack@0.1.52 ... --git-host-alias
+github-webknot` against the actual published package completed successfully with no trust
+  warning, and the generated project's `packages/*/package.json` scopes were rewritten by the
+  `_tasks` script — direct proof the original failure is fixed, not just that the unit tests pass.
+
+## Updates
+
+### 2026-09-11 - Hotfix released
+
+- Release commit: `2907bde187730aa0486f458e9278cc8c4bbb8f73`
+  (`fix(create-mono-stack): trust the default Copier template so project creation succeeds`), pushed
+  to `origin/master`.
+- Tag: annotated `v0.1.52` (`0d9b1948615e20e836c7626edec63ee75fb36eeb`) pushed to origin; peeled ref
+  `v0.1.52^{}` is `2907bde187730aa0486f458e9278cc8c4bbb8f73`.
+- Publication: `pnpm --filter create-mono-stack publish:package` completed successfully with public
+  latest access.
+- Verification: `npm view create-mono-stack@latest version` reports `0.1.52`; a real
+  `npx create-mono-stack@0.1.52` run reproduced and then confirmed the fix for the exact failure the
+  user hit on 0.1.51.
