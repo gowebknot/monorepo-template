@@ -131,6 +131,10 @@ Use current Zod imports, methods, and functions only; do not add deprecated pre-
 
 `packages/db` (`@monorepo-template/db`) owns shared Drizzle connection helpers. Read `packages/db/AGENTS.md` before changing database code.
 
+Use the existing ORM for database operations; do not author raw SQL or bypass it through the driver.
+Apply [backend-standards](skills/backend-standards/SKILL.md#orm-only-persistence), including for scripts,
+seeders, and test setup. Its ORM-only policy distinguishes generated migrations from handwritten SQL.
+
 This is a template repo: keep example schema tables under `packages/db/example/schema/`; exported `packages/db/src/` code should stay connection-only unless adapting the template into a real project.
 
 Database configuration must come from `@monorepo-template/env/server`, not direct `process.env` reads.

@@ -88,3 +88,13 @@
 - `pnpm skills:check` validated all 19 portable skills.
 - `pnpm skills:test` passed all 101 tests.
 - `pnpm format:check` passed for the repository.
+
+## Updates
+
+- 2026-09-11: The user reported mixed responsibilities and nested code despite the broad quality
+  guidance. Inspection found no general shallow-code policy and an explicit same-file preference in
+  JSX extraction. [Shallow Code and Cohesive Modules](2026-09-11-shallow-code-and-cohesive-modules.md)
+  extends dispatch guidance with lazy handlers and unknown-key handling, adds cross-cutting nesting
+  and ownership rules, and aligns JSX extraction and review. Existing keyed-dispatch and CVA choices
+  remain intact. Semantic fixture review passed; synchronization, skills tests, and formatting
+  results are tracked in the new checklist.

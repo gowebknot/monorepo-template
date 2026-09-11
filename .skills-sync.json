@@ -5,16 +5,16 @@
       "hash": "ff2ae01cc60d11bea93ff23497616eb116483c4ae0bb238a9da47a21545f41e8"
     },
     "backend-standards": {
-      "hash": "39992df835650c584c05a9655ac27bef87b8459d06feb98680e8d91bec7bd431"
+      "hash": "61cac9338737375f581ab028755bb1f4bd3a753bb1a1e3003b2c82bf6c236c86"
     },
     "checklist-tracking": {
       "hash": "4ab9f6f9e8763411b7c591a62f9d025a8a88aea54f9ec8049d2a6165b18974a1"
     },
     "code-quality": {
-      "hash": "e71d20de6b432edb2b77c6631f493d5f22c338dc92154a58773bf65ef5674472"
+      "hash": "e3ad1ae6088e065728356becb1404b6b170968ce5263b9e75f932570aed6ef1b"
     },
     "code-review": {
-      "hash": "6d6b61887c5515964359afaef6a19c9a89817f001a97d61db241f4b6b753ca01"
+      "hash": "abe17431dce3bc1ccc106f75154c31b8beee782cf91ca6132f516152d5b96019"
     },
     "contract-validation": {
       "hash": "e6ed7ae26226703183139317ead2bb41de905b2974ffd804be825b8b9b6861f1"
@@ -26,7 +26,7 @@
       "hash": "1429d2017cd79768c991eac8ef9eb870c9450680bc1d9416803dd369111d8afb"
     },
     "domain-driven-app-structure": {
-      "hash": "732e7173c751a3f408c31cefa3933b8572e31e491b5cda04247c26a738517f6a"
+      "hash": "07f8e8d45b7bf00922a4de33ceb6e29807e5468467cf74d02b9a68c4dbc08956"
     },
     "e2e-regression-test-writer": {
       "hash": "7a907602473c1f8bae236c1c5b702ae33dbed676c8c8183b415edc6ddc7f0b83"
@@ -35,10 +35,10 @@
       "hash": "9543f14967554afdaf3686a08796e97f1fa929342b21ab797825ed0a761dd366"
     },
     "frontend-standards": {
-      "hash": "86bf666774f96dc1417f74e506000710ce378ae70a4efe47e6e58a05b88f5b0a"
+      "hash": "0fd354555f01297402ac5a1abb59e17e7da4005a7fadc40e31d6a20aa97aef70"
     },
     "jsx-component-extraction": {
-      "hash": "0723effd57a7dd745548f7c8a6d85bc1b461c7f01de8bc1d80c17dc05fcafcc9"
+      "hash": "3e4798a08855738a55f0a8e905b583a411e155d01c868ba3bf8572bcc4139bae"
     },
     "maestro-mobile-e2e-test-writer": {
       "hash": "8221e437ea80be91c698fe7002aa4ac8aae1a46a4719385c91393185a3e9c2ea"

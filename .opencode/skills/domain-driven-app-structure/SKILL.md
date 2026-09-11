@@ -13,6 +13,9 @@ that should follow domain boundaries and nested conventions.
    controls, icons, and icon wrappers belong in `packages/ui`; app-wide composition belongs in the
    app's top-level `components/`; only feature-specific behavior and composition belong in
    `features/<feature>/components`.
+   For UI composition, apply [Atomic Design](../frontend-standards/SKILL.md#atomic-design) within these
+   ownership boundaries. Atomic levels describe component roles; they do not replace domain paths
+   or introduce a server-layer taxonomy.
 3. Identify the feature or domain for feature-owned code, then place transport, use-case, domain,
    persistence, and UI code in its matching nested folder.
    Before creating or moving route files, record a route-group-to-feature ownership map. A route group

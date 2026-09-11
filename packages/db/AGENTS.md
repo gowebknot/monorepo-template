@@ -4,6 +4,10 @@
 
 `@monorepo-template/db` owns shared Drizzle database connection helpers.
 
+Use Drizzle APIs for database operations; do not author raw SQL or bypass the ORM through its driver.
+Apply [backend-standards](../../skills/backend-standards/SKILL.md#orm-only-persistence) for persistence,
+seeders, test setup, and the distinction between generated migrations and handwritten SQL.
+
 ## Template Rule
 
 - Invoke the `authentication-rbac` skill before changing auth persistence, session tables, role or

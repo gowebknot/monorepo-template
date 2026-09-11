@@ -37,6 +37,14 @@ findings when automated tooling already owns that concern.
 - Check that tests assert behavior rather than implementation details and that mocks do not hide broken
   integration boundaries.
 - Check changed files remain under 300 lines and retain one cohesive responsibility.
+- Apply [Code Quality](../code-quality/SKILL.md) to the entire changed units: check component and helper
+  ownership, duplicated business rules, nested control flow, dense expressions, callbacks,
+  transformations, and keyed dispatch. For JSX, also apply
+  [JSX Component Extraction](../jsx-component-extraction/SKILL.md).
+- Flag structural violations even in short files with passing tests. Require a concrete reason for
+  necessary retained complexity. Check that extraction and flattening preserve evaluation order,
+  selected-branch execution, errors, side effects, state ownership, and cleanup; moving complexity
+  into vague helpers does not resolve it.
 - Check documentation, checklist statuses, release notes, and generated artifacts when the change
   affects them.
 - Flag any use of `--no-verify`, `--no-hooks`, `HUSKY=0`, skipped hooks, disabled checks, or equivalent

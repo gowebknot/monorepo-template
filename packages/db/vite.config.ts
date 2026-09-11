@@ -17,10 +17,12 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
+        "node:url",
         "@monorepo-template/env/server",
         "better-sqlite3",
         "drizzle-orm",
         "drizzle-orm/better-sqlite3",
+        "drizzle-orm/better-sqlite3/migrator",
         "drizzle-orm/node-postgres",
         "drizzle-orm/sqlite-core",
         "pg"

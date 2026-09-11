@@ -44,7 +44,7 @@ reference/
   main.ts                  # reference server entry point
   app.module.ts            # reference server module
   database/
-    database.module.ts       # provides EXAMPLE_DB, bootstraps demo schema on startup
+    database.module.ts       # provides EXAMPLE_DB, migrates and seeds demo schema on startup
     database.constants.ts
   users/                     # GET/POST/PATCH/DELETE /users
   todos/                     # GET/POST/PATCH/DELETE /todos

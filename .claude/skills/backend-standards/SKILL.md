@@ -35,6 +35,23 @@ side effects.
 - Avoid logging secrets, tokens, credentials, raw sensitive payloads, or unbounded user input.
 - Return stable structured errors and map internal failures without exposing implementation details.
 
+## ORM-Only Persistence
+
+- Use the installed ORM and existing schema, repositories, and database helpers for database reads
+  and writes. In this repository, use Drizzle's typed query builders, predicates, relations, and
+  transaction APIs. This applies to application code, jobs, scripts, seeders, and test setup/cleanup.
+- Do not author raw SQL strings or fragments, SQL template tags, `sql.raw`, raw-query methods, or
+  direct driver query/execute/exec calls to bypass the ORM. Parameterizing or typing handwritten SQL
+  does not make it comply with this architectural rule. Do not copy legacy/demo SQL as a precedent.
+- Define schema changes through the existing ORM schema and migration tooling. ORM-generated SQL
+  migration artifacts and the ORM migrator executing them are allowed; do not handwrite replacement
+  DDL, edit historical migrations, or move application queries into migration files to evade the rule.
+- If the installed ORM cannot express an operation, verify its supported APIs and report the precise
+  limitation and an ORM-based alternative. Do not silently fall back to raw SQL, introduce another
+  database client, or change this requirement without an explicit user instruction.
+- During review, inspect new database execution paths and confirm they use ORM APIs. Check receiver
+  types and arguments rather than assuming every method named `query` or `execute` is raw SQL.
+
 ## Database Seeding
 
 - Inspect the project's existing schema, migrations, database scripts, seeders, dependencies, and

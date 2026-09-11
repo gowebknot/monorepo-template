@@ -1,6 +1,6 @@
 ---
 name: frontend-standards
-description: "Use when implementing, reviewing, refactoring, or debugging frontend routes, components, forms, tables, loading and error states, environment configuration, API calls, query state, accessibility, responsive behavior, or component-library usage. Follow the repository's React, router, styling, validation, query, and package conventions while keeping UI state, server state, URL state, and form state clearly separated."
+description: "Use when implementing, reviewing, refactoring, or debugging frontend routes, components, Atomic Design composition, forms, tables, loading and error states, environment configuration, API calls, query state, accessibility, responsive behavior, or component-library usage. Follow the repository's React, router, styling, validation, query, and package conventions while keeping UI state, server state, URL state, and form state clearly separated."
 ---
 
 # Frontend Standards
@@ -16,6 +16,50 @@ predictable loading and error behavior.
    derived render value.
 3. Locate existing design-system components, shared schemas, API services, query hooks, and test
    utilities before creating replacements.
+
+## Atomic Design
+
+Apply Atomic Design when building, extending, or reviewing web and mobile interfaces. Use the five
+levels to reason about reusable parts and the assembled experience together, not as a mandatory
+linear build sequence. The methodology comes from
+[Brad Frost's Atomic Design](https://atomicdesign.bradfrost.com/chapter-2/); the placement and data
+boundaries below adapt it to this repository.
+
+| Level     | Responsibility                                                                               | Example                                                      |
+| --------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Atoms     | Small functional UI primitives using shared tokens and accessible platform behavior.         | Button, input, icon, label.                                  |
+| Molecules | A small combination of primitives serving one interaction or display purpose.                | Labeled search control or field with an error message.       |
+| Organisms | A distinct interface section composed of smaller units.                                      | Site header, product results section, account details panel. |
+| Templates | Page-level layout and content structure expressed through slots or explicit props.           | Search layout with header, filters, and results regions.     |
+| Pages     | Concrete screens that populate the structure with real content and connect feature behavior. | Search results screen using route input and query results.   |
+
+- Before implementation, identify the existing primitives, small composites, sections, layout, and
+  page composition needed by the request. Reuse or extend their owners before adding new components.
+- Compose only the levels that add a meaningful responsibility. An organism may use atoms directly;
+  a simple page does not need a new template wrapper. Refine parts against actual page needs instead
+  of building a speculative component catalog.
+- Keep domain ownership as the path rule: reusable feature-independent primitives and controls belong
+  in `packages/ui`; app-wide shells and navigation belong in app-level `components/`; feature-specific
+  composites and sections belong in `features/<feature>/components`. Place templates with their app
+  or feature owner and keep route entry files thin. Follow
+  [Domain-Driven App Structure](../domain-driven-app-structure/SKILL.md) when choosing paths.
+- Use atomic levels to describe responsibility, not to require `atoms/`, `molecules/`, `organisms/`,
+  `templates/`, and `pages/` folders or suffixes. Do not move product-specific components into shared
+  UI solely because they fit an atomic category. Respect platform-specific primitives and package
+  exports; never force web-only components into native screens for reuse.
+- Keep shared primitives and reusable visual composites independent of feature imports, routing,
+  and API clients. Pass explicit props, slots, and callbacks. Keep data loading, mutations, and domain
+  decisions in the existing feature hooks, loaders, and application boundaries; pages connect those
+  results to UI. Templates own layout, not another copy of fetching or business rules. Keep local
+  interaction state with its owner and preserve the repository's form and query-state rules.
+- Preserve the shallow-code and one-substantial-component-per-file rules through
+  [JSX Component Extraction](../jsx-component-extraction/SKILL.md). Atomic composition does not justify
+  deeply nested JSX, duplicated atoms, large prop bags, or unnecessary wrapper components. Atomic
+  levels do not imply separate lazy chunks; use the meaningful boundaries described below.
+- Verify parts in the assembled page with representative content, including long labels and relevant
+  loading, empty, error, and success states. Check responsive layout, accessible interactions, and
+  shared variants in context; feed failures back into the owning component rather than patching each
+  page with a duplicate. Use the existing focused tests and UI checks for the changed behavior.
 
 ## UI Boundaries
 

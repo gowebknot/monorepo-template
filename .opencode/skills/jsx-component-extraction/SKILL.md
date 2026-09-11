@@ -5,7 +5,10 @@ description: "Use when writing, reviewing, or refactoring React JSX or TSX with 
 
 # JSX Component Extraction
 
-Keep React render trees readable and keep JSX focused on describing UI structure.
+Keep React render trees readable and keep JSX focused on describing UI structure. Apply
+[Code Quality](../code-quality/SKILL.md) for the shared module, duplication, and shallow-code policy.
+Use the [Atomic Design guidance](../frontend-standards/SKILL.md#atomic-design) to choose meaningful
+primitive, composite, section, layout, and page boundaries while preserving domain ownership.
 
 ## Extraction Rules
 
@@ -16,9 +19,12 @@ Keep React render trees readable and keep JSX focused on describing UI structure
 - Inspect changed JSX or TSX for nested containers, repeated markup, mapped item content, nested
   cards or panels, forms, and complex conditional branches.
 - Extract a meaningful subtree when nesting or local logic makes the parent difficult to scan.
-- Prefer a same-file private component when the extracted block has one consumer.
-- Use a separate file only when the component is reused, independently substantial, or matches the
-  repository's component organization.
+- Default to one substantial component per file, even with one consumer. Put extracted rows, cards,
+  panels, and forms in named files beside their owning feature. A single consumer is not a reason to
+  accumulate substantial private components in the parent file.
+- Keep component-specific props and tiny cohesive helpers local; separate independent hooks,
+  transformations, and domain logic according to the shared code-quality policy.
+- Define components at module scope, never inside another component's render function.
 - Keep extracted components pure, typed, explicit about props, and focused on one responsibility.
 - Do not extract tiny wrappers when the new boundary would reduce clarity.
 
@@ -28,6 +34,13 @@ Keep React render trees readable and keep JSX focused on describing UI structure
   and permission decisions before the returned JSX.
 - Keep inline expressions to simple property access, direct event handlers, boolean toggles, and
   trivial interpolation.
+- Do not use nested or chained ternaries. Use clear render-state branches or keyed component lookup
+  as appropriate; keep hooks unconditional and before early returns.
+- Keep mapped item JSX and conditional subpanels small by delegating meaningful UI to typed
+  components. Avoid stacks of nested render callbacks and boolean branches. Do not hide complex JSX
+  in local render helpers or anonymous functions just to shorten the returned expression.
+- Preserve DOM nesting needed for semantics and layout. Extract components without adding wrapper
+  elements, changing keys, or breaking state ownership merely to make the source look shallower.
 - Preserve existing visual structure, behavior, accessibility attributes, styling, and library APIs.
 - Follow repository import and barrel-file rules after extraction.
 
