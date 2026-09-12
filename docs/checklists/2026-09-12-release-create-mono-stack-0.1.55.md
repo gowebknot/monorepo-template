@@ -90,8 +90,8 @@ full commit/push/tag/publish sequence, including pushing to `origin/master`, whe
 
 - [x] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.55` / `v0.1.55`.
 - [x] Package suite, full repository gate, and dry-run artifact validation pass.
-- [ ] The release commit and annotated `v0.1.55` tag are pushed to `origin` before publication.
-- [ ] The package-local wrapper publishes `create-mono-stack@0.1.55`; npm latest and remote tag
+- [x] The release commit and annotated `v0.1.55` tag are pushed to `origin` before publication.
+- [x] The package-local wrapper publishes `create-mono-stack@0.1.55`; npm latest and remote tag
       confirm it.
 
 ## Exact Test Cases
@@ -170,8 +170,14 @@ full commit/push/tag/publish sequence, including pushing to `origin/master`, whe
 - Must not happen: direct npm publish, credentials in Git, or publish before the pushed tag.
 - Planned command: `git ls-remote --tags origin v0.1.55 && npm view create-mono-stack@latest version`.
 - Expected result before the code change: tag does not exist and npm latest is 0.1.54.
-- First observed run: Pending — not yet run.
-- Passing rerun: Pending — not yet run.
+- First observed run: 2026-09-12, before pushing, `origin/master` had no `v0.1.55` tag and
+  `npm view create-mono-stack@latest version` returned `0.1.54`.
+- Passing rerun: 2026-09-12, `git push origin master` (`1297904..e53dce5`), `git tag -a v0.1.55` then
+  `git push origin v0.1.55` (`git ls-remote --tags origin v0.1.55` returned
+  `92017385b0d478051d7775742997de3045ee9aea`, peeling via `git rev-parse v0.1.55^{}` to
+  `e53dce5101131de460eba92a33a43369ca3f87f7`, equal to `HEAD`), then
+  `pnpm --filter create-mono-stack publish:package` succeeded. `npm view create-mono-stack@latest
+version` reported `0.1.54` on the first poll, `0.1.55` on the second (~12s propagation delay).
 
 ## Missing-Case Review
 
@@ -192,10 +198,34 @@ full commit/push/tag/publish sequence, including pushing to `origin/master`, whe
 - [x] Set the CLI fixture to `_commit: v0.1.55`.
 - [x] Record TEST-RELEASE-064 and 066 validation results in this checklist.
 - [x] Run `just check` and record TEST-RELEASE-065.
-- [ ] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.55`.
-- [ ] Publish with the package wrapper and record TEST-RELEASE-067 evidence.
+- [x] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.55`.
+- [x] Publish with the package wrapper and record TEST-RELEASE-067 evidence.
 
 ## Validation Notes
 
-- Registry baseline: `npm view create-mono-stack version` (before this release) is expected to be
-  `0.1.54`.
+- Registry baseline: `npm view create-mono-stack version` (before this release) was `0.1.54`.
+- TEST-RELEASE-064: `pnpm --filter create-mono-stack test` passed at 0.1.55 (290/290).
+- TEST-RELEASE-066: dry run produced `create-mono-stack-0.1.55.tgz`, 300 files, 618.2 kB packed,
+  1.0 MB unpacked; excludes the package `test/` directory, `node_modules`, and `.npmrc*`.
+- TEST-RELEASE-067: `v0.1.55` was pushed as annotated tag `92017385b0d478051d7775742997de3045ee9aea`,
+  peeling to release commit `e53dce5101131de460eba92a33a43369ca3f87f7`. The package-local wrapper
+  published `create-mono-stack@0.1.55`; npm reports that version as `latest`.
+
+## Updates
+
+### 2026-09-12 - Release published
+
+- Release commit: `e53dce5101131de460eba92a33a43369ca3f87f7`
+  (`chore(release): prepare create-mono-stack 0.1.55`), pushed to `origin/master`, preceded by the two
+  fix commits `aaea985` and `ef55331` (also pushed in the same `git push`).
+- Tag: annotated `v0.1.55` (`92017385b0d478051d7775742997de3045ee9aea`) pushed to origin; peeled ref
+  `v0.1.55^{}` is `e53dce5101131de460eba92a33a43369ca3f87f7`.
+- Publication: `pnpm --filter create-mono-stack publish:package` completed successfully with public
+  latest access.
+- Verification: `npm view create-mono-stack@latest version` reports `0.1.55` (after ~12s registry
+  propagation delay).
+- Also patched `jump-cloud=clone/apps/dashboard/eslint.config.js` directly (outside this repo) with
+  the same react-refresh override, so that already-generated project's lint passes immediately
+  without waiting for a regeneration against 0.1.55.
+- GitHub's Dependabot notice on push remains outstanding and unrelated; not addressed in this
+  release.
