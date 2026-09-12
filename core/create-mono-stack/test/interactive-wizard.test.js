@@ -83,6 +83,7 @@ test("renders an Ink wizard and uses safe project defaults", async (t) => {
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   assert.match(app.lastFrame(), /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
@@ -122,6 +123,7 @@ test("selects additional stack features through the multiselect screen", async (
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Next.js web app count/);
   await sendInput(app, enter, /Next.js web app name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, enter);
@@ -138,6 +140,153 @@ test("selects additional stack features through the multiselect screen", async (
       "my-project"
     ]
   ]);
+});
+
+test("TEST-E2EFLAG-002 asks about Maestro when a mobile feature is selected", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, wrapped(/Expo React Native app —/));
+  await sendInput(app, " ", wrapped(/\[x\] Expo React Native app/));
+  await sendInput(app, enter, /Vite web app count/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Expo React Native app count/);
+  await sendInput(app, enter, /Expo React Native app name/);
+
+  await sendInput(app, enter, /Maestro mobile E2E tests/);
+  assert.match(app.lastFrame(), /Maestro mobile E2E tests/);
+});
+
+test("TEST-E2EFLAG-003 skips both E2E questions when no mobile or web feature is selected", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, " ", wrapped(/\[ \] Vite web app/));
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Advanced options/);
+
+  assert.doesNotMatch(app.lastFrame(), /Maestro mobile E2E tests/);
+  assert.doesNotMatch(app.lastFrame(), /Playwright web E2E tests/);
+});
+
+test("TEST-E2EFLAG-004 declining Maestro appends --no-maestro", async (t) => {
+  const completed = [];
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: (args) => completed.push(args)
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, wrapped(/Expo React Native app —/));
+  await sendInput(app, " ", wrapped(/\[x\] Expo React Native app/));
+  await sendInput(app, enter, /Vite web app count/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Expo React Native app count/);
+  await sendInput(app, enter, /Expo React Native app name/);
+  await sendInput(app, enter, /Maestro mobile E2E tests/);
+  await sendInput(app, downArrow, /Skip Maestro tests/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+  await sendInput(app, enter);
+  await waitFor(() => completed.length === 1);
+
+  assert.ok(completed[0].includes("--no-maestro"));
+});
+
+test("TEST-E2EFLAG-005 declining Playwright appends --no-playwright", async (t) => {
+  const completed = [];
+  const app = render(
+    createElement(ProjectWizard, {
+      onComplete: (args) => completed.push(args)
+    })
+  );
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, enter, /Vite web app count/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
+  await sendInput(app, downArrow, /Skip Playwright tests/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+  await sendInput(app, enter);
+  await waitFor(() => completed.length === 1);
+
+  assert.ok(completed[0].includes("--no-playwright"));
+});
+
+test("TEST-E2EFLAG-006 Back from Playwright returns to Maestro when both apply", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, wrapped(/Expo React Native app —/));
+  await sendInput(app, " ", wrapped(/\[x\] Expo React Native app/));
+  await sendInput(app, enter, /Vite web app count/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Expo React Native app count/);
+  await sendInput(app, enter, /Expo React Native app name/);
+  await sendInput(app, enter, /Maestro mobile E2E tests/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, /❯ Back/);
+  await sendInput(app, enter, /Maestro mobile E2E tests/);
+
+  assert.match(app.lastFrame(), /Maestro mobile E2E tests/);
+});
+
+test("TEST-E2EFLAG-007 Confirmation lists both E2E choices when both were asked", async (t) => {
+  const app = render(createElement(ProjectWizard, { onComplete: () => {} }));
+  t.after(() => app.unmount());
+
+  await sendInput(app, enter, /Project name/);
+  await sendInput(app, enter, /Stack features/);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow);
+  await sendInput(app, downArrow, wrapped(/Expo React Native app —/));
+  await sendInput(app, " ", wrapped(/\[x\] Expo React Native app/));
+  await sendInput(app, enter, /Vite web app count/);
+  await sendInput(app, enter, /Vite web app name/);
+  await sendInput(app, enter, /NestJS API count/);
+  await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Expo React Native app count/);
+  await sendInput(app, enter, /Expo React Native app name/);
+  await sendInput(app, enter, /Maestro mobile E2E tests/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
+  await sendInput(app, enter, /Advanced options/);
+  await sendInput(app, enter, /Ready to create/);
+
+  assert.match(flattenFrame(app), /Maestro mobile E2E tests: Included/);
+  assert.match(flattenFrame(app), /Playwright web E2E tests: Included/);
 });
 
 test("asks only for names of selected apps", async (t) => {
@@ -207,6 +356,7 @@ test("navigates backward through selectable wizard screens", async (t) => {
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, downArrow);
@@ -233,6 +383,7 @@ test("renders discovered Python choices in the advanced flow", async (t) => {
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
@@ -279,6 +430,7 @@ test("TEST-WIZARD-003 shows the Advanced options question description and the de
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
 
   assert.match(
@@ -305,6 +457,7 @@ test("TEST-WIZARD-004 moves the shown option description when the Advanced optio
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
 
   await sendInput(
@@ -328,6 +481,7 @@ test("TEST-WIZARD-005 shows the Ready to create question description and the def
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
 
@@ -364,6 +518,7 @@ test("TEST-WIZARD-007 shows the question description and default-highlighted opt
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
@@ -395,6 +550,7 @@ test("TEST-WIZARD-008 renders a discovered choice without an authored descriptio
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
@@ -429,6 +585,7 @@ test("TEST-MULTI-007 asks how many, then names each instance, chaining across fe
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, enter, /Next.js web app count/);
   await sendInput(app, enter, /Next.js web app name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, enter);
@@ -480,6 +637,7 @@ test("collects advanced options through keyboard-driven Ink controls", async (t)
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
   await sendInput(app, "api", /api/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, downArrow, /\u276F Configure advanced options/);
   await sendInput(app, enter, /Git SSH host alias/);
@@ -565,6 +723,7 @@ test("cancels from the confirmation menu", async (t) => {
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, downArrow, /\u276F Cancel/);
@@ -595,6 +754,7 @@ test("remains interactive in Ink screen-reader mode", async (t) => {
   await sendInput(app, enter, /Vite web app name/);
   await sendInput(app, enter, /NestJS API count/);
   await sendInput(app, enter, /NestJS API name/);
+  await sendInput(app, enter, /Playwright web E2E tests/);
   await sendInput(app, enter, /Advanced options/);
   await sendInput(app, enter, /Ready to create/);
   await sendInput(app, enter);

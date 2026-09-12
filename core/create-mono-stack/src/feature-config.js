@@ -107,6 +107,16 @@ export function normalizeFeatures(value) {
   );
 }
 
+export function hasMobileFeature(features) {
+  return (
+    features.includes("mobile-expo") || features.includes("mobile-react-native")
+  );
+}
+
+export function hasWebFeature(features) {
+  return features.includes("web-vite") || features.includes("web-next");
+}
+
 export function serializeFeatureData(features) {
   const normalized = normalizeFeatures(features);
   const selected = new Set(normalized);

@@ -25,7 +25,10 @@ const managedWebRoot = fileURLToPath(
 // failure.
 async function createDestinationWithoutWebApp(
   t,
-  { projectName = "jump-cloud-clone" } = {}
+  {
+    projectName = "jump-cloud-clone",
+    nativeTree = reactTypeScriptNativeTree
+  } = {}
 ) {
   const root = await mkdtemp(join(tmpdir(), "native-scaffold-managed-"));
   const destination = join(root, "project");
@@ -40,7 +43,7 @@ async function createDestinationWithoutWebApp(
 
   const runCommand = async (command, args) => {
     if (args[0] === "create" && args[1] === "vite") {
-      await writeTree(join(temporaryRoot, args[2]), reactTypeScriptNativeTree);
+      await writeTree(join(temporaryRoot, args[2]), nativeTree);
     }
   };
 
@@ -130,4 +133,23 @@ test("TEST-SCOPE-002 leaves @monorepo-template/ untouched when the project is na
     packageJson.dependencies["@monorepo-template/env"],
     "workspace:^"
   );
+});
+
+test("TEST-SCOPE-003 also rewrites a bare monorepo-template reference to the destination scope", async (t) => {
+  const fixture = await createDestinationWithoutWebApp(t, {
+    projectName: "jump-cloud-clone",
+    nativeTree: {
+      ...reactTypeScriptNativeTree,
+      "src/root-ref.ts": 'export const ROOT_PACKAGE = "monorepo-template";\n'
+    }
+  });
+
+  await scaffoldDashboard(fixture);
+
+  const rootRef = await readFile(
+    join(fixture.destination, "apps/dashboard/src/root-ref.ts"),
+    "utf8"
+  );
+  assert.match(rootRef, /"jump-cloud-clone"/);
+  assert.doesNotMatch(rootRef, /"monorepo-template"/);
 });

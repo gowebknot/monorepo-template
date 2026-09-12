@@ -30,6 +30,8 @@ _exclude:
   - .npmrc.auth
   - .env.local
   - .env.*.local
+  - <%!- if not (feature_mobile_expo or feature_mobile_react_native) or not include_maestro_tests -!%>apps/maestro<%!- endif -!%>
+  - <%!- if not (feature_web_vite or feature_web_next) or not include_playwright_tests -!%>apps/playwright<%!- endif -!%>
 
 project_name:
   type: str
@@ -71,6 +73,16 @@ feature_mobile_expo:
 feature_mobile_react_native:
   type: bool
   default: false
+
+include_maestro_tests:
+  type: bool
+  default: true
+  when: <%= feature_mobile_expo or feature_mobile_react_native =%>
+
+include_playwright_tests:
+  type: bool
+  default: true
+  when: <%= feature_web_vite or feature_web_next =%>
 
 _message_after_copy: ""
 

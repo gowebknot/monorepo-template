@@ -93,6 +93,21 @@ test("TEST-MULTI-005 appends repeated --app-name flags for the same feature", ()
   );
 });
 
+test("TEST-E2EFLAG-008 maps --no-maestro and --no-playwright to explicit false options", () => {
+  const options = parseArguments(
+    ["acme-platform", "--no-maestro", "--no-playwright"],
+    "/workspace"
+  );
+  assert.equal(options.includeMaestro, false);
+  assert.equal(options.includePlaywright, false);
+});
+
+test("TEST-E2EFLAG-008 omits includeMaestro/includePlaywright when the flags are absent", () => {
+  const options = parseArguments(["acme-platform"], "/workspace");
+  assert.equal("includeMaestro" in options, false);
+  assert.equal("includePlaywright" in options, false);
+});
+
 test("advertises the zero-argument interactive wizard in help", async () => {
   const messages = [];
 
@@ -469,6 +484,10 @@ test("creates a project through isolated pinned Copier environments", async () =
         "feature_mobile_expo=false",
         "--data",
         "feature_mobile_react_native=false",
+        "--data",
+        "include_maestro_tests=false",
+        "--data",
+        "include_playwright_tests=true",
         "--vcs-ref",
         "HEAD",
         "/workspace/template",

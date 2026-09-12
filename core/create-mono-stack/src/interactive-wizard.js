@@ -9,11 +9,13 @@ import {
   DEFAULT_APP_NAMES,
   DEFAULT_FEATURES,
   FEATURE_DEFINITIONS,
-  defaultInstanceName
+  defaultInstanceName,
+  hasMobileFeature,
+  hasWebFeature
 } from "./feature-config.js";
-import { discoverWizardOptions } from "./wizard-discovery.js";
+import { discoverWizardOptions } from "#src/wizard-discovery.js";
 
-export { parseSshAliases } from "./wizard-discovery.js";
+export { parseSshAliases } from "#src/wizard-discovery.js";
 
 const h = createElement;
 const defaultDestination = "my-project";
@@ -29,6 +31,34 @@ const advancedChoices = [
       "Manually set the Git SSH host alias, Python executable, template source, and revision.",
     label: "Configure advanced options",
     value: true
+  }
+];
+const maestroDescription =
+  "Maestro runs mobile end-to-end flows against your selected mobile app.";
+const maestroChoices = [
+  {
+    description: "Add apps/maestro, Maestro mobile E2E flows for the app.",
+    label: "Include Maestro tests (recommended)",
+    value: true
+  },
+  {
+    description: "Don't include the Maestro mobile E2E suite.",
+    label: "Skip Maestro tests",
+    value: false
+  }
+];
+const playwrightDescription =
+  "Playwright runs web end-to-end flows against your selected web app.";
+const playwrightChoices = [
+  {
+    description: "Add apps/playwright, Playwright web E2E flows for the app.",
+    label: "Include Playwright tests (recommended)",
+    value: true
+  },
+  {
+    description: "Don't include the Playwright web E2E suite.",
+    label: "Skip Playwright tests",
+    value: false
   }
 ];
 const customChoice = "__custom__";
@@ -429,6 +459,19 @@ function featureNameStep(featureId, instanceIndex) {
   return `feature-name:${featureId}:${instanceIndex}`;
 }
 
+function nextStepAfterFeatures(features) {
+  if (hasMobileFeature(features)) return "e2e-maestro";
+  if (hasWebFeature(features)) return "e2e-playwright";
+  return "advanced";
+}
+
+function lastFeatureNameStep(answers) {
+  const lastFeature = answers.features.at(-1);
+  if (!lastFeature) return "features";
+  const count = answers.featureCounts[lastFeature] ?? 1;
+  return featureNameStep(lastFeature, count - 1);
+}
+
 function projectNameChoices(destination) {
   return [
     {
@@ -463,6 +506,22 @@ function Confirmation({ answers, onSelect }) {
         name
       ]);
     }),
+    ...(hasMobileFeature(answers.features)
+      ? [
+          [
+            "Maestro mobile E2E tests",
+            answers.includeMaestro ? "Included" : "Skipped"
+          ]
+        ]
+      : []),
+    ...(hasWebFeature(answers.features)
+      ? [
+          [
+            "Playwright web E2E tests",
+            answers.includePlaywright ? "Included" : "Skipped"
+          ]
+        ]
+      : []),
     ["SSH alias", answers.gitHostAlias || "none"],
     ["Python", answers.python || "auto-detect"],
     ["Template", answers.template || "latest stable"],
@@ -503,6 +562,12 @@ export function buildProjectArguments(answers) {
       )
     )
   ];
+  if (hasMobileFeature(features) && answers.includeMaestro === false) {
+    args.push("--no-maestro");
+  }
+  if (hasWebFeature(features) && answers.includePlaywright === false) {
+    args.push("--no-playwright");
+  }
   const options = [
     ["--git-host-alias", answers.gitHostAlias],
     ["--python", answers.python],
@@ -529,6 +594,8 @@ export function ProjectWizard({ onComplete, options = {} }) {
     ),
     serverAppName: DEFAULT_APP_NAMES.serverAppName,
     webAppName: DEFAULT_APP_NAMES.webAppName,
+    includeMaestro: true,
+    includePlaywright: true,
     gitHostAlias: "",
     projectName: "",
     python: "",
@@ -611,10 +678,57 @@ export function ProjectWizard({ onComplete, options = {} }) {
       showBack: true,
       onSelect(item) {
         if (item.value === backChoice) {
-          setStep("features");
+          setStep(
+            hasWebFeature(answers.features)
+              ? "e2e-playwright"
+              : hasMobileFeature(answers.features)
+                ? "e2e-maestro"
+                : "features"
+          );
           return;
         }
         setStep(item.value ? steps[0].field : "confirm");
+      }
+    });
+  } else if (step === "e2e-maestro") {
+    content = h(ChoiceQuestion, {
+      key: step,
+      description: maestroDescription,
+      items: maestroChoices,
+      label: "Maestro mobile E2E tests",
+      showBack: true,
+      onSelect(item) {
+        if (item.value === backChoice) {
+          setStep(lastFeatureNameStep(answers));
+          return;
+        }
+        setAnswers((current) => ({ ...current, includeMaestro: item.value }));
+        setStep(
+          hasWebFeature(answers.features) ? "e2e-playwright" : "advanced"
+        );
+      }
+    });
+  } else if (step === "e2e-playwright") {
+    content = h(ChoiceQuestion, {
+      key: step,
+      description: playwrightDescription,
+      items: playwrightChoices,
+      label: "Playwright web E2E tests",
+      showBack: true,
+      onSelect(item) {
+        if (item.value === backChoice) {
+          setStep(
+            hasMobileFeature(answers.features)
+              ? "e2e-maestro"
+              : lastFeatureNameStep(answers)
+          );
+          return;
+        }
+        setAnswers((current) => ({
+          ...current,
+          includePlaywright: item.value
+        }));
+        setStep("advanced");
       }
     });
   } else if (step === "confirm") {
@@ -707,7 +821,7 @@ export function ProjectWizard({ onComplete, options = {} }) {
               ? featureNameStep(featureId, instanceIndex + 1)
               : nextFeature
                 ? featureCountStep(nextFeature)
-                : "advanced"
+                : nextStepAfterFeatures(answers.features)
           );
         },
         placeholder: defaultInstanceName(featureId, instanceIndex)

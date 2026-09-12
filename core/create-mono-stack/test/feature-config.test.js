@@ -5,6 +5,8 @@ import {
   DEFAULT_FEATURES,
   FEATURE_DEFINITIONS,
   defaultInstanceName,
+  hasMobileFeature,
+  hasWebFeature,
   normalizeFeatures,
   serializeFeatureData
 } from "../src/feature-config.js";
@@ -71,4 +73,20 @@ test("TEST-FEATURE-001 documents every feature with a non-empty description", ()
     );
     assert.ok(description.trim().length > 0, `${id} has an empty description`);
   }
+});
+
+test("TEST-E2EFLAG-001 classifies feature lists for mobile relevance", () => {
+  assert.equal(hasMobileFeature([]), false);
+  assert.equal(hasMobileFeature(["api-nest"]), false);
+  assert.equal(hasMobileFeature(["mobile-expo"]), true);
+  assert.equal(hasMobileFeature(["mobile-react-native"]), true);
+  assert.equal(hasMobileFeature(["web-vite", "mobile-expo"]), true);
+});
+
+test("TEST-E2EFLAG-001 classifies feature lists for web relevance", () => {
+  assert.equal(hasWebFeature([]), false);
+  assert.equal(hasWebFeature(["api-nest"]), false);
+  assert.equal(hasWebFeature(["web-vite"]), true);
+  assert.equal(hasWebFeature(["web-next"]), true);
+  assert.equal(hasWebFeature(["mobile-expo", "web-next"]), true);
 });

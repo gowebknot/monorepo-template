@@ -141,6 +141,30 @@ test("uses Copier-native project identity rendering", async () => {
   assert.ok(config._exclude.includes(".venv"));
   assert.ok(!config._exclude.includes(".github"));
 
+  assert.equal(config.include_maestro_tests.default, true);
+  assert.match(config.include_maestro_tests.when, /feature_mobile_expo/);
+  assert.match(
+    config.include_maestro_tests.when,
+    /feature_mobile_react_native/
+  );
+  assert.equal(config.include_playwright_tests.default, true);
+  assert.match(config.include_playwright_tests.when, /feature_web_vite/);
+  assert.match(config.include_playwright_tests.when, /feature_web_next/);
+
+  const maestroExclude = config._exclude.find((entry) =>
+    entry.includes("apps/maestro")
+  );
+  assert.match(maestroExclude, /feature_mobile_expo/);
+  assert.match(maestroExclude, /feature_mobile_react_native/);
+  assert.match(maestroExclude, /include_maestro_tests/);
+
+  const playwrightExclude = config._exclude.find((entry) =>
+    entry.includes("apps/playwright")
+  );
+  assert.match(playwrightExclude, /feature_web_vite/);
+  assert.match(playwrightExclude, /feature_web_next/);
+  assert.match(playwrightExclude, /include_playwright_tests/);
+
   await assert.rejects(
     access(join(root, "scripts/configure-template-project.mjs"))
   );

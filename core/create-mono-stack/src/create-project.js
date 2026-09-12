@@ -29,6 +29,8 @@ import {
 } from "#src/project-management.js";
 import {
   defaultInstanceName,
+  hasMobileFeature,
+  hasWebFeature,
   normalizeFeatures,
   serializeFeatureData
 } from "#src/feature-config.js";
@@ -78,6 +80,10 @@ Options:
                            Vite app name (default: web)
        --server-app-name <name>
                            NestJS app name (default: server)
+       --no-maestro        Skip Maestro mobile E2E tests even if a mobile
+                           feature is selected (included by default)
+       --no-playwright     Skip Playwright web E2E tests even if a web
+                           feature is selected (included by default)
   -h, --help              Show this help
 `;
 
@@ -240,7 +246,9 @@ export function parseArguments(args, cwd = process.cwd()) {
       features: { type: "string" },
       "app-name": { type: "string", multiple: true },
       "web-app-name": { type: "string" },
-      "server-app-name": { type: "string" }
+      "server-app-name": { type: "string" },
+      "no-maestro": { type: "boolean" },
+      "no-playwright": { type: "boolean" }
     },
     strict: true
   });
@@ -285,6 +293,8 @@ export function parseArguments(args, cwd = process.cwd()) {
       : {
           serverAppName: validateAppName(values["server-app-name"])
         }),
+    ...(values["no-maestro"] ? { includeMaestro: false } : {}),
+    ...(values["no-playwright"] ? { includePlaywright: false } : {}),
     ...(appNames ? { appNames } : {})
   };
 }
@@ -353,6 +363,16 @@ export async function createProject(
         copierArguments.push("--data", data);
       }
     }
+    const includeMaestro =
+      hasMobileFeature(features) && options.includeMaestro !== false;
+    const includePlaywright =
+      hasWebFeature(features) && options.includePlaywright !== false;
+    copierArguments.push(
+      "--data",
+      `include_maestro_tests=${includeMaestro}`,
+      "--data",
+      `include_playwright_tests=${includePlaywright}`
+    );
     copierArguments.push("--vcs-ref", options.vcsRef ?? DEFAULT_TEMPLATE_REF);
     if (options.template === DEFAULT_TEMPLATE_SOURCE) {
       copierArguments.push("--trust");

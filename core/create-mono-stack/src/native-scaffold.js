@@ -62,6 +62,7 @@ const temporaryArtifacts = [
 ];
 
 const templateScope = "@monorepo-template/";
+const bareTemplateNamePattern = /"monorepo-template(?=["/])/g;
 // Mirrors scripts/render-package-scope.mjs's own rule exactly: that script rewrites the whole
 // destination project once, right after `copier copy` finishes; managed-template content is
 // copied in afterward (see applyReferenceProfile below), so it needs the same rewrite applied
@@ -103,7 +104,9 @@ async function renderTemplateScope(root, scope, dependencies) {
       : "";
     if (!scopeRenderTextExtensions.has(extension)) continue;
     const contents = await dependencies.readFile(path, "utf8");
-    const rendered = contents.replaceAll(templateScope, `@${scope}/`);
+    const rendered = contents
+      .replaceAll(templateScope, `@${scope}/`)
+      .replace(bareTemplateNamePattern, `"${scope}`);
     if (rendered !== contents) await dependencies.writeFile(path, rendered);
   }
 }

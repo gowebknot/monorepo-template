@@ -240,6 +240,78 @@ test("TEST-TRUST-002 does not trust a custom --template source", async () => {
   assert.ok(!copierCall.args.includes("--trust"));
 });
 
+test("TEST-E2EFLAG-009 excludes maestro and playwright when their features are absent", async () => {
+  const events = [];
+
+  await createProject(
+    {
+      destination,
+      features: ["api-nest"],
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    projectDependencies({ events })
+  );
+
+  const copierCall = events.find(
+    (event) =>
+      event.type === "command" &&
+      event.args[0] === "-m" &&
+      event.args[1] === "copier"
+  );
+  assert.ok(copierCall.args.includes("include_maestro_tests=false"));
+  assert.ok(copierCall.args.includes("include_playwright_tests=false"));
+});
+
+test("TEST-E2EFLAG-010 includes maestro and playwright by default when their features are present", async () => {
+  const events = [];
+
+  await createProject(
+    {
+      destination,
+      features: ["web-vite", "mobile-expo"],
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    projectDependencies({ events })
+  );
+
+  const copierCall = events.find(
+    (event) =>
+      event.type === "command" &&
+      event.args[0] === "-m" &&
+      event.args[1] === "copier"
+  );
+  assert.ok(copierCall.args.includes("include_maestro_tests=true"));
+  assert.ok(copierCall.args.includes("include_playwright_tests=true"));
+});
+
+test("TEST-E2EFLAG-011 honors an explicit opt-out even when the feature is present", async () => {
+  const events = [];
+
+  await createProject(
+    {
+      destination,
+      features: ["web-vite"],
+      includePlaywright: false,
+      projectName: "Acme Platform",
+      python: "python3",
+      template: "/workspace/template"
+    },
+    projectDependencies({ events })
+  );
+
+  const copierCall = events.find(
+    (event) =>
+      event.type === "command" &&
+      event.args[0] === "-m" &&
+      event.args[1] === "copier"
+  );
+  assert.ok(copierCall.args.includes("include_playwright_tests=false"));
+});
+
 test("TEST-ENV-006 explains when a template lacks the environment example", async () => {
   const dependencies = projectDependencies();
   dependencies.copyFile = async () => {
