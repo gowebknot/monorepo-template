@@ -39,6 +39,9 @@
   "imports": {
     "#scripts/*": "./scripts/*"
   },
+  "exports": {
+    "./scripts/*": "./scripts/*"
+  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md,yml,yaml}": "prettier --write"
   },

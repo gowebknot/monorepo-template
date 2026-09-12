@@ -1,4 +1,11 @@
+import { fileURLToPath } from "node:url";
+
 import { defineConfig, devices } from "@playwright/test";
+
+import { findAppByFeature } from "monorepo-template/scripts/stack-app-lookup.mjs";
+
+const projectRoot = fileURLToPath(new URL("../..", import.meta.url));
+const webApp = findAppByFeature(projectRoot, ["web-vite", "web-next"]);
 
 export default defineConfig({
   testDir: "./tests",
@@ -17,7 +24,7 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: "pnpm --filter web dev --host 127.0.0.1",
+    command: `pnpm --filter ${webApp?.name ?? "web"} dev --host 127.0.0.1`,
     url: "http://127.0.0.1:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000

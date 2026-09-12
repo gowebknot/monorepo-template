@@ -39,6 +39,7 @@ import {
 } from "#src/native-scaffold.js";
 import { allocateAppPorts, configureAppScripts } from "#src/port-allocation.js";
 import { syncSkillTriggers } from "#src/skill-triggers.js";
+import { syncAppNameReferences } from "#src/app-name-references.js";
 import { promptForSetup } from "#src/setup-prompt.js";
 
 export const DEFAULT_TEMPLATE_SOURCE =
@@ -407,6 +408,10 @@ export async function createProject(
       write: dependencies.writeFile
     });
     await syncSkillTriggers(options.destination, allocatedApps, {
+      read: dependencies.readFile ?? readFile,
+      write: dependencies.writeFile
+    });
+    await syncAppNameReferences(options.destination, allocatedApps, {
       read: dependencies.readFile ?? readFile,
       write: dependencies.writeFile
     });

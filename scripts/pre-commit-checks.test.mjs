@@ -20,3 +20,16 @@ test("TEST-SWAGGER-006 skips the Swagger convention check without a server", () 
     false
   );
 });
+
+test("TEST-PRECOMMIT-007 uses the resolved server app name in the unit-test filter", () => {
+  const checks = selectChecks({
+    hasCoreLauncher: false,
+    hasServer: true,
+    serverAppName: "api"
+  });
+
+  assert.deepEqual(
+    checks.find(({ label }) => label === "server unit tests"),
+    { label: "server unit tests", args: ["--filter", "api", "test"] }
+  );
+});

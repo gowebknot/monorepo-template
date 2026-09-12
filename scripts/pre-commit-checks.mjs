@@ -3,6 +3,8 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { findAppByFeature } from "#scripts/stack-app-lookup.mjs";
+
 const root = new URL("..", import.meta.url);
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
@@ -64,7 +66,11 @@ async function runParallel(commands) {
   if (failure) throw failure;
 }
 
-export function selectChecks({ hasCoreLauncher, hasServer }) {
+export function selectChecks({
+  hasCoreLauncher,
+  hasServer,
+  serverAppName = "server"
+}) {
   const checks = [
     { label: "build", args: ["build"] },
     { label: "skill tests", args: ["skills:test"] },
@@ -86,7 +92,7 @@ export function selectChecks({ hasCoreLauncher, hasServer }) {
     });
     checks.splice(3, 0, {
       label: "server unit tests",
-      args: ["--filter", "server", "test"]
+      args: ["--filter", serverAppName, "test"]
     });
   }
 
@@ -111,13 +117,20 @@ async function main() {
     "scripts/shared-component-testids.mjs"
   ]);
 
+  const serverApp = findAppByFeature(fileURLToPath(root), [
+    "api-nest",
+    "api-express"
+  ]);
+  const serverAppPath = serverApp?.path ?? "apps/server";
+
   const checks = selectChecks({
     hasCoreLauncher: existsSync(
       new URL("../core/create-mono-stack/package.json", import.meta.url)
     ),
     hasServer: existsSync(
-      new URL("../apps/server/package.json", import.meta.url)
-    )
+      new URL(`../${serverAppPath}/package.json`, import.meta.url)
+    ),
+    serverAppName: serverApp?.name ?? "server"
   });
 
   await runParallel(checks.filter(({ isolated }) => !isolated));

@@ -1,9 +1,13 @@
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
-import { isPortAvailable } from "../../../scripts/dev-ports.mjs";
+import { isPortAvailable } from "monorepo-template/scripts/dev-ports.mjs";
+import { findAppByFeature } from "monorepo-template/scripts/stack-app-lookup.mjs";
 
-const workspaceRoot = resolve(import.meta.dirname, "../../..");
+const scriptDirectory = import.meta.dirname;
+const workspaceRoot = resolve(scriptDirectory, "../../..");
+const serverApp = findAppByFeature(workspaceRoot, ["api-nest", "api-express"]);
+const expoApp = findAppByFeature(workspaceRoot, ["mobile-expo"]);
 const ports = [3001, 8082];
 const platformConfig = {
   ios: { appId: "host.exp.Exponent", host: "127.0.0.1" },
@@ -94,8 +98,8 @@ const children = [];
 try {
   const platforms = requestedPlatforms();
   children.push(
-    spawnDevServer("server"),
-    spawnDevServer("expo", ["--", "--port", "8082"])
+    spawnDevServer(serverApp?.name ?? "server"),
+    spawnDevServer(expoApp?.name ?? "expo", ["--", "--port", "8082"])
   );
   await waitForPorts();
   for (const platform of platforms) await runMaestro(platform);

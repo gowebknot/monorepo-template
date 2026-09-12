@@ -2,6 +2,8 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { findAppByFeature } from "#scripts/stack-app-lookup.mjs";
+
 const routeDecorators = new Set([
   "All",
   "Delete",
@@ -69,8 +71,11 @@ async function findControllerFiles(directory) {
   return files.flat();
 }
 
-export async function validateSwaggerDocumentation(root) {
-  const files = await findControllerFiles(join(root, "apps/server/src"));
+export async function validateSwaggerDocumentation(
+  root,
+  { serverAppPath = "apps/server" } = {}
+) {
+  const files = await findControllerFiles(join(root, serverAppPath, "src"));
   const results = await Promise.all(
     files.map(async (file) =>
       validateControllerSource(
@@ -84,7 +89,10 @@ export async function validateSwaggerDocumentation(root) {
 
 async function main() {
   const root = fileURLToPath(new URL("..", import.meta.url));
-  const errors = await validateSwaggerDocumentation(root);
+  const serverApp = findAppByFeature(root, ["api-nest", "api-express"]);
+  const errors = await validateSwaggerDocumentation(root, {
+    serverAppPath: serverApp?.path ?? "apps/server"
+  });
   if (errors.length > 0) {
     console.error("Swagger documentation convention failed:");
     for (const error of errors) console.error(`- ${error}`);
