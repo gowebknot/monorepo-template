@@ -10,6 +10,7 @@ import {
 import {
   createNativeScaffoldFixture,
   pathExists,
+  reactTypeScriptNativeTree,
   vueTypeScriptNativeTree
 } from "./native-scaffold.helpers.js";
 
@@ -73,6 +74,78 @@ test("TEST-TAILWIND-001 activates Tailwind in generated React apps", async (t) =
   assert.match(viteConfig, /import tailwindcss from "@tailwindcss\/vite"/);
   assert.match(viteConfig, /tailwindcss\(\)/);
   assert.equal(typeof packageJson.dependencies["@tailwindcss/vite"], "string");
+});
+
+test("TEST-ESLINT-001 disables react-refresh/only-export-components for the reference content", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t);
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "web-vite": ["dashboard"] },
+      destination: fixture.destination,
+      features: ["web-vite"]
+    },
+    dependencies(fixture)
+  );
+
+  const appRoot = join(fixture.destination, "apps/dashboard");
+  const eslintConfig = await fixture.read(join(appRoot, "eslint.config.js"));
+
+  assert.match(
+    eslintConfig,
+    /rules:\s*\{\s*"react-refresh\/only-export-components":\s*"off"\s*\}/
+  );
+});
+
+test("TEST-ESLINT-002 stays idempotent when the override is already present", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t, {
+    nativeVite: {
+      ...reactTypeScriptNativeTree,
+      "eslint.config.js": reactTypeScriptNativeTree["eslint.config.js"].replace(
+        "languageOptions: {\n      globals: globals.browser\n    }",
+        'languageOptions: {\n      globals: globals.browser\n    },\n    rules: {\n      "react-refresh/only-export-components": "off"\n    }'
+      )
+    }
+  });
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "web-vite": ["dashboard"] },
+      destination: fixture.destination,
+      features: ["web-vite"]
+    },
+    dependencies(fixture)
+  );
+
+  const appRoot = join(fixture.destination, "apps/dashboard");
+  const eslintConfig = await fixture.read(join(appRoot, "eslint.config.js"));
+  const occurrences = eslintConfig.match(
+    /"react-refresh\/only-export-components"/g
+  );
+
+  assert.equal(occurrences?.length, 1);
+});
+
+test("TEST-ESLINT-003 fails loudly when the native output has no languageOptions block", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t, {
+    nativeVite: {
+      ...reactTypeScriptNativeTree,
+      "eslint.config.js":
+        "export default []; // native-eslint-no-language-options"
+    }
+  });
+
+  await assert.rejects(
+    scaffoldNativeApps(
+      {
+        appNames: { "web-vite": ["dashboard"] },
+        destination: fixture.destination,
+        features: ["web-vite"]
+      },
+      dependencies(fixture)
+    ),
+    /languageOptions/
+  );
 });
 
 test("TEST-COMMAND-002 skips the nested NestJS install", async (t) => {

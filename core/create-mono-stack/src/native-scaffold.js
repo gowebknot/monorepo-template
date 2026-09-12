@@ -132,6 +132,29 @@ async function injectTailwindVitePlugin(nativeTarget, dependencies) {
   await dependencies.writeFile(configPath, config);
 }
 
+async function disableReferenceReactRefreshRule(nativeTarget, dependencies) {
+  const configPath = join(nativeTarget, "eslint.config.js");
+  const config = await dependencies.readFile(configPath, "utf8");
+
+  if (config.includes("react-refresh/only-export-components")) return;
+
+  const languageOptionsPattern =
+    /languageOptions:\s*\{\s*globals:\s*globals\.browser\s*\}/;
+  if (!languageOptionsPattern.test(config)) {
+    throw new Error(
+      `Vite ESLint config has no languageOptions block to extend: ${configPath}`
+    );
+  }
+
+  const patched = config.replace(
+    languageOptionsPattern,
+    (match) =>
+      `${match},\n    rules: {\n      "react-refresh/only-export-components": "off"\n    }`
+  );
+
+  await dependencies.writeFile(configPath, patched);
+}
+
 function temporaryAppName(generator, name) {
   return `${generator}-${name}`;
 }
@@ -319,6 +342,7 @@ export async function applyReferenceProfile(
   }
   if (profile.postProcess === "tailwind-vite") {
     await injectTailwindVitePlugin(nativeTarget, dependencies);
+    await disableReferenceReactRefreshRule(nativeTarget, dependencies);
   }
   const packageJson = mergeProfilePackageJson(
     nativePackage,
