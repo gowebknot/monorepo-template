@@ -139,7 +139,7 @@ async function disableReferenceReactRefreshRule(nativeTarget, dependencies) {
   if (config.includes("react-refresh/only-export-components")) return;
 
   const languageOptionsPattern =
-    /languageOptions:\s*\{\s*globals:\s*globals\.browser\s*\}/;
+    /languageOptions:\s*\{\s*globals:\s*globals\.browser\s*,?\s*\}/;
   if (!languageOptionsPattern.test(config)) {
     throw new Error(
       `Vite ESLint config has no languageOptions block to extend: ${configPath}`

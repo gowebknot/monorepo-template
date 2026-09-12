@@ -102,8 +102,8 @@ test("TEST-ESLINT-002 stays idempotent when the override is already present", as
     nativeVite: {
       ...reactTypeScriptNativeTree,
       "eslint.config.js": reactTypeScriptNativeTree["eslint.config.js"].replace(
-        "languageOptions: {\n      globals: globals.browser\n    }",
-        'languageOptions: {\n      globals: globals.browser\n    },\n    rules: {\n      "react-refresh/only-export-components": "off"\n    }'
+        "languageOptions: {\n      globals: globals.browser,\n    }",
+        'languageOptions: {\n      globals: globals.browser,\n    },\n    rules: {\n      "react-refresh/only-export-components": "off"\n    }'
       )
     }
   });
@@ -145,6 +145,35 @@ test("TEST-ESLINT-003 fails loudly when the native output has no languageOptions
       dependencies(fixture)
     ),
     /languageOptions/
+  );
+});
+
+test("TEST-ESLINT-004 also matches languageOptions without a trailing comma", async (t) => {
+  const fixture = await createNativeScaffoldFixture(t, {
+    nativeVite: {
+      ...reactTypeScriptNativeTree,
+      "eslint.config.js": reactTypeScriptNativeTree["eslint.config.js"].replace(
+        "languageOptions: {\n      globals: globals.browser,\n    }",
+        "languageOptions: {\n      globals: globals.browser\n    }"
+      )
+    }
+  });
+
+  await scaffoldNativeApps(
+    {
+      appNames: { "web-vite": ["dashboard"] },
+      destination: fixture.destination,
+      features: ["web-vite"]
+    },
+    dependencies(fixture)
+  );
+
+  const appRoot = join(fixture.destination, "apps/dashboard");
+  const eslintConfig = await fixture.read(join(appRoot, "eslint.config.js"));
+
+  assert.match(
+    eslintConfig,
+    /rules:\s*\{\s*"react-refresh\/only-export-components":\s*"off"\s*\}/
   );
 });
 

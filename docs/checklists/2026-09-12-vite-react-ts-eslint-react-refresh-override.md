@@ -151,3 +151,24 @@ None found.
 - First observed run: Failed — no rejection occurred at all (nothing patched or validated the shape
   yet), as expected.
 - Passing rerun: Passed.
+
+## Updates
+
+### 2026-09-12 — languageOptions regex did not match current create-vite output
+
+- Reason: A real run of the `create-mono-stack` interactive wizard against a current `create-vite`
+  install (`create-vite@9.2.1`) threw `Vite ESLint config has no languageOptions block to extend`
+  instead of patching the generated `eslint.config.js`.
+- Evidence: Unpacking `create-vite@9.2.1` from the npm registry and reading its embedded eslint
+  template (`dist/index.js`, function `At`) showed the generated `languageOptions` block now includes
+  a trailing comma after `globals: globals.browser`, which `languageOptionsPattern` (this checklist's
+  `TEST-ESLINT-001`/`002`/`003`) never matched. The `reactTypeScriptNativeTree` fixture this checklist
+  relied on (`core/create-mono-stack/test/native-scaffold.helpers.js`) had drifted from real tool
+  output and did not catch it.
+- Impact: Every `vite/react-ts` app scaffolded against a current `create-vite` install failed
+  scaffolding entirely at this step, rather than only missing the lint-rule override.
+- Corrective action: `languageOptionsPattern` now accepts an optional trailing comma before the
+  closing brace; the fixture and `TEST-ESLINT-002`'s fixture-mutation string were updated to match
+  real output; a new `TEST-ESLINT-004` locks in that the older (no-comma) shape still matches too.
+- Validation: `pnpm --filter create-mono-stack test` (291/291 passing) and `just check` (passing).
+- New checklist: [[2026-09-12-vite-eslint-language-options-trailing-comma-fix]].
