@@ -217,6 +217,27 @@ generator: "vite", name: "dashboard", path: "apps/dashboard", referenceProfile: 
 - Passing rerun: Passed, as part of the same `node --test scripts/skill-gate.test.mjs` run above
   (37/37).
 
+## Updates
+
+### 2026-09-13 - Correction: the fix still asserted coverage for unconfigured app types
+
+The user reported that a real generated project configuring only `web-vite` (renamed to
+`apps/dashbohjk`) and `api-nest` (renamed to `apps/lkjhgf`) still failed `TEST-GATE-024` on its first
+commit, this time for the `mobile-expo`/`mobile-react-native`/`web-next` probes. Root cause: this
+checklist's fix resolved a _renamed_ app's real path correctly, but `resolveAppPath`'s fallback to the
+canonical default path (`apps/expo`, `apps/mobile`, `apps/next`) was applied even when the manifest
+exists but simply never configured that feature at all — the correct, intentional behavior of
+`scripts/skill-triggers.mjs`'s `buildAppTriggerRules` (and its duplicate,
+`core/create-mono-stack/src/skill-triggers.js`) is to emit _no rule whatsoever_ for an app type the
+project never selected, so probing a canonical default path for an unselected feature always resolves
+to zero required skills — a mismatch between this fix's assumption ("every renameable app type is
+always gated somewhere") and the generator's real contract ("only configured app types are gated").
+`TEST-GATE-032` specifically asserted the wrong outcome (that an unconfigured feature falls back to
+being gated at its canonical default), which is exactly backwards.
+
+See [TEST-GATE-024 asserts coverage for unconfigured app types](2026-09-13-skill-gate-test-covers-unconfigured-apps.md)
+for the corrected fix, its own full test matrix, and validation results.
+
 ## Missing-Case Review
 
 1. Every small task maps to a test ID above.

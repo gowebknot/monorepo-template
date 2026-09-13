@@ -11,6 +11,7 @@ import {
   parseReadPaths
 } from "./skill-gate.mjs";
 import { readStackConfig } from "#scripts/stack-config.mjs";
+import { buildAppTriggerRules } from "#scripts/skill-triggers.mjs";
 
 const { extractChecklistReferences } = await import(
   new URL("./implementation-contract.mjs", import.meta.url)
@@ -21,18 +22,23 @@ const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 // A generated project can rename any web-vite/web-next/mobile-expo/mobile-react-native/api-nest app
 // away from its canonical default (scripts/stack-config.mjs only requires path === `apps/${name}`),
 // and .claude/skill-triggers.json is correctly rewritten to reference the real path. This repository
-// itself ships no .mono-stack.json (it is the template source, not a generated project), so falling
-// back to the canonical default here reproduces today's behavior exactly.
-function loadConfiguredApps(root, readManifestFile) {
+// itself ships no .mono-stack.json (it is the template source, not a generated project), so every
+// probe falls back to covered:true at its canonical default there, matching this repository's own
+// hand-maintained table that unconditionally covers every frontend app type. A real generated project
+// only gates the app types it actually selected (scripts/skill-triggers.mjs's buildAppTriggerRules
+// only emits a rule for a configured app), so a feature absent from the manifest has no rule at all --
+// covered:false skips the assertion instead of probing a canonical path that would never be gated.
+function resolveAppProbe(root, feature, defaultPath, readManifestFile) {
+  let apps;
   try {
-    return readStackConfig(root, readManifestFile).apps;
+    apps = readStackConfig(root, readManifestFile).apps;
   } catch {
-    return [];
+    return { covered: true, path: defaultPath };
   }
-}
-
-function resolveAppPath(apps, feature, defaultPath) {
-  return apps.find((app) => app.feature === feature)?.path ?? defaultPath;
+  const configured = apps.find((app) => app.feature === feature);
+  return configured
+    ? { covered: true, path: configured.path }
+    : { covered: false };
 }
 
 const triggers = {
@@ -389,9 +395,6 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
     collectRequired(filePath, table).filter(
       (skill) => skill !== "test-first-workflow"
     );
-  const configuredApps = loadConfiguredApps(repositoryRoot);
-  const appPath = (feature, defaultPath) =>
-    resolveAppPath(configuredApps, feature, defaultPath);
 
   assert.deepEqual(requiredFor("packages/api-client/src/users.ts").sort(), [
     "end-to-end-api-flow"
@@ -399,15 +402,26 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
   assert.deepEqual(requiredFor("packages/query-client/src/users.ts"), [
     "end-to-end-api-flow"
   ]);
-  assert.ok(
-    requiredFor(
-      `${appPath("api-nest", "apps/server")}/src/example.controller.ts`
-    ).includes("contract-validation")
+
+  const serverProbe = resolveAppProbe(
+    repositoryRoot,
+    "api-nest",
+    "apps/server"
   );
+  if (serverProbe.covered) {
+    assert.ok(
+      requiredFor(`${serverProbe.path}/src/example.controller.ts`).includes(
+        "contract-validation"
+      )
+    );
+  }
+
   for (const { feature, defaultPath, entryFile } of renameableApps.filter(
     (app) => app.feature !== "api-nest"
   )) {
-    const filePath = `${appPath(feature, defaultPath)}/${entryFile}`;
+    const probe = resolveAppProbe(repositoryRoot, feature, defaultPath);
+    if (!probe.covered) continue;
+    const filePath = `${probe.path}/${entryFile}`;
     assert.ok(requiredFor(filePath).includes("frontend-standards"), filePath);
     assert.ok(
       requiredFor(filePath).includes("domain-driven-app-structure"),
@@ -453,12 +467,15 @@ test("TEST-GATE-031 resolves a renamed app's real path from .mono-stack.json", (
     ]
   };
 
-  const configuredApps = loadConfiguredApps(
+  const probe = resolveAppProbe(
     "/fake-project",
+    "web-vite",
+    "apps/web",
     () => manifestJson
   );
-  const filePath = `${resolveAppPath(configuredApps, "web-vite", "apps/web")}/src/App.tsx`;
 
+  assert.equal(probe.covered, true);
+  const filePath = `${probe.path}/src/App.tsx`;
   assert.equal(filePath, "apps/dashboard/src/App.tsx");
   assert.ok(collectRequired(filePath, table).includes("frontend-standards"));
   assert.ok(
@@ -466,7 +483,7 @@ test("TEST-GATE-031 resolves a renamed app's real path from .mono-stack.json", (
   );
 });
 
-test("TEST-GATE-032 falls back to the canonical default when a feature has no configured app", () => {
+test("TEST-GATE-032 skips an app type the manifest never configured", () => {
   const manifestJson = JSON.stringify({
     schemaVersion: 3,
     features: ["web-vite"],
@@ -486,13 +503,82 @@ test("TEST-GATE-032 falls back to the canonical default when a feature has no co
     ]
   });
 
-  const configuredApps = loadConfiguredApps(
+  const probe = resolveAppProbe(
     "/fake-project",
+    "mobile-expo",
+    "apps/expo",
     () => manifestJson
   );
-  const filePath = `${resolveAppPath(configuredApps, "mobile-expo", "apps/expo")}/App.tsx`;
 
-  assert.equal(filePath, "apps/expo/App.tsx");
+  assert.equal(probe.covered, false);
+});
+
+test("TEST-GATE-033 covers only the apps a real project actually configured", () => {
+  const manifestJson = JSON.stringify({
+    schemaVersion: 3,
+    features: ["web-vite", "api-nest"],
+    apps: [
+      {
+        feature: "web-vite",
+        generator: "vite",
+        name: "dashbohjk",
+        path: "apps/dashbohjk",
+        referenceProfile: null,
+        selection: {
+          framework: "React",
+          linter: "ESLint",
+          variant: "TypeScript"
+        }
+      },
+      {
+        feature: "api-nest",
+        generator: "nestjs",
+        name: "lkjhgf",
+        path: "apps/lkjhgf",
+        referenceProfile: null
+      }
+    ]
+  });
+  const readManifest = () => manifestJson;
+  const table = {
+    always: [],
+    rules: buildAppTriggerRules(JSON.parse(manifestJson).apps)
+  };
+  const requiredFor = (filePath) => collectRequired(filePath, table);
+
+  const webProbe = resolveAppProbe(
+    "/fake-project",
+    "web-vite",
+    "apps/web",
+    readManifest
+  );
+  assert.equal(webProbe.covered, true);
+  assert.ok(
+    requiredFor(`${webProbe.path}/src/App.tsx`).includes("frontend-standards")
+  );
+
+  const serverProbe = resolveAppProbe(
+    "/fake-project",
+    "api-nest",
+    "apps/server",
+    readManifest
+  );
+  assert.equal(serverProbe.covered, true);
+  assert.ok(
+    requiredFor(`${serverProbe.path}/src/example.controller.ts`).includes(
+      "contract-validation"
+    )
+  );
+
+  for (const feature of ["web-next", "mobile-expo", "mobile-react-native"]) {
+    const probe = resolveAppProbe(
+      "/fake-project",
+      feature,
+      "apps/unused",
+      readManifest
+    );
+    assert.equal(probe.covered, false, feature);
+  }
 });
 
 test("TEST-GATE-025 denies a Playwright spec edit missing the e2e skill", () => {
