@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { createHash } from "node:crypto";
 import {
   cp,
   lstat,
@@ -16,6 +15,8 @@ import { basename, join, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseDocument } from "yaml";
+
+import { hashTree } from "#scripts/skills-hash.mjs";
 
 const RESOURCE_DIRECTORIES = [
   "scripts",
@@ -181,39 +182,6 @@ async function ensureConvention(skillPath) {
       await writeFile(join(resourcePath, ".gitkeep"), "");
     }
   }
-}
-
-async function collectFiles(path, prefix = "") {
-  const files = [];
-  for (const entry of (await readdir(path, { withFileTypes: true })).sort(
-    (left, right) => left.name.localeCompare(right.name)
-  )) {
-    const entryPath = join(path, entry.name);
-    const entryPrefix = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.isSymbolicLink()) {
-      fail(`Symlinks are not allowed in portable skills: ${entryPath}`);
-    }
-    if (entry.isDirectory()) {
-      files.push(...(await collectFiles(entryPath, entryPrefix)));
-    } else if (entry.isFile()) {
-      files.push({
-        path: entryPrefix,
-        content: await readFile(entryPath)
-      });
-    }
-  }
-  return files;
-}
-
-async function hashTree(path) {
-  const hash = createHash("sha256");
-  for (const file of await collectFiles(path)) {
-    hash.update(file.path);
-    hash.update("\0");
-    hash.update(file.content);
-    hash.update("\0");
-  }
-  return hash.digest("hex");
 }
 
 async function listSkills(rootPath) {

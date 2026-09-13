@@ -1,6 +1,10 @@
 import { basename, join } from "node:path";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 
+import { hashTree } from "#scripts/skills-hash.mjs";
+
+const skillsManifestFile = ".skills-sync.json";
+const skillsRootDirectory = "skills";
 const ignoredDirectories = new Set([".git", ".venv", "dist", "node_modules"]);
 const textExtensions = new Set([
   ".cjs",
@@ -56,7 +60,33 @@ export async function renderPackageScope(root) {
   }
 
   await visit(root);
+  await recomputeSkillsManifest(root);
   return scope;
+}
+
+// The scope substitution above rewrites illustrative `@monorepo-template/<name>` examples inside
+// this repository's own shipped skill docs (create-minimal-package, end-to-end-api-flow,
+// frontend-standards, jsx-component-extraction all reference the pattern), which changes those
+// skills' on-disk content without updating the recorded manifest hash from .skills-sync.json's
+// authoring-time value. Recompute it here so the mandatory skills:check step passes on a
+// generated project's very first commit instead of failing on stale hashes.
+async function recomputeSkillsManifest(root) {
+  const manifestPath = join(root, skillsManifestFile);
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+
+  for (const name of Object.keys(manifest.skills)) {
+    manifest.skills[name] = {
+      hash: await hashTree(join(root, skillsRootDirectory, name))
+    };
+  }
+
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 if (

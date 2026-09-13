@@ -1,13 +1,24 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
   renderFileContents,
   renderPackageScope
-} from "./render-package-scope.mjs";
+} from "#scripts/render-package-scope.mjs";
+import { checkRoot } from "#scripts/skills.mjs";
+import { hashTree } from "#scripts/skills-hash.mjs";
+
+const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+const skillRoots = [
+  "skills",
+  ".agents/skills",
+  ".claude/skills",
+  ".opencode/skills"
+];
 
 test("TEST-RENDERSCOPE-001 rewrites the scoped-package pattern", () => {
   assert.equal(
@@ -93,4 +104,51 @@ test("TEST-RENDERSCOPE-006 walks a real directory tree and rewrites both pattern
     "utf8"
   );
   assert.equal(ignored, '"monorepo-template"');
+});
+
+test("TEST-RENDERSCOPE-007 recomputes .skills-sync.json after rendering so checkRoot still passes", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "render-package-scope-skills-"));
+  t.after(() => rm(root, { force: true, recursive: true }));
+
+  const skillName = "create-minimal-package";
+  for (const skillRoot of skillRoots) {
+    await cp(
+      join(repositoryRoot, skillRoot, skillName),
+      join(root, skillRoot, skillName),
+      { recursive: true }
+    );
+  }
+  await writeFile(join(root, "package.json"), JSON.stringify({ name: "acme" }));
+
+  const originalHash = await hashTree(join(root, "skills", skillName));
+  await writeFile(
+    join(root, ".skills-sync.json"),
+    `${JSON.stringify(
+      { version: 1, skills: { [skillName]: { hash: originalHash } } },
+      null,
+      2
+    )}\n`
+  );
+
+  await renderPackageScope(root);
+
+  const rendered = await readFile(
+    join(root, "skills", skillName, "SKILL.md"),
+    "utf8"
+  );
+  assert.match(rendered, /@acme\//);
+  await assert.doesNotReject(() => checkRoot(root));
+});
+
+test("TEST-RENDERSCOPE-008 tolerates a missing skills-sync manifest", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "render-package-scope-noskills-"));
+  t.after(() => rm(root, { force: true, recursive: true }));
+
+  await writeFile(join(root, "package.json"), JSON.stringify({ name: "acme" }));
+
+  await assert.doesNotReject(() => renderPackageScope(root));
+  await assert.rejects(
+    () => readFile(join(root, ".skills-sync.json"), "utf8"),
+    { code: "ENOENT" }
+  );
 });
