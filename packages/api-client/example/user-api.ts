@@ -5,7 +5,7 @@ import type {
   User
 } from "@monorepo-template/entities/example";
 
-import { referenceApiPaths } from "./api-paths";
+import { referenceApiPaths } from "#example/api-paths";
 
 export const userApi = createCrudService<
   User,

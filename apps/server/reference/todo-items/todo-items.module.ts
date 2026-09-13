@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { TodoItemsController } from './todo-items.controller';
-import { TodoItemsService } from './todo-items.service';
+import { TodoItemsController } from '#reference/todo-items/todo-items.controller';
+import { TodoItemsService } from '#reference/todo-items/todo-items.service';
 
 @Module({
   controllers: [TodoItemsController],

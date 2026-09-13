@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { Button } from "../../components/ui/button";
-import { Checkbox } from "../../components/ui/checkbox";
+import { Button } from "@reference/components/ui/button";
+import { Checkbox } from "@reference/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -9,8 +9,8 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "../../components/ui/table";
-import { useAppForm } from "../../components/forms/form-core";
+} from "@reference/components/ui/table";
+import { useAppForm } from "@reference/components/forms/form-core";
 import {
   useTodoDetail,
   useUpdateTodoOptimistic,

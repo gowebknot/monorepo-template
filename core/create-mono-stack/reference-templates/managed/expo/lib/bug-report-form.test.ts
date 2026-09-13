@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bugReportSchema } from "./bug-report-form";
+import { bugReportSchema } from "@/lib/bug-report-form";
 
 describe("bugReportSchema", () => {
   it("requires terms agreement", () => {

@@ -11,8 +11,8 @@ import type {
   UpdateTodoItemInput,
 } from '@monorepo-template/db/example';
 
-import { EXAMPLE_DB } from '../database/database.constants';
-import type { ExampleDb } from '../database/database.module';
+import { EXAMPLE_DB } from '#reference/database/database.constants';
+import type { ExampleDb } from '#reference/database/database.module';
 
 @Injectable()
 export class TodoItemsService {

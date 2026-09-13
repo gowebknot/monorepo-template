@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { serverEnvSchema } from "../dist/server-env.js";
+import { serverEnvSchema } from "#dist/server-env";
 
 const baseConfig = {
   NODE_ENV: "test",

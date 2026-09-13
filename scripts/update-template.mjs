@@ -3,10 +3,13 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { readStackConfig } from "./stack-config.mjs";
-import { synchronizeSkillTriggers } from "./skill-triggers.mjs";
+import { readStackConfig } from "#scripts/stack-config.mjs";
+import { synchronizeSkillTriggers } from "#scripts/skill-triggers.mjs";
 
-export { STACK_CONFIG_FILENAME, readStackConfig } from "./stack-config.mjs";
+export {
+  STACK_CONFIG_FILENAME,
+  readStackConfig
+} from "#scripts/stack-config.mjs";
 
 export const GIT_HOST_ALIAS_CONFIG_KEY = "mono-stack.template-host-alias";
 

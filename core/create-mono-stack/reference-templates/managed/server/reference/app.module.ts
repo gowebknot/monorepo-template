@@ -3,11 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 
 import { validateReferenceServerEnv } from '@monorepo-template/env/reference-server';
 
-import { AuthModule } from './auth/auth.module';
-import { DatabaseModule } from './database/database.module';
-import { TodoItemsModule } from './todo-items/todo-items.module';
-import { TodosModule } from './todos/todos.module';
-import { UsersModule } from './users/users.module';
+import { AuthModule } from '#reference/auth/auth.module';
+import { DatabaseModule } from '#reference/database/database.module';
+import { TodoItemsModule } from '#reference/todo-items/todo-items.module';
+import { TodosModule } from '#reference/todos/todos.module';
+import { UsersModule } from '#reference/users/users.module';
 
 @Module({
   imports: [

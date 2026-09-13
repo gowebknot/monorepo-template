@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { basename, resolve } from "node:path";
 
-import { ensureProjectPorts } from "./dev-ports.mjs";
+import { ensureProjectPorts } from "#scripts/dev-ports.mjs";
 
 export function commandFor(app, mode, port) {
   const reference = mode === "reference";

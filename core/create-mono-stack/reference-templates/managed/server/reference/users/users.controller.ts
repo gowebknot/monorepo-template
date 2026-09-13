@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import type { CreateUserInput, UpdateUserInput } from '@monorepo-template/db/example';
 
-import { UsersService } from './users.service';
+import { UsersService } from '#reference/users/users.service';
 
 @Controller('users')
 export class UsersController {

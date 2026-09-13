@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { FieldWrapper, useFieldMeta } from "./field-wrapper";
-import { Button } from "../../ui/button";
-import { FieldLabel } from "../../ui/field";
-import { Input } from "../../ui/input";
-import { cn } from "../../../lib/utils";
+import { FieldWrapper, useFieldMeta } from "@reference/components/forms/field-elements/field-wrapper";
+import { Button } from "@reference/components/ui/button";
+import { FieldLabel } from "@reference/components/ui/field";
+import { Input } from "@reference/components/ui/input";
+import { cn } from "@reference/lib/utils";
 
 interface FormInputProps extends React.ComponentProps<typeof Input> {
   isPasswordType?: boolean;

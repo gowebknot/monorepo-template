@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseAllowedOrigins } from './allowed-origins';
+import { parseAllowedOrigins } from '@/allowed-origins';
 
 describe('parseAllowedOrigins', () => {
   it('parses and trims multiple origins', () => {

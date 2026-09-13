@@ -207,7 +207,7 @@ test("TEST-MANIFEST-036 keeps stack metadata launcher-owned", async () => {
   await access(join(root, "scripts/stack-config.mjs"));
   assert.match(
     await readFile(join(root, "scripts/update-template.mjs"), "utf8"),
-    /from "\.\/stack-config\.mjs"/
+    /from "#scripts\/stack-config\.mjs"/
   );
 });
 

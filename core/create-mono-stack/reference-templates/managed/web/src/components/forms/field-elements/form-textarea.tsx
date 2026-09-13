@@ -1,6 +1,6 @@
-import { FieldWrapper, useFieldMeta } from "./field-wrapper";
-import { FieldLabel } from "../../ui/field";
-import { Textarea } from "../../ui/textarea";
+import { FieldWrapper, useFieldMeta } from "@reference/components/forms/field-elements/field-wrapper";
+import { FieldLabel } from "@reference/components/ui/field";
+import { Textarea } from "@reference/components/ui/textarea";
 
 interface FormTextareaProps extends React.ComponentProps<typeof Textarea> {
   labelProps?: React.ComponentProps<typeof FieldLabel>;

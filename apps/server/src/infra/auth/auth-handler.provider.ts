@@ -5,7 +5,7 @@ import {
 import { createPostgresDb } from '@monorepo-template/db';
 import { serverEnv } from '@monorepo-template/env/server';
 
-import { MONOREPO_AUTH_HANDLER } from './auth.constants';
+import { MONOREPO_AUTH_HANDLER } from '@/infra/auth/auth.constants';
 
 export const authHandlerProvider = {
   provide: MONOREPO_AUTH_HANDLER,

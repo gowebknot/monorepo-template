@@ -7,8 +7,8 @@ import {
   configureAppScripts,
   ensureProjectPorts,
   isPortAvailable
-} from "./dev-ports.mjs";
-import { commandFor, environmentFor } from "./run-app.mjs";
+} from "#scripts/dev-ports.mjs";
+import { commandFor, environmentFor } from "#scripts/run-app.mjs";
 
 test("TEST-PORT-005 allocates unique generated-project ports", async () => {
   const apps = await allocateAppPorts(

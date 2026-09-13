@@ -16,7 +16,10 @@ const barrelNames = new Set([
   "index.jsx",
   "index.mjs",
   "index.ts",
-  "index.tsx"
+  "index.tsx",
+  // @monorepo-template/env's package-root and src/ barrels (documented in its AGENTS.md as using
+  // relative exports so generated .d.ts files stay portable, same reason as index.ts elsewhere).
+  "env.ts"
 ]);
 
 function isSourceFile(filePath) {
@@ -59,11 +62,29 @@ export function findRelativeImports(text, filePath) {
     .sort((left, right) => left.line - right.line);
 }
 
-export function getStagedSourceFiles() {
+function hasInitialCommit(cwd) {
+  try {
+    execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
+      cwd,
+      stdio: "ignore"
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getStagedSourceFiles(cwd = process.cwd()) {
+  // Before a project's first commit, `git diff --cached` compares the index against the empty
+  // tree, so every staged file (the entire generated codebase) would be reported as newly added.
+  // The rule only makes sense against an established baseline, which does not exist yet here.
+  if (!hasInitialCommit(cwd)) return [];
+
   const output = execFileSync(
     "git",
     ["diff", "--cached", "--name-only", "--diff-filter=ACMRT"],
     {
+      cwd,
       encoding: "utf8"
     }
   );

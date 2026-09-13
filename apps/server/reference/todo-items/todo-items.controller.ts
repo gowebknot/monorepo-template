@@ -13,7 +13,7 @@ import type {
   UpdateTodoItemInput,
 } from '@monorepo-template/db/example';
 
-import { TodoItemsService } from './todo-items.service';
+import { TodoItemsService } from '#reference/todo-items/todo-items.service';
 
 @Controller('todo-items')
 export class TodoItemsController {

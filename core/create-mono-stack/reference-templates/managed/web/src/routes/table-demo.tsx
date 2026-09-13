@@ -15,8 +15,8 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
-import { Button } from "../components/ui/button";
-import { Checkbox } from "../components/ui/checkbox";
+import { Button } from "@reference/components/ui/button";
+import { Checkbox } from "@reference/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -25,8 +25,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from "../components/ui/dropdown-menu";
-import { useAppForm } from "../components/forms/form-core";
+} from "@reference/components/ui/dropdown-menu";
+import { useAppForm } from "@reference/components/forms/form-core";
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "../components/ui/table";
+} from "@reference/components/ui/table";
 
 export const Route = createFileRoute("/table-demo")({
   component: TableDemo

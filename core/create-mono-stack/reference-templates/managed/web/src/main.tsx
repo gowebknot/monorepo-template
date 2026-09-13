@@ -7,8 +7,8 @@ import {
 } from "@monorepo-template/query-client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { createWebEnv } from "@monorepo-template/env/web";
-import { routeTree } from "./routeTree.gen";
-import "./index.css";
+import { routeTree } from "@reference/routeTree.gen";
+import "@reference/index.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

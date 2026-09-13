@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { AuthService } from './auth.service';
+import { AuthService } from '#reference/auth/auth.service';
 
 interface CreateAuthSessionBody {
   userId: string;

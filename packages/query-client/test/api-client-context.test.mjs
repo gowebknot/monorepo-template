@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { resolveServiceOptions } from "../src/resolve-service-options.ts";
+import { resolveServiceOptions } from "#src/resolve-service-options";
 
 test("inherits the provider service options", () => {
   assert.deepEqual(

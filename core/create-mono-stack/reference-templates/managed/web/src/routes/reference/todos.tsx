@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-form";
-import { Button } from "../../components/ui/button";
+import { Button } from "@reference/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,8 +8,8 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "../../components/ui/table";
-import { useAppForm } from "../../components/forms/form-core";
+} from "@reference/components/ui/table";
+import { useAppForm } from "@reference/components/forms/form-core";
 import {
   useTodoListByUser,
   useCreateTodoOptimistic,

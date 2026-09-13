@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "types": "./dist/env.d.ts",
+  "imports": {
+    "#dist/*": "./dist/*.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/env.d.ts",

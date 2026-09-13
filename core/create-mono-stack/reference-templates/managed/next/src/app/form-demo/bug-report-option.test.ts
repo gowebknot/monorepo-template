@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bugReportSchema } from "./bug-report-option";
+import { bugReportSchema } from "@/app/form-demo/bug-report-option";
 
 const validReport = {
   title: "Broken button",

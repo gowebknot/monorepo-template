@@ -1,12 +1,12 @@
-import { FieldWrapper, useFieldMeta } from "./field-wrapper";
-import { FieldLabel } from "../../ui/field";
+import { FieldWrapper, useFieldMeta } from "@reference/components/forms/field-elements/field-wrapper";
+import { FieldLabel } from "@reference/components/ui/field";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "../../ui/select";
+} from "@reference/components/ui/select";
 
 interface FormSelectProps extends Omit<
   React.ComponentProps<typeof SelectTrigger>,

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { TodosController } from './todos.controller';
-import { TodosService } from './todos.service';
+import { TodosController } from '#reference/todos/todos.controller';
+import { TodosService } from '#reference/todos/todos.service';
 
 @Module({
   controllers: [TodosController],

@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AuthController } from './auth.controller';
+import { AuthController } from '@/http/auth/auth.controller';
 
 describe('AuthController', () => {
   it('forwards the original Node request and response to Better Auth', async () => {

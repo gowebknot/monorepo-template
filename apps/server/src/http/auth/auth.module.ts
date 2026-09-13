@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { AuthController } from './auth.controller';
-import { authHandlerProvider } from '../../infra/auth/auth-handler.provider';
+import { AuthController } from '@/http/auth/auth.controller';
+import { authHandlerProvider } from '@/infra/auth/auth-handler.provider';
 
 @Module({
   controllers: [AuthController],

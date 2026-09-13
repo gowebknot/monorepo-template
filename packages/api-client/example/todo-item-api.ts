@@ -7,7 +7,7 @@ import type {
   UpdateTodoItemInput
 } from "@monorepo-template/entities/example";
 
-import { referenceApiPaths } from "./api-paths";
+import { referenceApiPaths } from "#example/api-paths";
 
 const crud = createCrudService<
   TodoItem,

@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
-import { parseAllowedOrigins } from './allowed-origins';
-import { ReferenceAppModule } from './app.module';
+import { parseAllowedOrigins } from '#reference/allowed-origins';
+import { ReferenceAppModule } from '#reference/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(ReferenceAppModule);

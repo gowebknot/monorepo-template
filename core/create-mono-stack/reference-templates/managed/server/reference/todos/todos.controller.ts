@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import type { CreateTodoInput, UpdateTodoInput } from '@monorepo-template/db/example';
 
-import { TodosService } from './todos.service';
+import { TodosService } from '#reference/todos/todos.service';
 
 @Controller('todos')
 export class TodosController {

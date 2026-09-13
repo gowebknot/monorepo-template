@@ -126,7 +126,11 @@ export const REFERENCE_PROFILES = {
       { destination: "CLAUDE.md", source: "CLAUDE.md" },
       { destination: "vitest.config.ts", source: "vitest.config.ts" },
       { destination: "reference/index.html", source: "index.html" },
-      { destination: "reference/src", source: "src" }
+      { destination: "reference/src", source: "src" },
+      {
+        destination: "reference/tsconfig.json",
+        source: "tsconfig.reference.json"
+      }
     ],
     selectionMatches: isReactTypeScriptSelection
   },

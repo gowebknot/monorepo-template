@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "imports": {
+    "#example/*": "./example/*.ts"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

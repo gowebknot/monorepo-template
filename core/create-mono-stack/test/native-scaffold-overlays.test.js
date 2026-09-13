@@ -83,6 +83,14 @@ test("TEST-REFERENCE-009 copies an isolated React TypeScript reference", async (
   );
 });
 
+test("TEST-REFERENCE-012 wires up an editor-visible @reference/* alias for the reference tree", async (t) => {
+  const { root } = await scaffoldWeb(t);
+
+  const referenceTsconfig = await fixtureText(root, "reference/tsconfig.json");
+  assert.match(referenceTsconfig, /"@reference\/\*":\s*\["\.\/src\/\*"\]/);
+  assert.match(referenceTsconfig, /"include":\s*\["src"\]/);
+});
+
 test("TEST-SCAFFOLD-002 copies guidance files for a Vite React app", async (t) => {
   const { root } = await scaffoldWeb(t);
 

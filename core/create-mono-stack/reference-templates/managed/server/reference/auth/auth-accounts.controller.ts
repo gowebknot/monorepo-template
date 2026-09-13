@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import type { CreateAuthAccountInput } from '@monorepo-template/db/example';
 
-import { AuthService } from './auth.service';
+import { AuthService } from '#reference/auth/auth.service';
 
 @Controller('auth/accounts')
 export class AuthAccountsController {
