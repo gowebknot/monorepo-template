@@ -10,12 +10,30 @@ import {
   parseInvokedSkills,
   parseReadPaths
 } from "./skill-gate.mjs";
+import { readStackConfig } from "#scripts/stack-config.mjs";
 
 const { extractChecklistReferences } = await import(
   new URL("./implementation-contract.mjs", import.meta.url)
 );
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+
+// A generated project can rename any web-vite/web-next/mobile-expo/mobile-react-native/api-nest app
+// away from its canonical default (scripts/stack-config.mjs only requires path === `apps/${name}`),
+// and .claude/skill-triggers.json is correctly rewritten to reference the real path. This repository
+// itself ships no .mono-stack.json (it is the template source, not a generated project), so falling
+// back to the canonical default here reproduces today's behavior exactly.
+function loadConfiguredApps(root, readManifestFile) {
+  try {
+    return readStackConfig(root, readManifestFile).apps;
+  } catch {
+    return [];
+  }
+}
+
+function resolveAppPath(apps, feature, defaultPath) {
+  return apps.find((app) => app.feature === feature)?.path ?? defaultPath;
+}
 
 const triggers = {
   always: ["test-first-workflow"],
@@ -341,6 +359,26 @@ test("TEST-GATE-017 skill-triggers.json only names real skills", async () => {
   }
 });
 
+const renameableApps = [
+  { feature: "web-vite", defaultPath: "apps/web", entryFile: "src/App.tsx" },
+  {
+    feature: "web-next",
+    defaultPath: "apps/next",
+    entryFile: "src/app/page.tsx"
+  },
+  { feature: "mobile-expo", defaultPath: "apps/expo", entryFile: "App.tsx" },
+  {
+    feature: "mobile-react-native",
+    defaultPath: "apps/mobile",
+    entryFile: "App.tsx"
+  },
+  {
+    feature: "api-nest",
+    defaultPath: "apps/server",
+    entryFile: "src/example.controller.ts"
+  }
+];
+
 test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
   const raw = await readFile(
     join(repositoryRoot, ".claude/skill-triggers.json"),
@@ -351,6 +389,9 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
     collectRequired(filePath, table).filter(
       (skill) => skill !== "test-first-workflow"
     );
+  const configuredApps = loadConfiguredApps(repositoryRoot);
+  const appPath = (feature, defaultPath) =>
+    resolveAppPath(configuredApps, feature, defaultPath);
 
   assert.deepEqual(requiredFor("packages/api-client/src/users.ts").sort(), [
     "end-to-end-api-flow"
@@ -359,16 +400,14 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
     "end-to-end-api-flow"
   ]);
   assert.ok(
-    requiredFor("apps/server/src/example.controller.ts").includes(
-      "contract-validation"
-    )
+    requiredFor(
+      `${appPath("api-nest", "apps/server")}/src/example.controller.ts`
+    ).includes("contract-validation")
   );
-  for (const filePath of [
-    "apps/web/src/App.tsx",
-    "apps/next/src/app/page.tsx",
-    "apps/expo/App.tsx",
-    "apps/mobile/App.tsx"
-  ]) {
+  for (const { feature, defaultPath, entryFile } of renameableApps.filter(
+    (app) => app.feature !== "api-nest"
+  )) {
+    const filePath = `${appPath(feature, defaultPath)}/${entryFile}`;
     assert.ok(requiredFor(filePath).includes("frontend-standards"), filePath);
     assert.ok(
       requiredFor(filePath).includes("domain-driven-app-structure"),
@@ -383,6 +422,77 @@ test("TEST-GATE-024 canonical trigger table covers the API chain", async () => {
   assert.deepEqual(requiredFor("apps/maestro/flows/auth.yaml"), [
     "maestro-mobile-e2e-test-writer"
   ]);
+});
+
+test("TEST-GATE-031 resolves a renamed app's real path from .mono-stack.json", () => {
+  const manifestJson = JSON.stringify({
+    schemaVersion: 3,
+    features: ["web-vite"],
+    apps: [
+      {
+        feature: "web-vite",
+        generator: "vite",
+        name: "dashboard",
+        path: "apps/dashboard",
+        referenceProfile: null,
+        selection: {
+          framework: "React",
+          linter: "ESLint",
+          variant: "TypeScript"
+        }
+      }
+    ]
+  });
+  const table = {
+    always: [],
+    rules: [
+      {
+        when: ["apps/dashboard/**"],
+        require: ["frontend-standards", "domain-driven-app-structure"]
+      }
+    ]
+  };
+
+  const configuredApps = loadConfiguredApps(
+    "/fake-project",
+    () => manifestJson
+  );
+  const filePath = `${resolveAppPath(configuredApps, "web-vite", "apps/web")}/src/App.tsx`;
+
+  assert.equal(filePath, "apps/dashboard/src/App.tsx");
+  assert.ok(collectRequired(filePath, table).includes("frontend-standards"));
+  assert.ok(
+    collectRequired(filePath, table).includes("domain-driven-app-structure")
+  );
+});
+
+test("TEST-GATE-032 falls back to the canonical default when a feature has no configured app", () => {
+  const manifestJson = JSON.stringify({
+    schemaVersion: 3,
+    features: ["web-vite"],
+    apps: [
+      {
+        feature: "web-vite",
+        generator: "vite",
+        name: "web",
+        path: "apps/web",
+        referenceProfile: null,
+        selection: {
+          framework: "React",
+          linter: "ESLint",
+          variant: "TypeScript"
+        }
+      }
+    ]
+  });
+
+  const configuredApps = loadConfiguredApps(
+    "/fake-project",
+    () => manifestJson
+  );
+  const filePath = `${resolveAppPath(configuredApps, "mobile-expo", "apps/expo")}/App.tsx`;
+
+  assert.equal(filePath, "apps/expo/App.tsx");
 });
 
 test("TEST-GATE-025 denies a Playwright spec edit missing the e2e skill", () => {
