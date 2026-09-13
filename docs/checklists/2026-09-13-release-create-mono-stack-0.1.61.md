@@ -82,8 +82,8 @@ change, rather than relying on a prior confirmation from earlier in the session.
 
 - [x] `core/create-mono-stack/package.json` and the CLI fixture state `0.1.61` / `v0.1.61`.
 - [x] Package suite, full repository gate, and dry-run artifact validation pass.
-- [ ] The release commit and annotated `v0.1.61` tag are pushed to `origin` before publication.
-- [ ] The package-local wrapper publishes `create-mono-stack@0.1.61`; npm latest and remote tag
+- [x] The release commit and annotated `v0.1.61` tag are pushed to `origin` before publication.
+- [x] The package-local wrapper publishes `create-mono-stack@0.1.61`; npm latest and remote tag
       confirm it.
 
 ## Exact Test Cases
@@ -167,8 +167,14 @@ change, rather than relying on a prior confirmation from earlier in the session.
 - Must not happen: direct npm publish, credentials in Git, or publish before the pushed tag.
 - Planned command: `git ls-remote --tags origin v0.1.61 && npm view create-mono-stack@latest version`.
 - Expected result before the code change: tag does not exist and npm latest is 0.1.60.
-- First observed run: Pending.
-- Passing rerun: Pending.
+- First observed run: 2026-09-13, before pushing, `origin/master` had no `v0.1.61` tag and
+  `npm view create-mono-stack version` returned `0.1.60`.
+- Passing rerun: 2026-09-13, `git push origin master` (`1e474c3..8891951`), `git tag -a v0.1.61` then
+  `git push origin v0.1.61` (`git ls-remote --tags origin v0.1.61` returned
+  `f44d9966d8c96c844b4df5032635d7709ddaa596`, peeling via `git rev-parse v0.1.61^{}` to
+  `88919511fe852725cf06d1ba69492ae6444442ba`, equal to `HEAD`), then
+  `pnpm --filter create-mono-stack publish:package` succeeded. `npm view create-mono-stack@latest
+version` reported `0.1.61` after a 5s poll.
 
 ## Missing-Case Review
 
@@ -187,8 +193,8 @@ change, rather than relying on a prior confirmation from earlier in the session.
 - [x] Set the CLI fixture to `_commit: v0.1.61`.
 - [x] Record TEST-RELEASE-088 and 090 validation results in this checklist.
 - [x] Run `just check` and record TEST-RELEASE-089.
-- [ ] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.61`.
-- [ ] Publish with the package wrapper and record TEST-RELEASE-091 evidence.
+- [x] Commit release metadata with hooks, push `master`, create/push annotated `v0.1.61`.
+- [x] Publish with the package wrapper and record TEST-RELEASE-091 evidence.
 
 ## Validation Notes
 
@@ -198,4 +204,22 @@ change, rather than relying on a prior confirmation from earlier in the session.
   passed.
 - TEST-RELEASE-090: dry run produced `create-mono-stack-0.1.61.tgz`, 301 files, 619.6 kB packed,
   1.0 MB unpacked; excludes the package's own `test/` directory, `node_modules`, and `.npmrc*`.
-- TEST-RELEASE-091: pending push/tag/publish.
+- TEST-RELEASE-091: `v0.1.61` was pushed as annotated tag `f44d9966d8c96c844b4df5032635d7709ddaa596`,
+  peeling to release commit `88919511fe852725cf06d1ba69492ae6444442ba`. The package-local wrapper
+  published `create-mono-stack@0.1.61` (final packed tarball: 620.7 kB, 301 files); npm reports that
+  version as `latest`.
+
+## Updates
+
+### 2026-09-13 - Release published
+
+- Release commit: `88919511fe852725cf06d1ba69492ae6444442ba`
+  (`chore(release): prepare create-mono-stack 0.1.61`), pushed to `origin/master`, preceded by the fix
+  commit `4c60877` (also pushed in the same `git push`).
+- Tag: annotated `v0.1.61` (`f44d9966d8c96c844b4df5032635d7709ddaa596`) pushed to origin; peeled ref
+  `v0.1.61^{}` is `88919511fe852725cf06d1ba69492ae6444442ba`.
+- Publication: `pnpm --filter create-mono-stack publish:package` completed successfully with public
+  latest access.
+- Verification: `npm view create-mono-stack@latest version` reports `0.1.61`.
+- GitHub's Dependabot notice on push (3 vulnerabilities, 2 high, 1 low) remains outstanding and
+  unrelated; not addressed in this release.
